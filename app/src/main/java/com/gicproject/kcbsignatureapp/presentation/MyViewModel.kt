@@ -247,6 +247,7 @@ class MyViewModel @Inject constructor(
                     d("TAG", "autoDetectCivilId: cardinsert")
                     if (stateMain.value.civilIdPage) {
                         cardInserted = true
+                        emptyMainState()
                         readData()
                     }
                 }
