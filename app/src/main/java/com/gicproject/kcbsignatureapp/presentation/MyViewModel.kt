@@ -18,7 +18,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gicproject.kcbsignatureapp.R
+import com.gicproject.kcbsignatureapp.common.Constants
+import com.gicproject.kcbsignatureapp.domain.repository.DataStoreRepository
 import com.gicproject.kcbsignatureapp.pacicardlibrary.PaciCardReaderAbstract
 import com.gicproject.kcbsignatureapp.pacicardlibrary.PaciCardReaderMAV3
 import com.suprema.BioMiniFactory
@@ -41,7 +42,9 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 @HiltViewModel
-class MyViewModel @Inject constructor() : ViewModel() {
+class MyViewModel @Inject constructor(
+    val repository: DataStoreRepository
+) : ViewModel() {
 
     private val _isRefreshingSetting = MutableStateFlow(false)
     val isRefreshingSetting: StateFlow<Boolean>
@@ -68,39 +71,60 @@ class MyViewModel @Inject constructor() : ViewModel() {
     private val _fingerPrintUri = mutableStateOf(null as Bitmap?)
     val fingerPrintUri: State<Bitmap?> = _fingerPrintUri
 
+    private val _isAutoDetectCard = mutableStateOf(false)
+    val isAutoDetectCard: State<Boolean> = _isAutoDetectCard
+
 
     lateinit var reader: SmartCardReader
 
     init {
-
-
+        initAutoDetectPreference()
     }
-    fun setCameraInitialized(value: Boolean){
+
+    private fun initAutoDetectPreference() {
+        viewModelScope.launch {
+            val value = repository.getBoolean(Constants.KEY_AUTO_DETECT_CARD)
+            if (value != null) {
+                _isAutoDetectCard.value = value
+            }
+        }
+    }
+
+    fun setAutoDetect(autoDetectValue: Boolean) {
+        viewModelScope.launch {
+            _isAutoDetectCard.value = autoDetectValue
+            repository.putBoolean(Constants.KEY_AUTO_DETECT_CARD, autoDetectValue)
+        }
+    }
+
+    fun setCameraInitialized(value: Boolean) {
         _isCameraInitialized.value = value
     }
-    fun setPhotoUri(value: Uri?){
+
+    fun setPhotoUri(value: Uri?) {
         _photoUri.value = value
     }
 
-    fun setFingerPrintUri(value: Bitmap?){
+    fun setFingerPrintUri(value: Bitmap?) {
         _fingerPrintUri.value = value
     }
 
 
-    fun setShowCamera(value: Boolean){
+    fun setShowCamera(value: Boolean) {
         _shouldShowCamera.value = value
     }
 
-    fun setShowPhoto(value: Boolean){
+    fun setShowPhoto(value: Boolean) {
         _shouldShowPhoto.value = value
     }
-    fun emptyMainState(){
+
+    fun emptyMainState() {
         _stateMain.value = MainScreenState()
         _photoUri.value = null
         _fingerPrintUri.value = null
         _shouldShowCamera.value = true
         _shouldShowPhoto.value = false
-   //     _statusFingerPrint.value = ""
+        //     _statusFingerPrint.value = ""
     }
 
 
@@ -175,31 +199,72 @@ class MyViewModel @Inject constructor() : ViewModel() {
     fun settingReader(context: Context) {
         reader = SmartCardReader(context)
         FingerPrint.fingericPower(1)
+        FingerPrint.fingerPrintPower(1)
 
         viewModelScope.launch(Dispatchers.Main) {
             _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true)
             delay(3000)
             reader.open(1)
             _stateMain.value = _stateMain.value.copy(isLoadingCivilId = false)
+            autoDetectCivilId()
         }
     }
 
     fun backToCivilIdPage() {
         _stateMain.value = _stateMain.value.copy(
-            isLoadingCivilId = false, fingerPrintPage = false, civilIdPage = true, signaturePage = false
+            isLoadingCivilId = false,
+            fingerPrintPage = false,
+            civilIdPage = true,
+            signaturePage = false
         )
     }
+
     fun backToFingerPrintPage() {
         _stateMain.value = _stateMain.value.copy(
-            isLoadingCivilId = false, fingerPrintPage = true, civilIdPage = false, signaturePage = false
+            isLoadingCivilId = false,
+            fingerPrintPage = true,
+            civilIdPage = false,
+            signaturePage = false
         )
     }
 
     fun openSignaturePage() {
         _stateMain.value = _stateMain.value.copy(
-            isLoadingCivilId = false, fingerPrintPage = false, civilIdPage = false, signaturePage = true
+            isLoadingCivilId = false,
+            fingerPrintPage = false,
+            civilIdPage = false,
+            signaturePage = true
         )
     }
+
+
+    var cardInserted = false
+    fun autoDetectCivilId() {
+        if (isAutoDetectCard.value) {
+            d("TAG", "autoDetectCivilId: ${cardInserted} readerPresent: ${reader.iccPowerOn()}")
+            if (!cardInserted) {
+                if (reader.iccPowerOn()) {
+                    d("TAG", "autoDetectCivilId: cardinsert")
+                    if (stateMain.value.civilIdPage) {
+                        cardInserted = true
+                        readData()
+                    }
+                }
+            } else {
+                if (!reader.iccPowerOn()) {
+                    d("TAG", "autoDetectCivilId: cardremoved")
+                    cardInserted = false
+                }
+            }
+        }
+        viewModelScope.launch {
+            delay(3000)
+            autoDetectCivilId()
+        }
+
+
+    }
+
 
     fun readData() {
         _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true)
@@ -365,10 +430,13 @@ class MyViewModel @Inject constructor() : ViewModel() {
                     e.printStackTrace()
                 }
                 _stateMain.value = _stateMain.value.copy(
-                    isLoadingCivilId = false, fingerPrintPage = true, civilIdPage = false, signaturePage = false
+                    isLoadingCivilId = false,
+                    fingerPrintPage = true,
+                    civilIdPage = false,
+                    signaturePage = false
                 )
             }
-        }else{
+        } else {
 
 
             _stateMain.value = _stateMain.value.copy(isLoadingCivilId = false)
@@ -378,21 +446,49 @@ class MyViewModel @Inject constructor() : ViewModel() {
 
     //finger print section
 
-     fun doAutoCapture() {
+    fun doAutoCapture() {
         Logger.d("buttonCaptureAuto clicked")
         mTemplateData = null
         mCaptureOption.extractParam.captureTemplate = true
         mCaptureOption.captureFuntion = IBioMiniDevice.CaptureFuntion.CAPTURE_AUTO
-         _fingerPrintUri.value = null
+        _fingerPrintUri.value = null
         mCaptureOption.frameRate = IBioMiniDevice.FrameRate.LOW
-         statusFingerPrint.value = "Capturing"
+        statusFingerPrint.value = "Capturing"
         if (mCurrentDevice != null) {
             val result: Int? = mCurrentDevice?.captureAuto(mCaptureOption, mCaptureCallBack)
-            if (result == IBioMiniDevice.ErrorCode.ERR_NOT_SUPPORTED.value()) {
+            if (result == ErrorCode.ERR_NOT_SUPPORTED.value()) {
                 statusFingerPrint.value = "This device is not support auto Capture!"
             }
         }
     }
+
+    private fun doAbortCapture() {
+        Thread(Runnable {
+            if (mCurrentDevice != null) {
+                if (!mCurrentDevice!!.isCapturing) {
+                    //   statusFingerPrint.value = "Capture Function is already aborted."
+                    mCaptureOption.captureFuntion = CaptureFuntion.NONE
+                    return@Runnable
+                }
+                val result = mCurrentDevice!!.abortCapturing()
+                Logger.d("run: abortCapturing : $result")
+                if (result == 0) {
+                    if (mCaptureOption.captureFuntion != CaptureFuntion.NONE)
+
+                    //   statusFingerPrint.value =  mCaptureOption.captureFuntion.name + " is aborted."
+
+                        mCaptureOption.captureFuntion = CaptureFuntion.NONE
+                } else {
+                    if (result == ErrorCode.ERR_CAPTURE_ABORTING.value()) {
+                        //      statusFingerPrint.value =  "abortCapture is still running."
+
+                    } else
+                        statusFingerPrint.value = "abort capture fail!"
+                }
+            }
+        }).start()
+    }
+
     private val mDetect_core = 0
     private val mTemplateQualityEx = 0
     private val mCaptureStartTime: Long = 0
@@ -412,21 +508,23 @@ class MyViewModel @Inject constructor() : ViewModel() {
             if (capturedTemplate != null) {
                 Logger.d("TemplateData is not null!")
                 mTemplateData = capturedTemplate
+
             }
 
 //            if((option.captureFuntion != IBioMiniDevice.CaptureFuntion.START_CAPTURING && option.captureFuntion != IBioMiniDevice.CaptureFuntion.NONE))
             if (capturedTemplate != null) {
                 Logger.d("check additional capture result.")
                 if (mCurrentDevice != null && mCurrentDevice!!.lfdLevel > 0) {
-                    statusFingerPrint.value ="LFD SCORE : " + mCurrentDevice!!.lfdScoreFromCapture
+                    statusFingerPrint.value = "LFD SCORE : " + mCurrentDevice!!.lfdScoreFromCapture
                 }
                 if (mDetect_core == 1) {
                     val _coord = mCurrentDevice!!.coreCoordinate
-                    statusFingerPrint.value ="Core Coordinate X : " + _coord[0] + " Y : " + _coord[1]
+                    statusFingerPrint.value =
+                        "Core Coordinate X : " + _coord[0] + " Y : " + _coord[1]
                 }
                 if (mTemplateQualityEx == 1) {
                     val _templateQualityExValue = mCurrentDevice!!.templateQualityExValue
-                    statusFingerPrint.value ="template Quality : $_templateQualityExValue"
+                    statusFingerPrint.value = "template Quality : $_templateQualityExValue"
                 }
             }
 
@@ -451,6 +549,8 @@ class MyViewModel @Inject constructor() : ViewModel() {
                     statusFingerPrint.value = "Captured OK"
                     Logger.i("capture time = " + (System.currentTimeMillis() - mCaptureStartTime))
                     _fingerPrintUri.value = capturedImage
+                    doAbortCapture()
+
                 } // This is your code
                 mainHandler.post(myRunnable)
             }
@@ -460,25 +560,26 @@ class MyViewModel @Inject constructor() : ViewModel() {
 
         override fun onCaptureError(context: Any, errorCode: Int, error: String) {
             if (errorCode == ErrorCode.CTRL_ERR_IS_CAPTURING.value()) {
-                statusFingerPrint.value ="Capturing"
+                statusFingerPrint.value = "Capturing"
             } else if (errorCode == ErrorCode.CTRL_ERR_CAPTURE_ABORTED.value()) {
                 Logger.d("CTRL_ERR_CAPTURE_ABORTED occured.")
             } else if (errorCode == ErrorCode.CTRL_ERR_FAKE_FINGER.value()) {
-                 statusFingerPrint.value ="Fake Finger Detected"
+                statusFingerPrint.value = "Fake Finger Detected"
                 if (mCurrentDevice != null && mCurrentDevice!!.lfdLevel > 0) {
-                    statusFingerPrint.value ="LFD SCORE : " + mCurrentDevice!!.lfdScoreFromCapture
+                    statusFingerPrint.value = "LFD SCORE : " + mCurrentDevice!!.lfdScoreFromCapture
                 }
             } else {
-                 statusFingerPrint.value =mCaptureOption.captureFuntion.name + " is fail by " + error
-                statusFingerPrint.value ="Please try again."
+                statusFingerPrint.value =
+                    mCaptureOption.captureFuntion.name + " is fail by " + error
+                statusFingerPrint.value = "Please try again."
             }
         }
     }
 
 
     private val ACTION_USB_PERMISSION: String? = "com.android.example.USB_PERMISSION"
-      fun initUsbListener(mContext :Context,usbManager: UsbManager) {
-          mUsbManager = usbManager
+    fun initUsbListener(mContext: Context, usbManager: UsbManager) {
+        mUsbManager = usbManager
         val pi = PendingIntent.getBroadcast(
             mContext,
             0,
@@ -495,6 +596,7 @@ class MyViewModel @Inject constructor() : ViewModel() {
         mContext.registerReceiver(mUsbReceiver, detachfilter)
         addDeviceToUsbDeviceList(mContext)
     }
+
     var mUsbDevice: UsbDevice? = null
     private val mUsbReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -505,8 +607,14 @@ class MyViewModel @Inject constructor() : ViewModel() {
                     val hasUsbPermission =
                         intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
                     if (hasUsbPermission && mUsbDevice != null) {
-                        d("TAG", mUsbDevice?.getDeviceName() + " is acquire the usb permission. activate this device.")
-                        if (mUsbDevice != null) d("TAG", "ACTIVATE_USB_DEVICE : " + mUsbDevice?.getDeviceName())
+                        d(
+                            "TAG",
+                            mUsbDevice?.getDeviceName() + " is acquire the usb permission. activate this device."
+                        )
+                        if (mUsbDevice != null) d(
+                            "TAG",
+                            "ACTIVATE_USB_DEVICE : " + mUsbDevice?.getDeviceName()
+                        )
                         createBioMiniDevice(mContext = context)
                     } else {
                         d("TAG", "USB permission is not granted!")
@@ -518,7 +626,7 @@ class MyViewModel @Inject constructor() : ViewModel() {
                 }
                 UsbManager.ACTION_USB_DEVICE_DETACHED -> {
                     d("TAG", "ACTION_USB_DEVICE_DETACHED")
-                   //  statusFingerPrint.value =getResources().getString(R.string.usb_detached))
+                    //  statusFingerPrint.value =getResources().getString(R.string.usb_detached))
                     removeDevice()
                 }
                 else -> {}
@@ -534,8 +642,9 @@ class MyViewModel @Inject constructor() : ViewModel() {
         }
         mUsbDevice = null
         mCurrentDevice = null
-       // if (mImageView != null) mImageView.setImageBitmap(null)
+        // if (mImageView != null) mImageView.setImageBitmap(null)
     }
+
     private var mUsbManager: UsbManager? = null
     private var mPermissionIntent: PendingIntent? = null
     fun addDeviceToUsbDeviceList(mContext: Context) {
@@ -567,7 +676,10 @@ class MyViewModel @Inject constructor() : ViewModel() {
                 } else {
                     d("TAG", "This device alread have USB permission! please activate this device.")
                     //                    _rsApi.deviceAttached(mUsbDevice);
-                    if (mUsbDevice != null)     d("TAG", "ACTIVATE_USB_DEVICE : " + mUsbDevice!!.deviceName)
+                    if (mUsbDevice != null) d(
+                        "TAG",
+                        "ACTIVATE_USB_DEVICE : " + mUsbDevice!!.deviceName
+                    )
                     createBioMiniDevice(mContext = mContext)
                 }
             } else {
@@ -575,6 +687,7 @@ class MyViewModel @Inject constructor() : ViewModel() {
             }
         }
     }
+
     private var mBioMiniFactory: BioMiniFactory? = null
     private var mTemplateData: TemplateData? = null
     private val mCaptureOption = CaptureOption()
@@ -582,7 +695,7 @@ class MyViewModel @Inject constructor() : ViewModel() {
     private fun createBioMiniDevice(mContext: Context) {
         d("TAG", "START!")
         if (mUsbDevice == null) {
-             statusFingerPrint.value ="Device Not Connected"
+            statusFingerPrint.value = "Device Not Connected"
             return
         }
         if (mBioMiniFactory != null) {
@@ -604,14 +717,14 @@ class MyViewModel @Inject constructor() : ViewModel() {
         if (_result == true) {
             mCurrentDevice = mBioMiniFactory?.getDevice(0)
             if (mCurrentDevice != null) {
-                 statusFingerPrint.value ="device attached"
+                statusFingerPrint.value = "device attached"
 
                 d("TAG", "mCurrentDevice attached : $mCurrentDevice")
                 //    mViewPager.setCurrentItem(0);
                 viewModelScope.launch(Dispatchers.Main) {
                     if (mCurrentDevice != null /*&& mCurrentDevice.getDeviceInfo() != null*/) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                       //    requestWritePermission()
+                            //    requestWritePermission()
                         }
                         _fingerPrintUri.value = null
                     }

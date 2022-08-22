@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        var mUsbManager = getSystemService(USB_SERVICE) as UsbManager
+        val mUsbManager = getSystemService(USB_SERVICE) as UsbManager
 
 
         setContent {
@@ -97,9 +97,10 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onResume() {
-        requestCameraPermission()
+    //    requestCameraPermission()
         outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
+
         super.onResume()
     }
 

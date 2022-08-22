@@ -138,7 +138,10 @@ fun takePhoto(
         SimpleDateFormat(filenameFormat, Locale.US).format(System.currentTimeMillis()) + ".jpg"
     )
 
-    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+    val metadata = ImageCapture.Metadata().apply {
+        isReversedHorizontal = true
+    }
+    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).setMetadata(metadata).build()
 
     imageCapture.takePicture(outputOptions, executor, object : ImageCapture.OnImageSavedCallback {
         override fun onError(exception: ImageCaptureException) {

@@ -74,13 +74,14 @@ fun MainScreen(
                     /* WallClock(hour.value,
                          minute.value,
                          second.value,)*/
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                     Image(
                         painter = painterResource(id = R.drawable.kcblogo),
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
-                            .width(190.dp)
-                            .height(55.dp),
+                            .width(210.dp)
+                            .height(80.dp)
+                            .padding(top = 20.dp),
                         contentDescription = "qrcode sample"
                     )
                 }
@@ -91,7 +92,9 @@ fun MainScreen(
                         CivilIdPage(state.isLoadingCivilId, onClick = {
                             viewModel.emptyMainState()
                             viewModel.readData()
-                        })
+                        },onClickAutoDetect ={
+                            viewModel.setAutoDetect(it)
+                        }, isAutoDetect = viewModel.isAutoDetectCard.value)
                     }
                     if (state.fingerPrintPage) {
                         FingerPrintPage(onClickBack = {
@@ -162,6 +165,7 @@ fun FingerPrintPage(
     val preview = androidx.camera.core.Preview.Builder().build()
     val previewView = remember { PreviewView(context) }
     val imageCapture: ImageCapture = remember { ImageCapture.Builder().build() }
+
     val cameraSelector = CameraSelector.Builder()
         .requireLensFacing(lensFacing)
         .build()
@@ -441,7 +445,7 @@ fun FingerPrintPage(
 
 
 @Composable
-fun CivilIdPage(loading: Boolean, onClick: () -> Unit) {
+fun CivilIdPage(loading: Boolean,isAutoDetect: Boolean, onClick: () -> Unit,onClickAutoDetect: (value: Boolean) -> Unit) {
 
     Row(modifier = Modifier.fillMaxSize()) {
 
@@ -452,6 +456,14 @@ fun CivilIdPage(loading: Boolean, onClick: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Auto Detect Card")
+                Spacer(modifier = Modifier.width(50.dp))
+                Switch(
+                    checked = isAutoDetect,
+                    onCheckedChange = {onClickAutoDetect(it)}
+                )
+            }
             Text(
                 "Please Insert Civil ID and Click Below Button",
                 color = MaterialTheme.colors.primary,
@@ -468,9 +480,12 @@ fun CivilIdPage(loading: Boolean, onClick: () -> Unit) {
                         Text(text = "Read Data")
                     }
                 }
+
+
             } else {
                 CircularProgressIndicator()
             }
+
 
         }
         Column(
