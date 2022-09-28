@@ -1,10 +1,15 @@
 package com.gicproject.kcbsignatureapp.di
 
-import android.app.Application
 import android.content.Context
-import androidx.room.Room
+import com.gicproject.kcbsignatureapp.data.remote.MyApi
+import com.gicproject.dasdoctorcvapp.domain.use_case.*
+import com.gicproject.kcbsignatureapp.common.Constants
 import com.gicproject.kcbsignatureapp.data.repository.DataStoreRepositoryImpl
+import com.gicproject.kcbsignatureapp.data.repository.MyRepositoryImpl
 import com.gicproject.kcbsignatureapp.domain.repository.DataStoreRepository
+import com.gicproject.kcbsignatureapp.domain.repository.MyRepository
+import com.gicproject.kcbsignatureapp.domain.use_case.AddEmployeeData
+import com.gicproject.kcbsignatureapp.domain.use_case.MyUseCases
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,5 +29,32 @@ class AppModule {
         @ApplicationContext app: Context
     ): DataStoreRepository = DataStoreRepositoryImpl(app)
 
+    @Provides
+    @Singleton
+    fun provideMyApi(): MyApi {
+        return Retrofit.Builder()
+            .baseUrl(Constants.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MyApi::class.java)
+    }
 
+    @Provides
+    @Singleton
+    fun provideMyRepository(api: MyApi): MyRepository {
+        return MyRepositoryImpl(api = api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSurveyUseCases(
+        repository: MyRepository,
+        dataStoreRepository: DataStoreRepository
+    ): MyUseCases {
+        return MyUseCases(
+            getResult = GetResult(repository = repository),
+            getEmployeeData = GetEmployeeData(repository = repository),
+            addEmployeeData = AddEmployeeData(repository = repository)
+        )
+    }
 }

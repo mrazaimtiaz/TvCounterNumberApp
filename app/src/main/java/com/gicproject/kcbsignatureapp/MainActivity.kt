@@ -14,6 +14,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
@@ -23,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.gicproject.kcbsignatureapp.presentation.MainScreen
+import com.gicproject.kcbsignatureapp.presentation.MyEvent
 import com.gicproject.kcbsignatureapp.presentation.MyViewModel
 import com.gicproject.kcbsignatureapp.ui.theme.KcbSignatureAppTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -58,16 +60,19 @@ class MainActivity : ComponentActivity() {
 
         val mUsbManager = getSystemService(USB_SERVICE) as UsbManager
 
-
+        val getAssets = assets
         setContent {
              viewModel = hiltViewModel()
             viewModel?.settingReader(this)
+            viewModel?.setAssets(getAssets)
+
 
             viewModel?.initUsbListener(this,mUsbManager)
 
 
             val systemUiController = rememberSystemUiController()
-            KcbSignatureAppTheme {
+            KcbSignatureAppTheme(darkTheme =false) {
+
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),

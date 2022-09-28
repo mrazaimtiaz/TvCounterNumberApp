@@ -7,7 +7,7 @@ data class MainScreenState(
     val civilIdPage: Boolean = true,
     val fingerPrintPage: Boolean = false,
     val signaturePage: Boolean = false,
-    val error: String = "",
+    val showToast: String = "",
     val civilidText: String = "",
     val serialNoText: String = "",
     val fullNameText: String = "",

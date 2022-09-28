@@ -11,7 +11,7 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.gicproject.kcbsignatureapp"
+        applicationId "com.gicproject.kcbsignatureapptest"
         minSdk 24
         targetSdk 32
         versionCode 1
@@ -117,6 +117,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2"
+
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
     // Navigation Components
     implementation "androidx.navigation:navigation-fragment-ktx:2.4.2"

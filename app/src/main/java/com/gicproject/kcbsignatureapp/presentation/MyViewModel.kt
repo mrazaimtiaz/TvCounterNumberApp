@@ -1,25 +1,30 @@
 package com.gicproject.kcbsignatureapp.presentation
 
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
+import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.util.Log.d
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.net.toFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gicproject.kcbsignatureapp.OkhttpManager
 import com.gicproject.kcbsignatureapp.common.Constants
+import com.gicproject.kcbsignatureapp.common.Resource
+import com.gicproject.kcbsignatureapp.domain.model.GetPersonSendModel
 import com.gicproject.kcbsignatureapp.domain.repository.DataStoreRepository
+import com.gicproject.kcbsignatureapp.domain.use_case.MyUseCases
 import com.gicproject.kcbsignatureapp.pacicardlibrary.PaciCardReaderAbstract
 import com.gicproject.kcbsignatureapp.pacicardlibrary.PaciCardReaderMAV3
 import com.suprema.BioMiniFactory
@@ -34,15 +39,22 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.asRequestBody
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.*
+import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
+
 @HiltViewModel
 class MyViewModel @Inject constructor(
+    private val surveyUseCases: MyUseCases,
     val repository: DataStoreRepository
 ) : ViewModel() {
 
@@ -71,7 +83,10 @@ class MyViewModel @Inject constructor(
     private val _fingerPrintUri = mutableStateOf(null as Bitmap?)
     val fingerPrintUri: State<Bitmap?> = _fingerPrintUri
 
-    private val _isAutoDetectCard = mutableStateOf(false)
+    private val _signatureSvg = mutableStateOf(null as String?)
+    val signatureSvg: State<String?> = _signatureSvg
+
+    private val _isAutoDetectCard = mutableStateOf(true)
     val isAutoDetectCard: State<Boolean> = _isAutoDetectCard
 
 
@@ -108,6 +123,9 @@ class MyViewModel @Inject constructor(
     fun setFingerPrintUri(value: Bitmap?) {
         _fingerPrintUri.value = value
     }
+    fun setSignatureSvg(value: String?) {
+        _signatureSvg.value = value
+    }
 
 
     fun setShowCamera(value: Boolean) {
@@ -130,6 +148,149 @@ class MyViewModel @Inject constructor(
 
     fun onEvent(event: MyEvent) {
         when (event) {
+            is MyEvent.GetEmployeeData -> {
+                d("TAG", "onEvent: error event getemployeedata1")
+                surveyUseCases.getEmployeeData(GetPersonSendModel(p_proc_name = "APPS.XXKCB_HR_MOBILE1_SS_PKG.LIST_EMP_WITH_SIGNATURE",P_NATIONAL_ID = event.id)).onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            d("TAG", "onEvent: error event getemployeedata")
+                            result.data?.let {
+                                if(it.NATIONALIDENTIFIER.toString() == event.id){
+                                    _stateMain.value = _stateMain.value.copy(
+                                        isLoadingCivilId = false,
+                                        fingerPrintPage = true,
+                                        civilIdPage = false,
+                                        showToast = "",
+                                        signaturePage = false
+                                    )
+                                }else{
+                                    _stateMain.value = _stateMain.value.copy(
+                                        isLoadingCivilId = false,
+                                        fingerPrintPage = false,
+                                        civilIdPage = true,
+                                        showToast = "CivilId not matched ${event.id} / ${it.NATIONALIDENTIFIER}",
+                                        signaturePage = false
+                                    )
+                                }
+
+                            }
+                        }
+                        is Resource.Error -> {
+                            d("TAG", "onEvent: error event getemployeedata")
+                            _stateMain.value = _stateMain.value.copy(
+                                isLoadingCivilId = false,
+                                fingerPrintPage = false,
+                                civilIdPage = true,
+                                showToast = "Server Error",
+                                signaturePage = false
+                            )
+                        }
+                        is Resource.Loading -> {
+                            _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true, showToast = "")
+                          //  _stateSetting.value = SettingScreenState(isLoading = true)
+                        }
+                    }
+                }.launchIn(viewModelScope)
+            }
+            is MyEvent.AddEmployeeData -> {
+              //  progressbarSubmitButton.setVisibility(View.VISIBLE)
+                val th = Thread {
+                    var client: OkHttpClient
+                    try {
+
+                        OkhttpManager.getInstance().trustrCertificates = assetManager.open("")
+                        client = OkhttpManager.getInstance().build()
+                    } catch (e: IOException) {
+                        client = OkHttpClient()
+                    }
+                    var MEDIA_TYPE_PNG: MediaType
+                    val buildernew: MultipartBody.Builder =
+                        MultipartBody.Builder().setType(MultipartBody.FORM)
+
+                            MEDIA_TYPE_PNG =  "image/jpeg".toMediaType()
+                                if(_photoUri.value != null){
+                                    val imageBody: RequestBody =
+                                        _photoUri.value!!.toFile().asRequestBody(MEDIA_TYPE_PNG)
+                                    buildernew.addFormDataPart(
+                                        "cameraimage",
+                                       "cameraimage",
+                                        imageBody
+                                    )
+                                }
+                                if(_fingerPrintUri.value != null){
+                                    val fileFingerPrint = bitmapToFile(_fingerPrintUri.value!!,"fingerprintimage")
+                                   if(fileFingerPrint != null){
+                                       val imageBody: RequestBody =
+                                           fileFingerPrint.asRequestBody(MEDIA_TYPE_PNG)
+                                       buildernew.addFormDataPart(
+                                           "fingerprintimage",
+                                           "fingerprintimage",
+                                           imageBody
+                                       )
+                                   }
+                                }
+                    if(_signatureSvg.value != null){
+                        buildernew.addFormDataPart(
+                            "fingerprintimage",
+                            "fingerprintimage",
+                            RequestBody.create("image/svg+xml".toMediaType(), _signatureSvg.value!!.toByteArray(Charset.defaultCharset()))
+
+                        )
+                    }
+
+
+                    /*if(_fingerPrintUri.value != null){
+                        val imageBody: RequestBody =
+                            _fingerPrintUri.value!!.toFile().asRequestBody(MEDIA_TYPE_PNG)
+                        buildernew.addFormDataPart(
+                            "cameraimage",
+                            "cameraimage",
+                            imageBody
+                        )
+                    }*/
+
+
+
+                    val requestBody: MultipartBody = buildernew.build()
+                    val request: Request = Request.Builder()
+                        .url("${Constants.BASE_URL}mid/api/Paci/ADD_EMPLOYEE_SIGNATURE?cid=" + _stateMain.value.civilidText)
+                        .post(requestBody)
+                        .build()
+                    try {
+                        var response: Response? = null
+                        response = client.newCall(request).execute()
+                        val s = response.body!!.string()
+
+                            try {
+                                val jsonObj = JSONObject(s)
+                                val a = jsonObj.getString("x_status")
+                                if (a.contains("S")) {
+                                    backToCivilIdPage()
+                                }else{
+                                    _stateMain.value = _stateMain.value.copy(showToast = "Status not True, Cannot Saved")
+
+                                }
+                            } catch (e: JSONException) {
+                                _stateMain.value = _stateMain.value.copy(showToast = "Could not parse")
+                                e.printStackTrace()
+                            }
+
+                    } catch (e: IOException) {
+                        _stateMain.value = _stateMain.value.copy(showToast = "Could not connect")
+                        //Toast.makeText(LoaActivity2.this,e.getMessage(), Toast.LENGTH_LONG).show();
+                        e.printStackTrace()
+                        Log.d("TAG", "my_submit2: " + e.message)
+                     /*   Handler(Looper.getMainLooper()).post {
+                            Toast.makeText(
+                                this,
+                                e.message,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }*/
+                    }
+                }
+                th.start()
+            }
             is MyEvent.CivilIdChanged -> {
                 _stateMain.value = _stateMain.value.copy(civilidText = event.text)
             }
@@ -202,11 +363,35 @@ class MyViewModel @Inject constructor(
         FingerPrint.fingerPrintPower(1)
 
         viewModelScope.launch(Dispatchers.Main) {
-            _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true)
+            _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true, showToast = "")
             delay(3000)
             reader.open(1)
-            _stateMain.value = _stateMain.value.copy(isLoadingCivilId = false)
+            _stateMain.value = _stateMain.value.copy(isLoadingCivilId = false, showToast = "")
             autoDetectCivilId()
+        }
+    }
+
+    fun bitmapToFile(bitmap: Bitmap, fileNameToSave: String): File? { // File name like "image.png"
+        //create a file to write bitmap data
+        var file: File? = null
+        return try {
+            file = File(Environment.getExternalStorageDirectory().toString() + File.separator + fileNameToSave)
+            file.createNewFile()
+
+            //Convert bitmap to byte array
+            val bos = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos) // YOU can also save it in JPEG
+            val bitmapdata = bos.toByteArray()
+
+            //write the bytes in file
+            val fos = FileOutputStream(file)
+            fos.write(bitmapdata)
+            fos.flush()
+            fos.close()
+            file
+        } catch (e: Exception) {
+            e.printStackTrace()
+            file // it will return null
         }
     }
 
@@ -215,8 +400,14 @@ class MyViewModel @Inject constructor(
             isLoadingCivilId = false,
             fingerPrintPage = false,
             civilIdPage = true,
+            showToast = "Success",
             signaturePage = false
         )
+    }
+
+    lateinit var assetManager: AssetManager
+    fun setAssets(mAssetManager: AssetManager){
+        assetManager = mAssetManager
     }
 
     fun backToFingerPrintPage() {
@@ -224,6 +415,7 @@ class MyViewModel @Inject constructor(
             isLoadingCivilId = false,
             fingerPrintPage = true,
             civilIdPage = false,
+            showToast = "",
             signaturePage = false
         )
     }
@@ -241,7 +433,9 @@ class MyViewModel @Inject constructor(
     var cardInserted = false
     fun autoDetectCivilId() {
         if (isAutoDetectCard.value) {
-            d("TAG", "autoDetectCivilId: ${cardInserted} readerPresent: ${reader.iccPowerOn()}")
+//            d("TAG", "autoDetectCivilId: ${cardInserted} readerPresent: ${reader.iccPowerOn()}")
+            reader.iccPowerOff()
+
             if (!cardInserted) {
                 if (reader.iccPowerOn()) {
                     d("TAG", "autoDetectCivilId: cardinsert")
@@ -249,6 +443,16 @@ class MyViewModel @Inject constructor(
                         cardInserted = true
                         emptyMainState()
                         readData()
+                    } else {
+                        viewModelScope.launch {
+                            delay(500)
+                            autoDetectCivilId()
+                        }
+                    }
+                } else {
+                    viewModelScope.launch {
+                        delay(500)
+                        autoDetectCivilId()
                     }
                 }
             } else {
@@ -256,11 +460,16 @@ class MyViewModel @Inject constructor(
                     d("TAG", "autoDetectCivilId: cardremoved")
                     cardInserted = false
                 }
+                viewModelScope.launch {
+                    delay(500)
+                    autoDetectCivilId()
+                }
             }
-        }
-        viewModelScope.launch {
-            delay(3000)
-            autoDetectCivilId()
+        } else {
+            viewModelScope.launch {
+                delay(500)
+                autoDetectCivilId()
+            }
         }
 
 
@@ -268,7 +477,7 @@ class MyViewModel @Inject constructor(
 
 
     fun readData() {
-        _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true)
+        _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true, showToast = "")
         if (reader.iccPowerOn()) {
             val ReaderHandler: ConcurrentHashMap<String?, PaciCardReaderAbstract?> =
                 ConcurrentHashMap<String?, PaciCardReaderAbstract?>()
@@ -307,6 +516,7 @@ class MyViewModel @Inject constructor(
                     var text = "";
                     try {
                         civilidText = paci!!.GetData("", "CIVIL-NO")
+                       // onEvent(MyEvent.GetEmployeeData(civilidText))
                     } catch (e: java.lang.Exception) {
                         e.printStackTrace()
                     }
@@ -425,6 +635,10 @@ class MyViewModel @Inject constructor(
                     onEvent(MyEvent.EmailChanged(emailText))
                     onEvent(MyEvent.DOBChanged(dobText))
                     onEvent(MyEvent.ExpiryDateChanged(expiryText))
+
+                    if (isAutoDetectCard.value) {
+                        autoDetectCivilId()
+                    }
 
 
                 } catch (e: Exception) {

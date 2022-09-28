@@ -80,7 +80,7 @@ fun SignaturePadPage(onClickBack: () -> Unit,viewModel: MyViewModel,) {
                 ) {
                     SignaturePadView(
                         penMaxWidth = 4.dp,
-                        penMinWidth = 2.dp,
+                        penMinWidth = 1.dp,
                         onReady = {
                             signaturePadAdapter = it
                         },
@@ -110,7 +110,9 @@ fun SignaturePadPage(onClickBack: () -> Unit,viewModel: MyViewModel,) {
                 ){
                     Button(onClick = {
                         mutableSvg.value = signaturePadAdapter?.getSignatureSvg() ?: ""
-                        viewModel.backToCivilIdPage()
+                        viewModel.setSignatureSvg(mutableSvg.value)
+                        viewModel.onEvent(MyEvent.AddEmployeeData)
+                      //  viewModel.backToCivilIdPage()
                     }) {
                         Text("Save")
                     }
@@ -134,7 +136,7 @@ fun SignaturePadPage(onClickBack: () -> Unit,viewModel: MyViewModel,) {
                         Text("Black")
                     }
                 }
-               // Text(text = "SVG: " + mutableSvg.value)
+                //Text(text = "SVG: " + mutableSvg.value)
 
 
         }

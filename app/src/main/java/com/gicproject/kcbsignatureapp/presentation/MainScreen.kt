@@ -2,6 +2,7 @@ package com.gicproject.kcbsignatureapp.presentation
 
 
 import android.util.Log
+import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.view.PreviewView
@@ -47,6 +48,14 @@ fun MainScreen(
 
     val isRefreshing by viewModel.isRefreshingSetting.collectAsState()
     val state = viewModel.stateMain.value
+
+    val context = LocalContext.current
+
+    if(state.showToast.isNotBlank()){
+        LaunchedEffect(key1 = true){
+            Toast.makeText(context,state.showToast,Toast.LENGTH_SHORT).show()
+        }
+    }
     Scaffold(
     ) { innerPadding ->
         SwipeRefresh(
@@ -221,7 +230,7 @@ fun FingerPrintPage(
 
     Row(modifier = Modifier.fillMaxSize()) {
 
-        Column(
+       /* Column(
             modifier = Modifier
                 .weight(2.0f)
                 .fillMaxSize(),
@@ -338,7 +347,7 @@ fun FingerPrintPage(
                 }
             }
 
-        }
+        }*/
         Column(
             modifier = Modifier
                 .weight(3.0f)
@@ -472,16 +481,16 @@ fun CivilIdPage(loading: Boolean,isAutoDetect: Boolean, onClick: () -> Unit,onCl
                 fontWeight = FontWeight.Bold,
             )
             if (!loading) {
-                Pulsating {
-                    Button(
-                        modifier = Modifier.padding(top = 20.dp),
-                        onClick = onClick
-                    ) {
-                        Text(text = "Read Data")
+                if(!isAutoDetect){
+                    Pulsating {
+                        Button(
+                            modifier = Modifier.padding(top = 20.dp),
+                            onClick = onClick
+                        ) {
+                            Text(text = "Read Data")
+                        }
                     }
                 }
-
-
             } else {
                 CircularProgressIndicator()
             }
