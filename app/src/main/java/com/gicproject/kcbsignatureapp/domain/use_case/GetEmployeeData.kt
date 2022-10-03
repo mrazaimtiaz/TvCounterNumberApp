@@ -16,13 +16,13 @@ import javax.inject.Inject
 class GetEmployeeData @Inject constructor(
     private val repository: MyRepository
 ) {
-    operator fun invoke(getPersonSendModel: GetPersonSendModel): Flow<Resource<EmployeeData?>> = flow {
+    operator fun invoke(getPersonSendModel: GetPersonSendModel): Flow<Resource<List<EmployeeData>?>> = flow {
         try {
             emit(Resource.Loading())
 
             var result = repository.getEmployeeData(getPersonSendModel)
             if(!result.isNullOrEmpty()){
-                emit(Resource.Success(result[0]))
+                emit(Resource.Success(result))
 
             }else{
                 emit(Resource.Error("Empty List"))

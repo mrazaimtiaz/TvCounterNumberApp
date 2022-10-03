@@ -4,6 +4,7 @@ import okhttp3.MultipartBody
 
 sealed class MyEvent {
     data class GetEmployeeData(val id: String) : MyEvent()
+    object GetEmployeeListData : MyEvent()
     object AddEmployeeData: MyEvent()
     data class CivilIdChanged(val text: String) : MyEvent()
     data class SerialNoChanged(val text: String) : MyEvent()

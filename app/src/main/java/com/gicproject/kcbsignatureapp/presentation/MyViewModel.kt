@@ -157,24 +157,39 @@ class MyViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             d("TAG", "onEvent: error event getemployeedata")
+
                             result.data?.let {
-                                if(it.NATIONALIDENTIFIER.toString() == event.id){
-                                    _stateMain.value = _stateMain.value.copy(
-                                        isLoadingCivilId = false,
-                                        fingerPrintPage = true,
-                                        civilIdPage = false,
-                                        showToast = "",
-                                        signaturePage = false
-                                    )
+                                if(it.isNotEmpty()){
+                                    if(it[0].NATIONALIDENTIFIER.toString() == event.id){
+                                        _stateMain.value = _stateMain.value.copy(
+                                            isLoadingCivilId = false,
+                                            fingerPrintPage = true,
+                                            civilIdPage = false,
+                                            employeeListPage = false,
+                                            showToast = "",
+                                            signaturePage = false
+                                        )
+                                    }else{
+                                        _stateMain.value = _stateMain.value.copy(
+                                            isLoadingCivilId = false,
+                                            fingerPrintPage = false,
+                                            employeeListPage = false,
+                                            civilIdPage = true,
+                                            showToast = "CivilId not matched ${event.id} / ${it[0].NATIONALIDENTIFIER}",
+                                            signaturePage = false
+                                        )
+                                    }
                                 }else{
                                     _stateMain.value = _stateMain.value.copy(
                                         isLoadingCivilId = false,
                                         fingerPrintPage = false,
+                                        employeeListPage = false,
                                         civilIdPage = true,
-                                        showToast = "CivilId not matched ${event.id} / ${it.NATIONALIDENTIFIER}",
+                                        showToast = "Empty List",
                                         signaturePage = false
                                     )
                                 }
+
 
                             }
                         }
@@ -183,6 +198,7 @@ class MyViewModel @Inject constructor(
                             _stateMain.value = _stateMain.value.copy(
                                 isLoadingCivilId = false,
                                 fingerPrintPage = false,
+                                employeeListPage = false,
                                 civilIdPage = true,
                                 showToast = "Server Error",
                                 signaturePage = false
@@ -191,6 +207,34 @@ class MyViewModel @Inject constructor(
                         is Resource.Loading -> {
                             _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true, showToast = "")
                           //  _stateSetting.value = SettingScreenState(isLoading = true)
+                        }
+                    }
+                }.launchIn(viewModelScope)
+            }
+            is MyEvent.GetEmployeeListData -> {
+                d("TAG", "onEvent: error event getemployeedata1")
+                surveyUseCases.getEmployeeData(GetPersonSendModel(p_proc_name = "APPS.XXKCB_HR_MOBILE1_SS_PKG.LIST_EMP_WITH_SIGNATURE",P_NATIONAL_ID = "0")).onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            d("TAG", "onEvent: error event getemployeedata")
+                            result.data?.let { _stateMain.value.copy(isLoadingEmployeeList = false, employeeList = it) }
+
+                        }
+                        is Resource.Error -> {
+                            d("TAG", "onEvent: error event getemployeedata")
+                            _stateMain.value = _stateMain.value.copy(
+                                isLoadingCivilId = false,
+                                fingerPrintPage = false,
+                                employeeListPage = true,
+                                employeeList = emptyList(),
+                                civilIdPage = false,
+                                showToast = "Server Error",
+                                signaturePage = false
+                            )
+                        }
+                        is Resource.Loading -> {
+                            _stateMain.value = _stateMain.value.copy(isLoadingEmployeeList = true, showToast = "")
+                            //  _stateSetting.value = SettingScreenState(isLoading = true)
                         }
                     }
                 }.launchIn(viewModelScope)
@@ -414,6 +458,7 @@ class MyViewModel @Inject constructor(
         _stateMain.value = _stateMain.value.copy(
             isLoadingCivilId = false,
             fingerPrintPage = false,
+            employeeListPage = false,
             civilIdPage = true,
             showToast = toastString,
             signaturePage = false
@@ -429,6 +474,7 @@ class MyViewModel @Inject constructor(
         _stateMain.value = _stateMain.value.copy(
             isLoadingCivilId = false,
             fingerPrintPage = true,
+            employeeListPage = false,
             civilIdPage = false,
             showToast = "",
             signaturePage = false
@@ -439,25 +485,45 @@ class MyViewModel @Inject constructor(
         _stateMain.value = _stateMain.value.copy(
             isLoadingCivilId = false,
             fingerPrintPage = false,
+            employeeListPage = false,
             civilIdPage = false,
             signaturePage = true
+        )
+    }
+
+    fun openEmployeeListPage() {
+        _stateMain.value = _stateMain.value.copy(
+            isLoadingCivilId = false,
+            fingerPrintPage = false,
+            civilIdPage = false,
+            signaturePage = false,
+            employeeListPage = true,
         )
     }
 
 
     var cardInserted = false
     fun autoDetectCivilId() {
+
         if (isAutoDetectCard.value) {
 //            d("TAG", "autoDetectCivilId: ${cardInserted} readerPresent: ${reader.iccPowerOn()}")
-            reader.iccPowerOff()
 
-            if (!cardInserted) {
-                if (reader.iccPowerOn()) {
-                    d("TAG", "autoDetectCivilId: cardinsert")
-                    if (stateMain.value.civilIdPage) {
-                        cardInserted = true
-                        emptyMainState()
-                        readData()
+            if(stateMain.value.civilIdPage){
+                reader.iccPowerOff()
+
+                if (!cardInserted) {
+                    if (reader.iccPowerOn()) {
+                        d("TAG", "autoDetectCivilId: cardinsert")
+                        if (stateMain.value.civilIdPage) {
+                            cardInserted = true
+                            emptyMainState()
+                            readData()
+                        } else {
+                            viewModelScope.launch {
+                                delay(500)
+                                autoDetectCivilId()
+                            }
+                        }
                     } else {
                         viewModelScope.launch {
                             delay(500)
@@ -465,16 +531,16 @@ class MyViewModel @Inject constructor(
                         }
                     }
                 } else {
+                    if (!reader.iccPowerOn()) {
+                        d("TAG", "autoDetectCivilId: cardremoved")
+                        cardInserted = false
+                    }
                     viewModelScope.launch {
                         delay(500)
                         autoDetectCivilId()
                     }
                 }
-            } else {
-                if (!reader.iccPowerOn()) {
-                    d("TAG", "autoDetectCivilId: cardremoved")
-                    cardInserted = false
-                }
+            }else{
                 viewModelScope.launch {
                     delay(500)
                     autoDetectCivilId()

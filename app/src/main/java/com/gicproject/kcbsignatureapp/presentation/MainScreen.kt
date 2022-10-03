@@ -11,6 +11,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -99,8 +102,9 @@ fun MainScreen(
                 ) {
                     if (state.civilIdPage) {
                         CivilIdPage(state.isLoadingCivilId, onClick = {
-                            viewModel.emptyMainState()
-                            viewModel.readData()
+                            //viewModel.emptyMainState()
+                            //viewModel.readData()
+                            viewModel.openEmployeeListPage()
                         },onClickAutoDetect ={
                             viewModel.setAutoDetect(it)
                         }, isAutoDetect = viewModel.isAutoDetectCard.value)
@@ -118,6 +122,15 @@ fun MainScreen(
                             viewModel = viewModel,
                         )
                     }
+                    if (state.employeeListPage) {
+                        EmployeeListPage(
+                            onClickBack = {
+                                viewModel.backToCivilIdPage()
+                            },
+                            viewModel = viewModel,
+                        )
+                    }
+
 
                     /*  Row(
                           horizontalArrangement = Arrangement.Center,
@@ -465,16 +478,17 @@ fun CivilIdPage(loading: Boolean,isAutoDetect: Boolean, onClick: () -> Unit,onCl
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            /*Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "Auto Detect Card")
                 Spacer(modifier = Modifier.width(50.dp))
                 Switch(
                     checked = isAutoDetect,
                     onCheckedChange = {onClickAutoDetect(it)}
                 )
-            }
+            }*/
+            // and Click Below Button
             Text(
-                "Please Insert Civil ID and Click Below Button",
+                "Please Insert Civil ID",
                 color = MaterialTheme.colors.primary,
                 textAlign = TextAlign.Center,
                 fontSize = 48.sp,
@@ -482,19 +496,84 @@ fun CivilIdPage(loading: Boolean,isAutoDetect: Boolean, onClick: () -> Unit,onCl
             )
             if (!loading) {
                 if(!isAutoDetect){
-                    Pulsating {
+                  //  Pulsating {
                         Button(
                             modifier = Modifier.padding(top = 20.dp),
                             onClick = onClick
                         ) {
-                            Text(text = "Read Data")
+                            Text(text = "Employee List")
                         }
-                    }
+                  //  }
                 }
             } else {
                 CircularProgressIndicator()
             }
 
+
+        }
+        Column(
+            modifier = Modifier
+                .weight(1.0f)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.civilidinsert),
+                contentDescription = "civilid"
+            )
+        }
+    }
+}
+
+
+
+@Composable
+fun EmployeeListPage(
+    onClickBack: () -> Unit, viewModel: MyViewModel,) {
+
+   var stateEmployeeList = viewModel.stateMain.value
+
+    Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = onClickBack) {
+            Icon(
+                Icons.Filled.KeyboardArrowLeft,
+                "back arrow",
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier
+                    .size(100.dp, 100.dp)
+            )
+        }
+    }
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        items(stateEmployeeList.employeeList) { item ->
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(vertical = 25.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "\uD83C\uDF3F  Plants in Cosmetics",
+                    style = MaterialTheme.typography.h3
+                )
+            }
+        }
+    }
+
+    Row(modifier = Modifier.fillMaxSize()) {
+
+        Column(
+            modifier = Modifier
+                .weight(2.0f)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
         }
         Column(
