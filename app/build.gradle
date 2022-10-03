@@ -11,7 +11,7 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.gicproject.kcbsignatureapptest"
+        applicationId "com.gicproject.kcbsignatureapp"
         minSdk 24
         targetSdk 32
         versionCode 1

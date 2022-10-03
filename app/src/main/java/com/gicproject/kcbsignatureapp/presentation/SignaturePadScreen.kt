@@ -1,6 +1,7 @@
 package com.gicproject.kcbsignatureapp.presentation
 
 import android.util.Log
+import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.view.PreviewView
@@ -40,6 +41,7 @@ fun SignaturePadPage(onClickBack: () -> Unit,viewModel: MyViewModel,) {
 
 
     val mutableSvg = remember { mutableStateOf("") }
+    val svgLoading = viewModel.svgLoading.value
 
     IconButton(onClick = onClickBack) {
         Icon(
@@ -108,14 +110,25 @@ fun SignaturePadPage(onClickBack: () -> Unit,viewModel: MyViewModel,) {
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ){
+
+                    if(!svgLoading){
+                        var context = LocalContext.current
                     Button(onClick = {
                         mutableSvg.value = signaturePadAdapter?.getSignatureSvg() ?: ""
-                        viewModel.setSignatureSvg(mutableSvg.value)
-                        viewModel.onEvent(MyEvent.AddEmployeeData)
+                        if(mutableSvg.value.isNotBlank()){
+                            viewModel.setSignatureSvg(mutableSvg.value)
+                            viewModel.onEvent(MyEvent.AddEmployeeData)
+                        }else{
+                            Toast.makeText(context, "Empty Signature", Toast.LENGTH_LONG).show()
+
+                        }
                       //  viewModel.backToCivilIdPage()
                     }) {
                         Text("Save")
                     }
+                } else {
+                         CircularProgressIndicator()
+                  }
                     Spacer(modifier = Modifier.width(20.dp))
                     Button(onClick = {
                         mutableSvg.value = ""
@@ -124,7 +137,7 @@ fun SignaturePadPage(onClickBack: () -> Unit,viewModel: MyViewModel,) {
                         Text("Clear")
                     }
                     Spacer(modifier = Modifier.width(20.dp))
-                    Button(onClick = {
+                   /* Button(onClick = {
                         penColor.value = Color.Red
                     }) {
                         Text("Red")
@@ -134,7 +147,7 @@ fun SignaturePadPage(onClickBack: () -> Unit,viewModel: MyViewModel,) {
                         penColor.value = Color.Black
                     }) {
                         Text("Black")
-                    }
+                    }*/
                 }
                 //Text(text = "SVG: " + mutableSvg.value)
 

@@ -89,6 +89,9 @@ class MyViewModel @Inject constructor(
     private val _isAutoDetectCard = mutableStateOf(true)
     val isAutoDetectCard: State<Boolean> = _isAutoDetectCard
 
+    private val _svgLoading = mutableStateOf(false)
+    val svgLoading: State<Boolean> = _svgLoading
+
 
     lateinit var reader: SmartCardReader
 
@@ -194,6 +197,9 @@ class MyViewModel @Inject constructor(
             }
             is MyEvent.AddEmployeeData -> {
               //  progressbarSubmitButton.setVisibility(View.VISIBLE)
+                _svgLoading.value = true
+                d("TAG", "onEvent: 1 addemployeedata")
+
                 val th = Thread {
                     var client: OkHttpClient
                     try {
@@ -201,6 +207,7 @@ class MyViewModel @Inject constructor(
                         OkhttpManager.getInstance().trustrCertificates = assetManager.open("")
                         client = OkhttpManager.getInstance().build()
                     } catch (e: IOException) {
+                        _svgLoading.value = false
                         client = OkHttpClient()
                     }
                     var MEDIA_TYPE_PNG: MediaType
@@ -229,10 +236,11 @@ class MyViewModel @Inject constructor(
                                        )
                                    }
                                 }
+
                     if(_signatureSvg.value != null){
                         buildernew.addFormDataPart(
-                            "fingerprintimage",
-                            "fingerprintimage",
+                            "signature.svg",
+                            "signature.svg",
                             RequestBody.create("image/svg+xml".toMediaType(), _signatureSvg.value!!.toByteArray(Charset.defaultCharset()))
 
                         )
@@ -249,9 +257,11 @@ class MyViewModel @Inject constructor(
                         )
                     }*/
 
+                    d("TAG", "onEvent: 2 addemployeedata")
 
 
                     val requestBody: MultipartBody = buildernew.build()
+                    d("TAG", "onEvent: add employee ${Constants.BASE_URL}mid/api/Paci/ADD_EMPLOYEE_SIGNATURE?cid=" + _stateMain.value.civilidText)
                     val request: Request = Request.Builder()
                         .url("${Constants.BASE_URL}mid/api/Paci/ADD_EMPLOYEE_SIGNATURE?cid=" + _stateMain.value.civilidText)
                         .post(requestBody)
@@ -260,12 +270,16 @@ class MyViewModel @Inject constructor(
                         var response: Response? = null
                         response = client.newCall(request).execute()
                         val s = response.body!!.string()
-
+                        _svgLoading.value = false
                             try {
                                 val jsonObj = JSONObject(s)
                                 val a = jsonObj.getString("x_status")
+                                val message = jsonObj.getString("x_message")
+                                //x_message
+                                d("TAG", "onEvent: status $a")
+                                d("TAG", "onEvent: message $message")
                                 if (a.contains("S")) {
-                                    backToCivilIdPage()
+                                    backToCivilIdPage("Signature Saved Successfully")
                                 }else{
                                     _stateMain.value = _stateMain.value.copy(showToast = "Status not True, Cannot Saved")
 
@@ -276,6 +290,7 @@ class MyViewModel @Inject constructor(
                             }
 
                     } catch (e: IOException) {
+                        _svgLoading.value = false
                         _stateMain.value = _stateMain.value.copy(showToast = "Could not connect")
                         //Toast.makeText(LoaActivity2.this,e.getMessage(), Toast.LENGTH_LONG).show();
                         e.printStackTrace()
@@ -395,12 +410,12 @@ class MyViewModel @Inject constructor(
         }
     }
 
-    fun backToCivilIdPage() {
+    fun backToCivilIdPage(toastString: String = "") {
         _stateMain.value = _stateMain.value.copy(
             isLoadingCivilId = false,
             fingerPrintPage = false,
             civilIdPage = true,
-            showToast = "Success",
+            showToast = toastString,
             signaturePage = false
         )
     }
@@ -516,7 +531,7 @@ class MyViewModel @Inject constructor(
                     var text = "";
                     try {
                         civilidText = paci!!.GetData("", "CIVIL-NO")
-                       // onEvent(MyEvent.GetEmployeeData(civilidText))
+                        onEvent(MyEvent.GetEmployeeData(civilidText))
                     } catch (e: java.lang.Exception) {
                         e.printStackTrace()
                     }
@@ -644,12 +659,12 @@ class MyViewModel @Inject constructor(
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-                _stateMain.value = _stateMain.value.copy(
+               /* _stateMain.value = _stateMain.value.copy(
                     isLoadingCivilId = false,
                     fingerPrintPage = true,
                     civilIdPage = false,
                     signaturePage = false
-                )
+                )*/
             }
         } else {
 
