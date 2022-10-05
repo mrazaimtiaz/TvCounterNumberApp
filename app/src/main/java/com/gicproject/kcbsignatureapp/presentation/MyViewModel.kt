@@ -121,6 +121,10 @@ class MyViewModel @Inject constructor(
                             ?.contains(charSequence.toString().toLowerCase(Locale.ROOT)) == true
                         || stateMain.value.employeeList[i].EMPLOYEENUMBER?.toLowerCase(Locale.ROOT)
                             ?.contains(charSequence.toString().toLowerCase(Locale.ROOT)) == true
+                        || stateMain.value.employeeList[i].NATIONALIDENTIFIER?.toLowerCase(Locale.ROOT)
+                            ?.contains(charSequence.toString().toLowerCase(Locale.ROOT)) == true
+                        || stateMain.value.employeeList[i].JOBNAME?.toLowerCase(Locale.ROOT)
+                            ?.contains(charSequence.toString().toLowerCase(Locale.ROOT)) == true
                     ) {
                         filteredList.add(stateMain.value.employeeList[i])
                     }
@@ -212,21 +216,12 @@ class MyViewModel @Inject constructor(
                                 if (it.isNotEmpty()) {
                                         _stateMain.value = _stateMain.value.copy(
                                             employeeSignatures = it,
-                                            isLoadingEmployeeInfo = false,
-                                            employeeInfoPage = true,
-                                            civilIdPage = false,
-                                            employeeListPage = false,
                                             showToast = "",
-                                            signaturePage = false
                                         )
 
                                 } else {
                                     _stateMain.value = _stateMain.value.copy(
                                         employeeSignatures = emptyList(),
-                                        isLoadingEmployeeInfo = false,
-                                        fingerPrintPage = false,
-                                        employeeListPage = false,
-                                        employeeInfoPage = true,
                                         showToast = "Empty List",
                                         signaturePage = false
                                     )
@@ -238,13 +233,7 @@ class MyViewModel @Inject constructor(
                         is Resource.Error -> {
                             d("TAG", "onEvent: error event getemployeedata")
                             _stateMain.value = _stateMain.value.copy(
-                                employeeSignatures = listOf(Constants.employeeSignature,Constants.employeeSignature,Constants.employeeSignature),
-                                isLoadingCivilId = false,
-                                isLoadingEmployeeInfo = false,
-                                fingerPrintPage = false,
-                                employeeListPage = false,
-                                employeeInfoPage = true,
-                                showToast = "Server Error",
+                                employeeSignatures = emptyList(),
                                 signaturePage = false
                             )
                         }
@@ -285,7 +274,7 @@ class MyViewModel @Inject constructor(
                                             fingerPrintPage = false,
                                             employeeListPage = false,
                                             civilIdPage = true,
-                                            showToast = "CivilId not matched ${event.id} / ${it[0].NATIONALIDENTIFIER}",
+                                            showToast = "CivilId not matched ${event.id} / ${it[0].NATIONALIDENTIFIER} \n البطاقة المدنية غير متطابقة ${event.id} / ${it[0].NATIONALIDENTIFIER}",
                                             signaturePage = false
                                         )
                                     }
@@ -346,60 +335,7 @@ class MyViewModel @Inject constructor(
                         is Resource.Error -> {
                             d("TAG", "onEvent: error event getemployeedata")
                             _stateMain.value = _stateMain.value.copy(
-                                isLoadingCivilId = false,
-                                fingerPrintPage = false,
-                                employeeListPage = true,
-                                employeeList = listOf(
-                                    EmployeeData(
-                                        PERSONID = "6099",
-                                        NATIONALIDENTIFIER = "292022100501",
-                                        EMPLOYEENUMBER = "3405",
-                                        FULLNAME = "احمد غالب علي حرز",
-                                        USERID = "3529",
-                                        USERNAME = "AHGH",
-                                        ASSIGNMENTID = "4264",
-                                        ORGANIZATIONID = "173",
-                                        ORGANIZATIONNAME = "قسم السجل العام-اداره الشئون الإداريه",
-                                        JOBID = "2389",
-                                        JOBNAME = "مندوب",
-                                        TAKLIFTYPECODE = "",
-                                        TAKLIFTYPENAME = "",
-                                        TAKLIFDEPARTMENTID = "",
-                                        TAKLIFDEPARTMENTNAME = "",
-                                        TAKLIFJOBID = "",
-                                        TAKLIFJOBNAME = "",
-                                        TAKLIFTECHJOBID = "",
-                                        TAKLIFTECHJOBNAME = "",
-                                        SIGNATUREEXISTS = "N"
-                                    )
-                                ),
-                                employeeSearchList = listOf(
-                                    EmployeeData(
-                                        PERSONID = "6099",
-                                        NATIONALIDENTIFIER = "292022100501",
-                                        EMPLOYEENUMBER = "3405",
-                                        FULLNAME = "احمد غالب علي حرز",
-                                        USERID = "3529",
-                                        USERNAME = "AHGH",
-                                        ASSIGNMENTID = "4264",
-                                        ORGANIZATIONID = "173",
-                                        ORGANIZATIONNAME = "قسم السجل العام-اداره الشئون الإداريه",
-                                        JOBID = "2389",
-                                        JOBNAME = "مندوب",
-                                        TAKLIFTYPECODE = "",
-                                        TAKLIFTYPENAME = "",
-                                        TAKLIFDEPARTMENTID = "",
-                                        TAKLIFDEPARTMENTNAME = "",
-                                        TAKLIFJOBID = "",
-                                        TAKLIFJOBNAME = "",
-                                        TAKLIFTECHJOBID = "",
-                                        TAKLIFTECHJOBNAME = "",
-                                        SIGNATUREEXISTS = "N"
-                                    )
-                                ),
-                                civilIdPage = false,
                                 showToast = result.message.toString(),
-                                signaturePage = false
                             )
 
 
@@ -506,7 +442,7 @@ class MyViewModel @Inject constructor(
                                 backToCivilIdPage("S")
                             } else {
                                 _stateMain.value =
-                                    _stateMain.value.copy(showToast = "Status not True, Cannot Saved")
+                                    _stateMain.value.copy(showToast = "الحالة ليست صحيحة ، لا يمكن الحفظ \n Status not True, Cannot Saved")
 
                             }
                         } catch (e: JSONException) {
@@ -642,6 +578,7 @@ class MyViewModel @Inject constructor(
         _stateMain.value = _stateMain.value.copy(
             isLoadingCivilId = false,
             fingerPrintPage = false,
+            employeeInfoPage = false,
             employeeListPage = false,
             civilIdPage = true,
             showToast = toastString,
@@ -652,6 +589,7 @@ class MyViewModel @Inject constructor(
         _stateMain.value = _stateMain.value.copy(
             isLoadingCivilId = false,
             fingerPrintPage = false,
+            employeeInfoPage = false,
             employeeListPage = true,
             civilIdPage = false,
             signaturePage = false
@@ -667,6 +605,7 @@ class MyViewModel @Inject constructor(
         _stateMain.value = _stateMain.value.copy(
             isLoadingCivilId = false,
             fingerPrintPage = true,
+            employeeInfoPage = false,
             employeeListPage = false,
             civilIdPage = false,
             showToast = "",
@@ -679,6 +618,7 @@ class MyViewModel @Inject constructor(
             isLoadingCivilId = false,
             fingerPrintPage = false,
             employeeListPage = false,
+            employeeInfoPage = false,
             civilIdPage = false,
             signaturePage = true
         )
@@ -688,6 +628,7 @@ class MyViewModel @Inject constructor(
         _stateMain.value = _stateMain.value.copy(
             isLoadingCivilId = false,
             fingerPrintPage = false,
+            employeeInfoPage = false,
             civilIdPage = false,
             signaturePage = false,
             employeeListPage = true,
@@ -808,6 +749,7 @@ class MyViewModel @Inject constructor(
                                     isLoadingCivilId = false,
                                     fingerPrintPage = true,
                                     civilIdPage = false,
+                                    employeeInfoPage = false,
                                     employeeListPage = false,
                                     showToast = "",
                                     signaturePage = false
@@ -816,7 +758,7 @@ class MyViewModel @Inject constructor(
                               _stateMain.value = _stateMain.value.copy(showToast = "CivilId not Matched ${civilIdMatch} / $civilidText \n الهوية المدنية غير متطابقة ${civilIdMatch} / $civilidText")
                             }
                         }else{
-                          //  onEvent(MyEvent.GetEmployeeData(civilidText)) //test
+                            onEvent(MyEvent.GetEmployeeData(civilidText)) //test
                         }
                     } catch (e: java.lang.Exception) {
                         e.printStackTrace()
@@ -945,12 +887,12 @@ class MyViewModel @Inject constructor(
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-                _stateMain.value = _stateMain.value.copy(
+               /* _stateMain.value = _stateMain.value.copy(
                     isLoadingCivilId = false,
                     fingerPrintPage = true,
                     civilIdPage = false,
                     signaturePage = false
-                )  //test
+                )*/  //test
             }
         } else {
             _stateMain.value = _stateMain.value.copy(isLoadingCivilId = false, showToast = "No CivilID Found \n لم يتم العثور على بطاقة هوية مدنية ")
@@ -961,17 +903,23 @@ class MyViewModel @Inject constructor(
     //finger print section
     private val _orderAsc = mutableStateOf(true)
     val orderAsc: State<Boolean> = _orderAsc
+    private val _sortingName = mutableStateOf("")
+    val sortingName: State<String> = _sortingName
     fun sortingList(columnNumber: String) {
         var list = _stateMain.value.employeeSearchList
         if (columnNumber == "1") {
+            _sortingName.value ="1"
             if (orderAsc.value) {
-                list = list.sortedBy { it.EMPLOYEENUMBER }
+                list = list.sortedBy {
+                    it.EMPLOYEENUMBER
+                }
                 _orderAsc.value = false
             } else {
                 list = list.sortedByDescending { it.EMPLOYEENUMBER }
                 _orderAsc.value = true
             }
         } else if (columnNumber == "2") {
+            _sortingName.value ="2"
             if (orderAsc.value) {
                 list = list.sortedBy { it.FULLNAME }
                 _orderAsc.value = false
@@ -980,6 +928,7 @@ class MyViewModel @Inject constructor(
                 _orderAsc.value = true
             }
         } else if (columnNumber == "3") {
+            _sortingName.value ="3"
             if (orderAsc.value) {
                 list = list.sortedBy { it.ORGANIZATIONNAME }
                 _orderAsc.value = false
@@ -988,6 +937,7 @@ class MyViewModel @Inject constructor(
                 _orderAsc.value = true
             }
         } else if (columnNumber == "4") {
+            _sortingName.value ="4"
             if (orderAsc.value) {
                 list = list.sortedBy { it.SIGNATUREEXISTS }
                 _orderAsc.value = false

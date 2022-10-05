@@ -111,7 +111,7 @@ fun MainScreen(
                     .padding(30.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = "Signature Saved Successfully", fontSize = 30.sp)
+                Text(text = "تم حفظ التوقيع بنجاح \n Signature Saved Successfully", fontSize = 30.sp)
                 DoneAnimation()
             }
         }
@@ -292,7 +292,7 @@ fun FingerPrintPage(
         Button(modifier = Modifier.padding(top = 20.dp), onClick = {
             viewModel.openSignaturePage()
         }) {
-            Text(text = "Capture Signature")
+            Text(text = "التقاط التوقيع \nCapture Signature", textAlign = TextAlign.Center)
         }
     }
 
@@ -427,14 +427,14 @@ fun FingerPrintPage(
             Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                 OutlinedTextField(readOnly = true,
                     value = civilIdText,
-                    label = { Text("Civil ID") },
+                    label = { Text("رقم البطاقة المدنية") },
                     onValueChange = {
                         viewModel.onEvent(MyEvent.CivilIdChanged(it))
                     })
                 Spacer(modifier = Modifier.width(20.dp))
                 OutlinedTextField(readOnly = true,
                     value = expiryDate,
-                    label = { Text("Expiry Date") },
+                    label = { Text("تاريخ انتهاء الصلاحية") },
                     onValueChange = {
                         viewModel.onEvent(MyEvent.ExpiryDateChanged(it))
                     })
@@ -442,28 +442,28 @@ fun FingerPrintPage(
             OutlinedTextField(modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
                 value = fullNameText,
-                label = { Text("Full Name English") },
+                label = { Text("الاسم بالإنجليزية") },
                 onValueChange = {
                     viewModel.onEvent(MyEvent.FullNameChanged(it))
                 })
             OutlinedTextField(modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
                 value = fullNameArText,
-                label = { Text("Full Name Arabic") },
+                label = { Text("الاسم عربي") },
                 onValueChange = {
                     viewModel.onEvent(MyEvent.FullNameArChanged(it))
                 })
             Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                 OutlinedTextField(readOnly = true,
                     value = nationalityText,
-                    label = { Text("Nationality") },
+                    label = { Text("الجنسية") },
                     onValueChange = {
                         viewModel.onEvent(MyEvent.NationalityChanged(it))
                     })
                 Spacer(modifier = Modifier.width(20.dp))
                 OutlinedTextField(readOnly = true,
                     value = dobText,
-                    label = { Text("Date of Birth") },
+                    label = { Text("تاريخ الولادة") },
                     onValueChange = {
                         viewModel.onEvent(MyEvent.DOBChanged(it))
                     })
@@ -471,14 +471,14 @@ fun FingerPrintPage(
             Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                 OutlinedTextField(readOnly = true,
                     value = genderText,
-                    label = { Text("Gender") },
+                    label = { Text("الجنس") },
                     onValueChange = {
                         viewModel.onEvent(MyEvent.GenderChanged(it))
                     })
                 Spacer(modifier = Modifier.width(20.dp))
                 OutlinedTextField(readOnly = true,
                     value = emailText,
-                    label = { Text("Email") },
+                    label = { Text("البريد الإلكتروني") },
                     onValueChange = {
                         viewModel.onEvent(MyEvent.EmailChanged(it))
                     })
@@ -486,14 +486,14 @@ fun FingerPrintPage(
             Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                 OutlinedTextField(readOnly = true,
                     value = tel1Text,
-                    label = { Text("Tel 1") },
+                    label = { Text("رقم الهاتف 1") },
                     onValueChange = {
                         viewModel.onEvent(MyEvent.Tel1Changed(it))
                     })
                 Spacer(modifier = Modifier.width(20.dp))
                 OutlinedTextField(readOnly = true,
                     value = tel2Text,
-                    label = { Text("Tel 2") },
+                    label = { Text("رقم الهاتف 2") },
                     onValueChange = {
                         viewModel.onEvent(MyEvent.Tel2Changed(it))
                     })
@@ -530,7 +530,7 @@ fun CivilIdPage(
             }*/
             // and Click Below Button
             Text(
-                "Please Insert Civil ID",
+                "الرجاء إدخال البطاقة المدنية \n Please Insert Civil ID ",
                 color = MaterialTheme.colors.primary,
                 textAlign = TextAlign.Center,
                 fontSize = 48.sp,
@@ -540,14 +540,14 @@ fun CivilIdPage(
                 Button(
                     modifier = Modifier.padding(top = 20.dp), onClick = onClick
                 ) {
-                    Text(text = "Employee List")
+                    Text(text = "قائمة موظف \n Employee List", textAlign = TextAlign.Center)
                 }
                 if (!isAutoDetect) {
                     //  Pulsating {
                     Button(
                         modifier = Modifier.padding(top = 20.dp), onClick = onClick
                     ) {
-                        Text(text = "Employee List")
+                        Text(text = "قائمة موظف \n Employee List", textAlign = TextAlign.Center)
                     }
                     //  }
                 }
@@ -623,7 +623,7 @@ fun EmployeeListPage(
             },
             maxLines = 1,
             colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.Transparent),
-            placeholder = { Text(text = "Search") },
+            placeholder = { Text(text = "يبحث - Search") },
             textStyle = MaterialTheme.typography.subtitle1,
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -648,7 +648,10 @@ fun EmployeeListPage(
             item {
                 Row(Modifier.background(Color.Gray)) {
 
-                    TableCell(text = "Emp Num",
+                    TableCell(text = if(viewModel.sortingName.value == "1" && viewModel.orderAsc.value)
+                        "▼ رقم الموظف"
+                        else if(viewModel.sortingName.value == "1" && !viewModel.orderAsc.value)
+                            "▲ رقم الموظف" else "رقم الموظف",
                         weight = column1Weight,
                         Modifier
                             .border(0.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f))
@@ -657,7 +660,10 @@ fun EmployeeListPage(
                             .clickable {
                                 viewModel.sortingList("1")
                             })
-                    TableCell(text = "Full Name",
+                    TableCell(text =  if(viewModel.sortingName.value == "2" && viewModel.orderAsc.value)
+                        "▼ اسم الموظف"
+                    else if(viewModel.sortingName.value == "2" && !viewModel.orderAsc.value)
+                        "▲ اسم الموظف" else "اسم الموظف",
                         weight = column2Weight,
                         Modifier
                             .border(0.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f))
@@ -666,7 +672,10 @@ fun EmployeeListPage(
                             .clickable {
                                 viewModel.sortingList("2")
                             })
-                    TableCell(text = "Dept Name",
+                    TableCell(text = if(viewModel.sortingName.value == "3" && viewModel.orderAsc.value)
+                        "▼ اسم القسم"
+                    else if(viewModel.sortingName.value == "3" && !viewModel.orderAsc.value)
+                        "▲ اسم القسم" else "اسم القسم",
                         weight = column3Weight,
                         Modifier
                             .border(0.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f))
@@ -675,7 +684,10 @@ fun EmployeeListPage(
                             .clickable {
                                 viewModel.sortingList("3")
                             })
-                    TableCell(text = "Status",
+                    TableCell(text = if(viewModel.sortingName.value == "4" && viewModel.orderAsc.value)
+                        "▼ الحالة"
+                    else if(viewModel.sortingName.value == "4" && !viewModel.orderAsc.value)
+                        "▲ الحالة" else "الحالة",
                         weight = column4Weight,
                         Modifier
                             .border(0.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f))
@@ -779,7 +791,7 @@ fun EmployeeInfoPage(
                 )
                 ShowRowText(title = "الاسم", text = employeeData?.FULLNAME ?: "")
                 ShowRowText(
-                    title = "اسم االمستخدم",
+                    title = "اسم المستخدم",
                     text = employeeData?.USERNAME ?: "",
                     bgColor = Color(0xFFDBE1FF)
                 )
@@ -834,12 +846,12 @@ fun EmployeeInfoPage(
             if(stateEmployeeInfo.employeeSignatures.isEmpty()){
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                     Text(text = "No Signature Found - لم يتم العثور على توقيع", color = Color.Red)
-
+//
                     if (!stateEmployeeInfo.isLoadingCivilId) {
                         Button(onClick = {
                             viewModel.emptyMainState()
                             viewModel.readData(employeeData?.NATIONALIDENTIFIER ?: "1") }) {
-                            Text("Add Signature \n أضف التوقيع", textAlign = TextAlign.Center)
+                            Text("أضف التوقيع \n Add Signature", textAlign = TextAlign.Center)
                         }
                     } else {
                         CircularProgressIndicator()
@@ -853,7 +865,7 @@ fun EmployeeInfoPage(
                             viewModel.emptyMainState()
                             viewModel.readData(employeeData?.NATIONALIDENTIFIER ?: "1")
                         }) {
-                            Text("Update Signature  \n توقيع التحديث", textAlign = TextAlign.Center)
+                            Text("توقيع التحديث \n Update Signature", textAlign = TextAlign.Center)
                         }
                     } else {
                         CircularProgressIndicator()
