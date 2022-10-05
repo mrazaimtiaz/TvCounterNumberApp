@@ -1,7 +1,10 @@
 package com.gicproject.kcbsignatureapp.presentation
 
 import android.app.PendingIntent
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.hardware.usb.UsbDevice
@@ -13,6 +16,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.util.Log.d
+import android.widget.Filter
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +26,7 @@ import androidx.lifecycle.viewModelScope
 import com.gicproject.kcbsignatureapp.OkhttpManager
 import com.gicproject.kcbsignatureapp.common.Constants
 import com.gicproject.kcbsignatureapp.common.Resource
+import com.gicproject.kcbsignatureapp.domain.model.EmployeeData
 import com.gicproject.kcbsignatureapp.domain.model.GetPersonSendModel
 import com.gicproject.kcbsignatureapp.domain.repository.DataStoreRepository
 import com.gicproject.kcbsignatureapp.domain.use_case.MyUseCases
@@ -46,8 +51,12 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.nio.charset.Charset
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
@@ -95,6 +104,41 @@ class MyViewModel @Inject constructor(
 
     lateinit var reader: SmartCardReader
 
+
+    val myFilter: Filter = object : Filter() {
+        //Automatic on background thread
+        override fun performFiltering(charSequence: CharSequence): FilterResults {
+            Log.d(
+                "TAG",
+                "performFiltering: $charSequence"
+            )
+            val filteredList: MutableList<EmployeeData?> = ArrayList<EmployeeData?>()
+            if (charSequence.isEmpty()) {
+                filteredList.addAll(stateMain.value.employeeList)
+            } else {
+                for (i in stateMain.value.employeeList.indices) {
+                    if (stateMain.value.employeeList[i].FULLNAME?.toLowerCase(Locale.ROOT)
+                            ?.contains(charSequence.toString().toLowerCase(Locale.ROOT)) == true
+                        || stateMain.value.employeeList[i].EMPLOYEENUMBER?.toLowerCase(Locale.ROOT)
+                            ?.contains(charSequence.toString().toLowerCase(Locale.ROOT)) == true
+                    ) {
+                        filteredList.add(stateMain.value.employeeList[i])
+                    }
+                }
+            }
+            val filterResults = FilterResults()
+            filterResults.values = filteredList
+            return filterResults
+        }
+
+        //Automatic on UI thread
+        override fun publishResults(charSequence: CharSequence, filterResults: FilterResults) {
+            _stateMain.value =
+                stateMain.value.copy(employeeSearchList = filterResults.values as List<EmployeeData>)
+
+        }
+    }
+
     init {
         initAutoDetectPreference()
     }
@@ -126,6 +170,7 @@ class MyViewModel @Inject constructor(
     fun setFingerPrintUri(value: Bitmap?) {
         _fingerPrintUri.value = value
     }
+
     fun setSignatureSvg(value: String?) {
         _signatureSvg.value = value
     }
@@ -151,16 +196,81 @@ class MyViewModel @Inject constructor(
 
     fun onEvent(event: MyEvent) {
         when (event) {
-            is MyEvent.GetEmployeeData -> {
-                d("TAG", "onEvent: error event getemployeedata1")
-                surveyUseCases.getEmployeeData(GetPersonSendModel(p_proc_name = "APPS.XXKCB_HR_MOBILE1_SS_PKG.LIST_EMP_WITH_SIGNATURE",P_NATIONAL_ID = event.id)).onEach { result ->
+            is MyEvent.GetEmployeeSignatureData -> {
+                d("TAG", "onEvent: error event getemployeedata signature")
+                surveyUseCases.getEmployeeSignature(
+                    GetPersonSendModel(
+                        p_proc_name = "APPS.XXKCB_HR_MOBILE1_SS_PKG.GET_EMPLOYEE_SIGNATURE",
+                        P_NATIONAL_ID = event.id
+                    )
+                ).onEach { result ->
                     when (result) {
                         is Resource.Success -> {
                             d("TAG", "onEvent: error event getemployeedata")
 
                             result.data?.let {
-                                if(it.isNotEmpty()){
-                                    if(it[0].NATIONALIDENTIFIER.toString() == event.id){
+                                if (it.isNotEmpty()) {
+                                        _stateMain.value = _stateMain.value.copy(
+                                            employeeSignatures = it,
+                                            isLoadingEmployeeInfo = false,
+                                            employeeInfoPage = true,
+                                            civilIdPage = false,
+                                            employeeListPage = false,
+                                            showToast = "",
+                                            signaturePage = false
+                                        )
+
+                                } else {
+                                    _stateMain.value = _stateMain.value.copy(
+                                        employeeSignatures = emptyList(),
+                                        isLoadingEmployeeInfo = false,
+                                        fingerPrintPage = false,
+                                        employeeListPage = false,
+                                        employeeInfoPage = true,
+                                        showToast = "Empty List",
+                                        signaturePage = false
+                                    )
+                                }
+
+
+                            }
+                        }
+                        is Resource.Error -> {
+                            d("TAG", "onEvent: error event getemployeedata")
+                            _stateMain.value = _stateMain.value.copy(
+                                employeeSignatures = listOf(Constants.employeeSignature,Constants.employeeSignature,Constants.employeeSignature),
+                                isLoadingCivilId = false,
+                                isLoadingEmployeeInfo = false,
+                                fingerPrintPage = false,
+                                employeeListPage = false,
+                                employeeInfoPage = true,
+                                showToast = "Server Error",
+                                signaturePage = false
+                            )
+                        }
+                        is Resource.Loading -> {
+                            _stateMain.value =
+                                _stateMain.value.copy(isLoadingEmployeeInfo = true, showToast = "")
+                            //  _stateSetting.value = SettingScreenState(isLoading = true)
+                        }
+                    }
+                }.launchIn(viewModelScope)
+            }
+            is MyEvent.GetEmployeeData -> {
+                d("TAG", "onEvent: error event getemployeedata1")
+                surveyUseCases.getEmployeeData(
+                    GetPersonSendModel(
+                        p_proc_name = "APPS.XXKCB_HR_MOBILE1_SS_PKG.LIST_EMP_WITH_SIGNATURE",
+                        P_NATIONAL_ID = event.id
+                    )
+                ).onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            d("TAG", "onEvent: error event getemployeedata")
+
+                            result.data?.let {
+                                if (it.isNotEmpty()) {
+                                    if (it[0].NATIONALIDENTIFIER.toString() == event.id) {
                                         _stateMain.value = _stateMain.value.copy(
                                             isLoadingCivilId = false,
                                             fingerPrintPage = true,
@@ -169,7 +279,7 @@ class MyViewModel @Inject constructor(
                                             showToast = "",
                                             signaturePage = false
                                         )
-                                    }else{
+                                    } else {
                                         _stateMain.value = _stateMain.value.copy(
                                             isLoadingCivilId = false,
                                             fingerPrintPage = false,
@@ -179,7 +289,7 @@ class MyViewModel @Inject constructor(
                                             signaturePage = false
                                         )
                                     }
-                                }else{
+                                } else {
                                     _stateMain.value = _stateMain.value.copy(
                                         isLoadingCivilId = false,
                                         fingerPrintPage = false,
@@ -205,19 +315,32 @@ class MyViewModel @Inject constructor(
                             )
                         }
                         is Resource.Loading -> {
-                            _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true, showToast = "")
-                          //  _stateSetting.value = SettingScreenState(isLoading = true)
+                            _stateMain.value =
+                                _stateMain.value.copy(isLoadingCivilId = true, showToast = "")
+                            //  _stateSetting.value = SettingScreenState(isLoading = true)
                         }
                     }
                 }.launchIn(viewModelScope)
             }
             is MyEvent.GetEmployeeListData -> {
                 d("TAG", "onEvent: error event getemployeedata1")
-                surveyUseCases.getEmployeeData(GetPersonSendModel(p_proc_name = "APPS.XXKCB_HR_MOBILE1_SS_PKG.LIST_EMP_WITH_SIGNATURE",P_NATIONAL_ID = "0")).onEach { result ->
+                surveyUseCases.getEmployeeData(
+                    GetPersonSendModel(
+                        p_proc_name = "APPS.XXKCB_HR_MOBILE1_SS_PKG.LIST_EMP_WITH_SIGNATURE",
+                        P_NATIONAL_ID = "0"
+                    )
+                ).onEach { result ->
                     when (result) {
                         is Resource.Success -> {
-                            d("TAG", "onEvent: error event getemployeedata")
-                            result.data?.let { _stateMain.value.copy(isLoadingEmployeeList = false, employeeList = it) }
+                            result.data?.let {
+
+                                d("TAG", "onEvent: error event getemployeedata ${it.size}")
+                                _stateMain.value = _stateMain.value.copy(
+                                    isLoadingEmployeeList = false,
+                                    employeeList = it,
+                                    employeeSearchList = it
+                                )
+                            }
 
                         }
                         is Resource.Error -> {
@@ -226,21 +349,71 @@ class MyViewModel @Inject constructor(
                                 isLoadingCivilId = false,
                                 fingerPrintPage = false,
                                 employeeListPage = true,
-                                employeeList = emptyList(),
+                                employeeList = listOf(
+                                    EmployeeData(
+                                        PERSONID = "6099",
+                                        NATIONALIDENTIFIER = "292022100501",
+                                        EMPLOYEENUMBER = "3405",
+                                        FULLNAME = "احمد غالب علي حرز",
+                                        USERID = "3529",
+                                        USERNAME = "AHGH",
+                                        ASSIGNMENTID = "4264",
+                                        ORGANIZATIONID = "173",
+                                        ORGANIZATIONNAME = "قسم السجل العام-اداره الشئون الإداريه",
+                                        JOBID = "2389",
+                                        JOBNAME = "مندوب",
+                                        TAKLIFTYPECODE = "",
+                                        TAKLIFTYPENAME = "",
+                                        TAKLIFDEPARTMENTID = "",
+                                        TAKLIFDEPARTMENTNAME = "",
+                                        TAKLIFJOBID = "",
+                                        TAKLIFJOBNAME = "",
+                                        TAKLIFTECHJOBID = "",
+                                        TAKLIFTECHJOBNAME = "",
+                                        SIGNATUREEXISTS = "N"
+                                    )
+                                ),
+                                employeeSearchList = listOf(
+                                    EmployeeData(
+                                        PERSONID = "6099",
+                                        NATIONALIDENTIFIER = "292022100501",
+                                        EMPLOYEENUMBER = "3405",
+                                        FULLNAME = "احمد غالب علي حرز",
+                                        USERID = "3529",
+                                        USERNAME = "AHGH",
+                                        ASSIGNMENTID = "4264",
+                                        ORGANIZATIONID = "173",
+                                        ORGANIZATIONNAME = "قسم السجل العام-اداره الشئون الإداريه",
+                                        JOBID = "2389",
+                                        JOBNAME = "مندوب",
+                                        TAKLIFTYPECODE = "",
+                                        TAKLIFTYPENAME = "",
+                                        TAKLIFDEPARTMENTID = "",
+                                        TAKLIFDEPARTMENTNAME = "",
+                                        TAKLIFJOBID = "",
+                                        TAKLIFJOBNAME = "",
+                                        TAKLIFTECHJOBID = "",
+                                        TAKLIFTECHJOBNAME = "",
+                                        SIGNATUREEXISTS = "N"
+                                    )
+                                ),
                                 civilIdPage = false,
-                                showToast = "Server Error",
+                                showToast = result.message.toString(),
                                 signaturePage = false
                             )
+
+
                         }
                         is Resource.Loading -> {
-                            _stateMain.value = _stateMain.value.copy(isLoadingEmployeeList = true, showToast = "")
+                            _stateMain.value =
+                                _stateMain.value.copy(isLoadingEmployeeList = true, showToast = "")
                             //  _stateSetting.value = SettingScreenState(isLoading = true)
                         }
                     }
                 }.launchIn(viewModelScope)
             }
             is MyEvent.AddEmployeeData -> {
-              //  progressbarSubmitButton.setVisibility(View.VISIBLE)
+                //  progressbarSubmitButton.setVisibility(View.VISIBLE)
                 _svgLoading.value = true
                 d("TAG", "onEvent: 1 addemployeedata")
 
@@ -258,34 +431,38 @@ class MyViewModel @Inject constructor(
                     val buildernew: MultipartBody.Builder =
                         MultipartBody.Builder().setType(MultipartBody.FORM)
 
-                            MEDIA_TYPE_PNG =  "image/jpeg".toMediaType()
-                                if(_photoUri.value != null){
-                                    val imageBody: RequestBody =
-                                        _photoUri.value!!.toFile().asRequestBody(MEDIA_TYPE_PNG)
-                                    buildernew.addFormDataPart(
-                                        "cameraimage",
-                                       "cameraimage",
-                                        imageBody
-                                    )
-                                }
-                                if(_fingerPrintUri.value != null){
-                                    val fileFingerPrint = bitmapToFile(_fingerPrintUri.value!!,"fingerprintimage")
-                                   if(fileFingerPrint != null){
-                                       val imageBody: RequestBody =
-                                           fileFingerPrint.asRequestBody(MEDIA_TYPE_PNG)
-                                       buildernew.addFormDataPart(
-                                           "fingerprintimage",
-                                           "fingerprintimage",
-                                           imageBody
-                                       )
-                                   }
-                                }
+                    MEDIA_TYPE_PNG = "image/jpeg".toMediaType()
+                    if (_photoUri.value != null) {
+                        val imageBody: RequestBody =
+                            _photoUri.value!!.toFile().asRequestBody(MEDIA_TYPE_PNG)
+                        buildernew.addFormDataPart(
+                            "cameraimage",
+                            "cameraimage",
+                            imageBody
+                        )
+                    }
+                    if (_fingerPrintUri.value != null) {
+                        val fileFingerPrint =
+                            bitmapToFile(_fingerPrintUri.value!!, "fingerprintimage")
+                        if (fileFingerPrint != null) {
+                            val imageBody: RequestBody =
+                                fileFingerPrint.asRequestBody(MEDIA_TYPE_PNG)
+                            buildernew.addFormDataPart(
+                                "fingerprintimage",
+                                "fingerprintimage",
+                                imageBody
+                            )
+                        }
+                    }
 
-                    if(_signatureSvg.value != null){
+                    if (_signatureSvg.value != null) {
                         buildernew.addFormDataPart(
                             "signature.svg",
                             "signature.svg",
-                            RequestBody.create("image/svg+xml".toMediaType(), _signatureSvg.value!!.toByteArray(Charset.defaultCharset()))
+                            RequestBody.create(
+                                "image/svg+xml".toMediaType(),
+                                _signatureSvg.value!!.toByteArray(Charset.defaultCharset())
+                            )
 
                         )
                     }
@@ -305,7 +482,10 @@ class MyViewModel @Inject constructor(
 
 
                     val requestBody: MultipartBody = buildernew.build()
-                    d("TAG", "onEvent: add employee ${Constants.BASE_URL}mid/api/Paci/ADD_EMPLOYEE_SIGNATURE?cid=" + _stateMain.value.civilidText)
+                    d(
+                        "TAG",
+                        "onEvent: add employee ${Constants.BASE_URL}mid/api/Paci/ADD_EMPLOYEE_SIGNATURE?cid=" + _stateMain.value.civilidText
+                    )
                     val request: Request = Request.Builder()
                         .url("${Constants.BASE_URL}mid/api/Paci/ADD_EMPLOYEE_SIGNATURE?cid=" + _stateMain.value.civilidText)
                         .post(requestBody)
@@ -315,23 +495,24 @@ class MyViewModel @Inject constructor(
                         response = client.newCall(request).execute()
                         val s = response.body!!.string()
                         _svgLoading.value = false
-                            try {
-                                val jsonObj = JSONObject(s)
-                                val a = jsonObj.getString("x_status")
-                                val message = jsonObj.getString("x_message")
-                                //x_message
-                                d("TAG", "onEvent: status $a")
-                                d("TAG", "onEvent: message $message")
-                                if (a.contains("S")) {
-                                    backToCivilIdPage("Signature Saved Successfully")
-                                }else{
-                                    _stateMain.value = _stateMain.value.copy(showToast = "Status not True, Cannot Saved")
+                        try {
+                            val jsonObj = JSONObject(s)
+                            val a = jsonObj.getString("x_status")
+                            val message = jsonObj.getString("x_message")
+                            //x_message
+                            d("TAG", "onEvent: status $a")
+                            d("TAG", "onEvent: message $message")
+                            if (a.contains("S")) {
+                                backToCivilIdPage("S")
+                            } else {
+                                _stateMain.value =
+                                    _stateMain.value.copy(showToast = "Status not True, Cannot Saved")
 
-                                }
-                            } catch (e: JSONException) {
-                                _stateMain.value = _stateMain.value.copy(showToast = "Could not parse")
-                                e.printStackTrace()
                             }
+                        } catch (e: JSONException) {
+                            _stateMain.value = _stateMain.value.copy(showToast = "Could not parse")
+                            e.printStackTrace()
+                        }
 
                     } catch (e: IOException) {
                         _svgLoading.value = false
@@ -339,13 +520,13 @@ class MyViewModel @Inject constructor(
                         //Toast.makeText(LoaActivity2.this,e.getMessage(), Toast.LENGTH_LONG).show();
                         e.printStackTrace()
                         Log.d("TAG", "my_submit2: " + e.message)
-                     /*   Handler(Looper.getMainLooper()).post {
-                            Toast.makeText(
-                                this,
-                                e.message,
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }*/
+                        /*   Handler(Looper.getMainLooper()).post {
+                               Toast.makeText(
+                                   this,
+                                   e.message,
+                                   Toast.LENGTH_LONG
+                               ).show()
+                           }*/
                     }
                 }
                 th.start()
@@ -434,7 +615,10 @@ class MyViewModel @Inject constructor(
         //create a file to write bitmap data
         var file: File? = null
         return try {
-            file = File(Environment.getExternalStorageDirectory().toString() + File.separator + fileNameToSave)
+            file = File(
+                Environment.getExternalStorageDirectory()
+                    .toString() + File.separator + fileNameToSave
+            )
             file.createNewFile()
 
             //Convert bitmap to byte array
@@ -464,9 +648,18 @@ class MyViewModel @Inject constructor(
             signaturePage = false
         )
     }
+    fun backToEmployeeListPage() {
+        _stateMain.value = _stateMain.value.copy(
+            isLoadingCivilId = false,
+            fingerPrintPage = false,
+            employeeListPage = true,
+            civilIdPage = false,
+            signaturePage = false
+        )
+    }
 
     lateinit var assetManager: AssetManager
-    fun setAssets(mAssetManager: AssetManager){
+    fun setAssets(mAssetManager: AssetManager) {
         assetManager = mAssetManager
     }
 
@@ -501,6 +694,18 @@ class MyViewModel @Inject constructor(
         )
     }
 
+    fun openEmployeeInfoPage(employeeData: EmployeeData) {
+        _stateMain.value = _stateMain.value.copy(
+            isLoadingCivilId = false,
+            fingerPrintPage = false,
+            civilIdPage = false,
+            signaturePage = false,
+            employeeListPage = false,
+            employeeInfoShow = employeeData,
+            employeeInfoPage = true
+        )
+    }
+
 
     var cardInserted = false
     fun autoDetectCivilId() {
@@ -508,7 +713,7 @@ class MyViewModel @Inject constructor(
         if (isAutoDetectCard.value) {
 //            d("TAG", "autoDetectCivilId: ${cardInserted} readerPresent: ${reader.iccPowerOn()}")
 
-            if(stateMain.value.civilIdPage){
+            if (stateMain.value.civilIdPage) {
                 reader.iccPowerOff()
 
                 if (!cardInserted) {
@@ -540,7 +745,7 @@ class MyViewModel @Inject constructor(
                         autoDetectCivilId()
                     }
                 }
-            }else{
+            } else {
                 viewModelScope.launch {
                     delay(500)
                     autoDetectCivilId()
@@ -557,7 +762,7 @@ class MyViewModel @Inject constructor(
     }
 
 
-    fun readData() {
+    fun readData(civilIdMatch: String = "") {
         _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true, showToast = "")
         if (reader.iccPowerOn()) {
             val ReaderHandler: ConcurrentHashMap<String?, PaciCardReaderAbstract?> =
@@ -597,7 +802,22 @@ class MyViewModel @Inject constructor(
                     var text = "";
                     try {
                         civilidText = paci!!.GetData("", "CIVIL-NO")
-                        onEvent(MyEvent.GetEmployeeData(civilidText))
+                        if(civilIdMatch.isNotBlank()){
+                            if(civilidText.equals(civilIdMatch)){
+                                _stateMain.value = _stateMain.value.copy(
+                                    isLoadingCivilId = false,
+                                    fingerPrintPage = true,
+                                    civilIdPage = false,
+                                    employeeListPage = false,
+                                    showToast = "",
+                                    signaturePage = false
+                                )
+                            }else{
+                              _stateMain.value = _stateMain.value.copy(showToast = "CivilId not Matched ${civilIdMatch} / $civilidText \n الهوية المدنية غير متطابقة ${civilIdMatch} / $civilidText")
+                            }
+                        }else{
+                          //  onEvent(MyEvent.GetEmployeeData(civilidText)) //test
+                        }
                     } catch (e: java.lang.Exception) {
                         e.printStackTrace()
                     }
@@ -725,22 +945,63 @@ class MyViewModel @Inject constructor(
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-               /* _stateMain.value = _stateMain.value.copy(
+                _stateMain.value = _stateMain.value.copy(
                     isLoadingCivilId = false,
                     fingerPrintPage = true,
                     civilIdPage = false,
                     signaturePage = false
-                )*/
+                )  //test
             }
         } else {
-
-
-            _stateMain.value = _stateMain.value.copy(isLoadingCivilId = false)
+            _stateMain.value = _stateMain.value.copy(isLoadingCivilId = false, showToast = "No CivilID Found \n لم يتم العثور على بطاقة هوية مدنية ")
         }
 
     }
 
     //finger print section
+    private val _orderAsc = mutableStateOf(true)
+    val orderAsc: State<Boolean> = _orderAsc
+    fun sortingList(columnNumber: String) {
+        var list = _stateMain.value.employeeSearchList
+        if (columnNumber == "1") {
+            if (orderAsc.value) {
+                list = list.sortedBy { it.EMPLOYEENUMBER }
+                _orderAsc.value = false
+            } else {
+                list = list.sortedByDescending { it.EMPLOYEENUMBER }
+                _orderAsc.value = true
+            }
+        } else if (columnNumber == "2") {
+            if (orderAsc.value) {
+                list = list.sortedBy { it.FULLNAME }
+                _orderAsc.value = false
+            } else {
+                list = list.sortedByDescending { it.FULLNAME }
+                _orderAsc.value = true
+            }
+        } else if (columnNumber == "3") {
+            if (orderAsc.value) {
+                list = list.sortedBy { it.ORGANIZATIONNAME }
+                _orderAsc.value = false
+            } else {
+                list = list.sortedByDescending { it.ORGANIZATIONNAME }
+                _orderAsc.value = true
+            }
+        } else if (columnNumber == "4") {
+            if (orderAsc.value) {
+                list = list.sortedBy { it.SIGNATUREEXISTS }
+                _orderAsc.value = false
+            } else {
+                list = list.sortedByDescending { it.SIGNATUREEXISTS }
+                _orderAsc.value = true
+            }
+        }
+        _stateMain.value = _stateMain.value.copy(employeeSearchList = list)
+    }
+
+    fun emptyToast() {
+        _stateMain.value = _stateMain.value.copy(showToast = "")
+    }
 
     fun doAutoCapture() {
         Logger.d("buttonCaptureAuto clicked")

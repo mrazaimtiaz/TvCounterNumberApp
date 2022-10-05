@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace 'com.gicproject.kcbsignatureapp'
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.gicproject.kcbsignatureapp"
         minSdk 24
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -65,6 +65,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
   //  implementation 'com.android.support:support-v4:23.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+
+    implementation "com.google.accompanist:accompanist-pager:0.26.4-beta"
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.1'
     implementation 'androidx.activity:activity-compose:1.4.0'
@@ -79,6 +81,9 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
 
+
+    implementation "com.airbnb.android:lottie-compose:5.2.0"
+
     //constraint layout compose
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
 
@@ -88,6 +93,10 @@ dependencies {
 
     implementation 'io.coil-kt:coil-compose:2.1.0'
     implementation "com.google.accompanist:accompanist-swiperefresh:0.24.8-beta"
+    //glide //coil
+    implementation "com.github.skydoves:landscapist-glide:2.0.0"
+
+    implementation 'com.caverock:androidsvg-aar:1.4'
 
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
 

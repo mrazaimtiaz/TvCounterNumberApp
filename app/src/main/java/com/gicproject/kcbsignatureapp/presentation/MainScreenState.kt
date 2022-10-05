@@ -1,16 +1,22 @@
 package com.gicproject.kcbsignatureapp.presentation
 
 import com.gicproject.kcbsignatureapp.domain.model.EmployeeData
+import com.gicproject.kcbsignatureapp.domain.model.EmployeeSignature
 
 
 data class MainScreenState(
+    val employeeSignatures:  List<EmployeeSignature> = emptyList(),
+    val isLoadingEmployeeInfo: Boolean = false,
+    val employeeInfoShow: EmployeeData? = null,
     val employeeList: List<EmployeeData> = emptyList(),
+    val employeeSearchList: List<EmployeeData> = emptyList(),
     val isLoadingEmployeeList: Boolean = false,
     val isLoadingCivilId: Boolean = false,
     val civilIdPage: Boolean = true,
     val fingerPrintPage: Boolean = false,
     val signaturePage: Boolean = false,
     val employeeListPage: Boolean = false,
+    val employeeInfoPage: Boolean = false,
     val showToast: String = "",
     val civilidText: String = "",
     val serialNoText: String = "",

@@ -63,11 +63,11 @@ class MainActivity : ComponentActivity() {
         val getAssets = assets
         setContent {
              viewModel = hiltViewModel()
-            viewModel?.settingReader(this)
+           // viewModel?.settingReader(this)
             viewModel?.setAssets(getAssets)
 
 
-            viewModel?.initUsbListener(this,mUsbManager)
+         //   viewModel?.initUsbListener(this,mUsbManager)
 
 
             val systemUiController = rememberSystemUiController()

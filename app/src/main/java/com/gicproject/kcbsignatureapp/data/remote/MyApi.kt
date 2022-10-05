@@ -4,6 +4,7 @@ package com.gicproject.kcbsignatureapp.data.remote
 import com.gicproject.kcbsignatureapp.common.Constants
 import com.gicproject.kcbsignatureapp.data.remote.dto.ResultDto
 import com.gicproject.kcbsignatureapp.domain.model.EmployeeData
+import com.gicproject.kcbsignatureapp.domain.model.EmployeeSignature
 import com.gicproject.kcbsignatureapp.domain.model.GetPersonSendModel
 import okhttp3.MultipartBody
 import retrofit2.Response
@@ -18,6 +19,11 @@ interface MyApi {
     suspend fun getEmployeeData(
         @Body getPersonSendModel: GetPersonSendModel
     ): List<EmployeeData>?
+
+    @POST(Constants.BASE_URL + "mid/api/Paci/get_person_proc_out")
+    suspend fun getEmployeeSignature(
+        @Body getPersonSendModel: GetPersonSendModel
+    ): List<EmployeeSignature>?
 
     @Multipart
     @POST(Constants.BASE_URL + "mid/api/Paci/ADD_EMPLOYEE_SIGNATURE")

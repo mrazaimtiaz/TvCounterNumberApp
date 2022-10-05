@@ -4,6 +4,7 @@ package com.gicproject.kcbsignatureapp.data.repository
 import com.gicproject.kcbsignatureapp.data.remote.MyApi
 import com.gicproject.kcbsignatureapp.data.remote.dto.ResultDto
 import com.gicproject.kcbsignatureapp.domain.model.EmployeeData
+import com.gicproject.kcbsignatureapp.domain.model.EmployeeSignature
 import com.gicproject.kcbsignatureapp.domain.model.GetPersonSendModel
 import com.gicproject.kcbsignatureapp.domain.repository.MyRepository
 import okhttp3.MultipartBody
@@ -20,6 +21,10 @@ class MyRepositoryImpl @Inject constructor(
 
     override suspend fun getEmployeeData(getPersonSendModel: GetPersonSendModel): List<EmployeeData>? {
         return api.getEmployeeData(getPersonSendModel)
+    }
+
+    override suspend fun getEmployeeSignature(getPersonSendModel: GetPersonSendModel): List<EmployeeSignature>? {
+        return api.getEmployeeSignature(getPersonSendModel)
     }
 
     override suspend fun addEmployeeData(

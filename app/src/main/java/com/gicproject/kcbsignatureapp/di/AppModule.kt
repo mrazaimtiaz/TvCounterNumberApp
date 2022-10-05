@@ -54,7 +54,8 @@ class AppModule {
         return MyUseCases(
             getResult = GetResult(repository = repository),
             getEmployeeData = GetEmployeeData(repository = repository),
-            addEmployeeData = AddEmployeeData(repository = repository)
+            addEmployeeData = AddEmployeeData(repository = repository),
+            getEmployeeSignature = GetEmployeeSignature(repository = repository)
         )
     }
 }

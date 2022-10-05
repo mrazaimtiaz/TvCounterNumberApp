@@ -3,6 +3,7 @@ package com.gicproject.kcbsignatureapp.presentation
 import okhttp3.MultipartBody
 
 sealed class MyEvent {
+    data class GetEmployeeSignatureData(val id: String) : MyEvent()
     data class GetEmployeeData(val id: String) : MyEvent()
     object GetEmployeeListData : MyEvent()
     object AddEmployeeData: MyEvent()
