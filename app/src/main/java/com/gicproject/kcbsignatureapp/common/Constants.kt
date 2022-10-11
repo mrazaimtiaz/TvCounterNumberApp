@@ -5,10 +5,9 @@ import com.gicproject.kcbsignatureapp.domain.model.EmployeeSignature
 
 class Constants {
     companion object {
-        const val BASE_URL = "http://10.15.10.61/"
+        //const val BASE_URL = "http://10.15.10.61/"
 
-        //const val BASE_URL = "http://kcbg2gweb.kcb.gov.kw/"
-        // const val BASE_URL = "http://gickuwait-dev.com/KHsurvey/"
+        const val BASE_URL = "http://kcbg2gweb.kcb.gov.kw/"
         //kcbg2gweb.kcb.gov.kw instead of 10.10.15.61
         const val KEY_AUTO_DETECT_CARD = "auto detect card"
         const val STATE_MSG_EN = "state msg en"

@@ -633,6 +633,12 @@ fun EmployeeListPage(
         )
     }
 
+    if(stateEmployeeList.isLoadingEmployeeList){
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+            CircularProgressIndicator()
+        }
+    }
+
     val column1Weight = .2f // 30%
     val column2Weight = .4f // 70%
     val column3Weight = .4f // 30%
@@ -667,10 +673,22 @@ fun EmployeeListPage(
                         weight = column2Weight,
                         Modifier
                             .border(0.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f))
-                            .weight(column1Weight)
+                            .weight(column2Weight)
                             .padding(horizontal = 4.dp, vertical = 2.dp)
                             .clickable {
                                 viewModel.sortingList("2")
+                            })
+                    TableCell(text =  if(viewModel.sortingName.value == "5" && viewModel.orderAsc.value)
+                        "▼ تعيين"
+                    else if(viewModel.sortingName.value == "5" && !viewModel.orderAsc.value)
+                        "▲ تعيين" else "تعيين",
+                        weight = column2Weight,
+                        Modifier
+                            .border(0.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f))
+                            .weight(column1Weight)
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                            .clickable {
+                                viewModel.sortingList("5")
                             })
                     TableCell(text = if(viewModel.sortingName.value == "3" && viewModel.orderAsc.value)
                         "▼ اسم القسم"
@@ -679,7 +697,7 @@ fun EmployeeListPage(
                         weight = column3Weight,
                         Modifier
                             .border(0.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f))
-                            .weight(column1Weight)
+                            .weight(column3Weight)
                             .padding(horizontal = 4.dp, vertical = 2.dp)
                             .clickable {
                                 viewModel.sortingList("3")
@@ -691,7 +709,7 @@ fun EmployeeListPage(
                         weight = column4Weight,
                         Modifier
                             .border(0.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f))
-                            .weight(column1Weight)
+                            .weight(column4Weight)
                             .padding(horizontal = 4.dp, vertical = 2.dp)
                             .clickable {
                                 viewModel.sortingList("4")
@@ -700,7 +718,6 @@ fun EmployeeListPage(
             }
             // Here are all the lines of your table.
             items(stateEmployeeList.employeeSearchList) { item ->
-
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -714,6 +731,7 @@ fun EmployeeListPage(
                         }) {
                     TableCell(text = item.EMPLOYEENUMBER ?: "", weight = column1Weight)
                     TableCell(text = item.FULLNAME ?: "", weight = column2Weight)
+                    TableCell(text = item.JOBNAME ?: "", weight = column1Weight)
                     TableCell(text = item.ORGANIZATIONNAME ?: "", weight = column3Weight)
                     Icon(
                         if (item.SIGNATUREEXISTS == "Y") Icons.Filled.Check else Icons.Filled.Close,
@@ -738,7 +756,6 @@ fun EmployeeListPage(
     ) {
 
         items(stateEmployeeList.employeeSearchList) { item ->
-            Log.d("TAG", "EmployeeListPage:size ${stateEmployeeList.employeeList.size}")
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -782,7 +799,9 @@ fun EmployeeInfoPage(
         }
     }
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Row(modifier = Modifier.fillMaxWidth().padding(2.dp)) {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)) {
             Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
                 ShowRowText(
                     title = "رقم الموظف",
@@ -812,36 +831,51 @@ fun EmployeeInfoPage(
             }
         }
         if (!stateEmployeeInfo.isLoadingEmployeeInfo) {
+            Log.d("TAG", "EmployeeInfoPage: not loading into")
             LazyRow(
                 modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(1.dp)
             ){
-                items(stateEmployeeInfo.employeeSignatures){item ->
-                    val decodeValue: ByteArray = Base64.decode(
-                        item.EMPLOYEESIGNATURE, Base64.DEFAULT
-                    )
-                    val text = String(decodeValue, Charset.forName("UTF-8"))
-                    val svg = SVG.getFromString(text)
-                    val drawable = PictureDrawable(svg.renderToPicture())
-                    var bitmap = Bitmap.createBitmap(
-                        drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
-                    )
-                    val canvas = Canvas(bitmap)
-                    canvas.drawPicture(drawable.picture)
-                    Column(modifier = Modifier.padding(5.dp)) {
-                        Image(
-                            bitmap = bitmap.asImageBitmap(),
-                            contentDescription = "logo",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colors.primary,
-                                    shape = RoundedCornerShape(10.dp)
+                try {
+                    items(stateEmployeeInfo.employeeSignatures){item ->
+                        var finalBitmap: Bitmap? = null
+                        try {
+                            val decodeValue: ByteArray = Base64.decode(
+                                item.EMPLOYEESIGNATURE, Base64.DEFAULT
+                            )
+                            val text = String(decodeValue, Charset.forName("UTF-8"))
+                            val svg = SVG.getFromString(text)
+                            val drawable = PictureDrawable(svg.renderToPicture())
+                            val bitmap = Bitmap.createBitmap(
+                                drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
+                            )
+                            val canvas = Canvas(bitmap)
+                            canvas.drawPicture(drawable.picture)
+                            finalBitmap = bitmap
+                        }catch (e: java.lang.Exception){
+                            e.printStackTrace()
+                        }
+
+                        Column(modifier = Modifier.padding(5.dp)) {
+                            finalBitmap?.asImageBitmap()?.let {
+                                Image(
+                                    bitmap = it,
+                                    contentDescription = "logo",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colors.primary,
+                                            shape = RoundedCornerShape(10.dp)
+                                        ).size(500.dp,240.dp)
                                 )
-                        )
-                        Text(text = item.ATTACHMENTDATE)
+                            }
+                            Text(text = item.ATTACHMENTDATE)
+                        }
                     }
+                }catch (e: java.lang.Exception){
+                    e.printStackTrace()
                 }
+
             }
             if(stateEmployeeInfo.employeeSignatures.isEmpty()){
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -849,7 +883,7 @@ fun EmployeeInfoPage(
 //
                     if (!stateEmployeeInfo.isLoadingCivilId) {
                         Button(onClick = {
-                            viewModel.emptyMainState()
+                            viewModel.emptyUri()
                             viewModel.readData(employeeData?.NATIONALIDENTIFIER ?: "1") }) {
                             Text("أضف التوقيع \n Add Signature", textAlign = TextAlign.Center)
                         }
@@ -862,7 +896,7 @@ fun EmployeeInfoPage(
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                     if (!stateEmployeeInfo.isLoadingCivilId) {
                         Button(onClick = {
-                            viewModel.emptyMainState()
+                            viewModel.emptyUri()
                             viewModel.readData(employeeData?.NATIONALIDENTIFIER ?: "1")
                         }) {
                             Text("توقيع التحديث \n Update Signature", textAlign = TextAlign.Center)
@@ -873,6 +907,7 @@ fun EmployeeInfoPage(
                 }
             }
         } else {
+            Log.d("TAG", "EmployeeInfoPage:  loading into")
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator()
             }

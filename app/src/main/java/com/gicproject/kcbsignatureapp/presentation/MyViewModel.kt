@@ -102,7 +102,7 @@ class MyViewModel @Inject constructor(
     val svgLoading: State<Boolean> = _svgLoading
 
 
-    lateinit var reader: SmartCardReader
+     var reader: SmartCardReader? = null
 
 
     val myFilter: Filter = object : Filter() {
@@ -121,9 +121,7 @@ class MyViewModel @Inject constructor(
                             ?.contains(charSequence.toString().toLowerCase(Locale.ROOT)) == true
                         || stateMain.value.employeeList[i].EMPLOYEENUMBER?.toLowerCase(Locale.ROOT)
                             ?.contains(charSequence.toString().toLowerCase(Locale.ROOT)) == true
-                        || stateMain.value.employeeList[i].NATIONALIDENTIFIER?.toLowerCase(Locale.ROOT)
-                            ?.contains(charSequence.toString().toLowerCase(Locale.ROOT)) == true
-                        || stateMain.value.employeeList[i].JOBNAME?.toLowerCase(Locale.ROOT)
+                        || stateMain.value.employeeList[i].ORGANIZATIONNAME?.toLowerCase(Locale.ROOT)
                             ?.contains(charSequence.toString().toLowerCase(Locale.ROOT)) == true
                     ) {
                         filteredList.add(stateMain.value.employeeList[i])
@@ -190,6 +188,7 @@ class MyViewModel @Inject constructor(
 
     fun emptyMainState() {
         _stateMain.value = MainScreenState()
+        _signatureSvg.value = null
         _photoUri.value = null
         _fingerPrintUri.value = null
         _shouldShowCamera.value = true
@@ -197,11 +196,20 @@ class MyViewModel @Inject constructor(
         //     _statusFingerPrint.value = ""
     }
 
+    fun emptyUri(){
+        _signatureSvg.value = null
+        _photoUri.value = null
+        _fingerPrintUri.value = null
+        _shouldShowCamera.value = true
+    }
+
+
+
 
     fun onEvent(event: MyEvent) {
         when (event) {
             is MyEvent.GetEmployeeSignatureData -> {
-                d("TAG", "onEvent: error event getemployeedata signature")
+                d("TAG", "GetEmployeeSignatureData signature")
                 surveyUseCases.getEmployeeSignature(
                     GetPersonSendModel(
                         p_proc_name = "APPS.XXKCB_HR_MOBILE1_SS_PKG.GET_EMPLOYEE_SIGNATURE",
@@ -210,20 +218,33 @@ class MyViewModel @Inject constructor(
                 ).onEach { result ->
                     when (result) {
                         is Resource.Success -> {
-                            d("TAG", "onEvent: error event getemployeedata")
+                            d("TAG", "GetEmployeeSignatureData getemployeedata")
 
                             result.data?.let {
                                 if (it.isNotEmpty()) {
+                                    val newList = it.sortedByDescending { it.ATTACHMENTDATE }
+                                    if(it[0].ERRORMESSAGE.isNotBlank()){
                                         _stateMain.value = _stateMain.value.copy(
-                                            employeeSignatures = it,
-                                            showToast = "",
+                                            employeeSignatures = emptyList(),
+                                            signaturePage = false,
+                                            isLoadingEmployeeInfo = false,
+                                            showToast = it[0].ERRORMESSAGE
                                         )
+                                    }else{
+                                        _stateMain.value = _stateMain.value.copy(
+                                            employeeSignatures = newList,
+                                            showToast = "",
+                                            isLoadingEmployeeInfo = false,
+                                        )
+                                    }
+
 
                                 } else {
                                     _stateMain.value = _stateMain.value.copy(
                                         employeeSignatures = emptyList(),
                                         showToast = "Empty List",
-                                        signaturePage = false
+                                        signaturePage = false,
+                                        isLoadingEmployeeInfo = false,
                                     )
                                 }
 
@@ -231,10 +252,12 @@ class MyViewModel @Inject constructor(
                             }
                         }
                         is Resource.Error -> {
-                            d("TAG", "onEvent: error event getemployeedata")
+                            d("TAG", "GetEmployeeSignatureData error event getemployeedata")
                             _stateMain.value = _stateMain.value.copy(
                                 employeeSignatures = emptyList(),
-                                signaturePage = false
+                                signaturePage = false,
+                                isLoadingEmployeeInfo = false,
+                                showToast = result.message.toString()
                             )
                         }
                         is Resource.Loading -> {
@@ -322,7 +345,33 @@ class MyViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let {
-
+                                it.forEachIndexed { index, item ->
+                                    if(item.JOBID == "2260"){
+                                        it[index].JOBID = "-100"
+                                    }else if(item.JOBID == "2456"){
+                                        it[index].JOBID = "-99"
+                                    }else if(item.JOBID == "2458"){
+                                        it[index].JOBID = "-98"
+                                    }else if(item.JOBID == "2258"){
+                                        it[index].JOBID = "-97"
+                                    }else if(item.JOBID == "2259"){
+                                        it[index].JOBID = "-96"
+                                    }else if(item.JOBID == "2261"){
+                                        it[index].JOBID = "-95"
+                                    }else if(item.JOBID == "2256"){
+                                        it[index].JOBID ="-94"
+                                    }else if(item.JOBID == "2257"){
+                                        it[index].JOBID = "-93"
+                                    }else if(item.JOBID == "2255"){
+                                        it[index].JOBID = "-92"
+                                    }else if(item.JOBID == "15064"){
+                                        it[index].JOBID = "-91"
+                                    }else if(item.JOBID == "15066"){
+                                        it[index].JOBID = "-90"
+                                    }else if(item.JOBID == "15068"){
+                                        it[index].JOBID = "-89"
+                                    }
+                                }
                                 d("TAG", "onEvent: error event getemployeedata ${it.size}")
                                 _stateMain.value = _stateMain.value.copy(
                                     isLoadingEmployeeList = false,
@@ -336,6 +385,7 @@ class MyViewModel @Inject constructor(
                             d("TAG", "onEvent: error event getemployeedata")
                             _stateMain.value = _stateMain.value.copy(
                                 showToast = result.message.toString(),
+                                isLoadingEmployeeList = false,
                             )
 
 
@@ -441,8 +491,9 @@ class MyViewModel @Inject constructor(
                             if (a.contains("S")) {
                                 backToCivilIdPage("S")
                             } else {
+
                                 _stateMain.value =
-                                    _stateMain.value.copy(showToast = "الحالة ليست صحيحة ، لا يمكن الحفظ \n Status not True, Cannot Saved")
+                                   _stateMain.value.copy(showToast = "الحالة ليست صحيحة ، لا يمكن الحفظ \n Status not True, Cannot Saved")
 
                             }
                         } catch (e: JSONException) {
@@ -541,7 +592,7 @@ class MyViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.Main) {
             _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true, showToast = "")
             delay(3000)
-            reader.open(1)
+            reader?.open(1)
             _stateMain.value = _stateMain.value.copy(isLoadingCivilId = false, showToast = "")
             autoDetectCivilId()
         }
@@ -586,13 +637,17 @@ class MyViewModel @Inject constructor(
         )
     }
     fun backToEmployeeListPage() {
+        _sortingName.value = ""
+        _orderAsc.value = true
         _stateMain.value = _stateMain.value.copy(
+
             isLoadingCivilId = false,
             fingerPrintPage = false,
             employeeInfoPage = false,
             employeeListPage = true,
             civilIdPage = false,
-            signaturePage = false
+            signaturePage = false,
+            employeeSearchList = _stateMain.value.employeeList
         )
     }
 
@@ -651,19 +706,26 @@ class MyViewModel @Inject constructor(
     var cardInserted = false
     fun autoDetectCivilId() {
 
-        if (isAutoDetectCard.value) {
+        try{
+            if (isAutoDetectCard.value) {
 //            d("TAG", "autoDetectCivilId: ${cardInserted} readerPresent: ${reader.iccPowerOn()}")
 
-            if (stateMain.value.civilIdPage) {
-                reader.iccPowerOff()
+                if (stateMain.value.civilIdPage) {
+                    reader?.iccPowerOff()
 
-                if (!cardInserted) {
-                    if (reader.iccPowerOn()) {
-                        d("TAG", "autoDetectCivilId: cardinsert")
-                        if (stateMain.value.civilIdPage) {
-                            cardInserted = true
-                            emptyMainState()
-                            readData()
+                    if (!cardInserted) {
+                        if (reader?.iccPowerOn() == true) {
+                            d("TAG", "autoDetectCivilId: cardinsert")
+                            if (stateMain.value.civilIdPage) {
+                                cardInserted = true
+                                emptyMainState()
+                                readData()
+                            } else {
+                                viewModelScope.launch {
+                                    delay(500)
+                                    autoDetectCivilId()
+                                }
+                            }
                         } else {
                             viewModelScope.launch {
                                 delay(500)
@@ -671,16 +733,16 @@ class MyViewModel @Inject constructor(
                             }
                         }
                     } else {
+                        if (reader?.iccPowerOn() == false) {
+                            d("TAG", "autoDetectCivilId: cardremoved")
+                            cardInserted = false
+                        }
                         viewModelScope.launch {
                             delay(500)
                             autoDetectCivilId()
                         }
                     }
                 } else {
-                    if (!reader.iccPowerOn()) {
-                        d("TAG", "autoDetectCivilId: cardremoved")
-                        cardInserted = false
-                    }
                     viewModelScope.launch {
                         delay(500)
                         autoDetectCivilId()
@@ -692,7 +754,8 @@ class MyViewModel @Inject constructor(
                     autoDetectCivilId()
                 }
             }
-        } else {
+        }catch (e: java.lang.Exception){
+            e.printStackTrace()
             viewModelScope.launch {
                 delay(500)
                 autoDetectCivilId()
@@ -700,12 +763,13 @@ class MyViewModel @Inject constructor(
         }
 
 
+
     }
 
 
     fun readData(civilIdMatch: String = "") {
         _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true, showToast = "")
-        if (reader.iccPowerOn()) {
+        if (reader?.iccPowerOn() == true) {
             val ReaderHandler: ConcurrentHashMap<String?, PaciCardReaderAbstract?> =
                 ConcurrentHashMap<String?, PaciCardReaderAbstract?>()
             val paci = PaciCardReaderMAV3(
@@ -755,7 +819,7 @@ class MyViewModel @Inject constructor(
                                     signaturePage = false
                                 )
                             }else{
-                              _stateMain.value = _stateMain.value.copy(showToast = "CivilId not Matched ${civilIdMatch} / $civilidText \n الهوية المدنية غير متطابقة ${civilIdMatch} / $civilidText")
+                              _stateMain.value = _stateMain.value.copy(isLoadingCivilId = false, showToast = "CivilId not Matched ${civilIdMatch} / $civilidText \n الهوية المدنية غير متطابقة ${civilIdMatch} / $civilidText")
                             }
                         }else{
                             onEvent(MyEvent.GetEmployeeData(civilidText)) //test
@@ -887,7 +951,7 @@ class MyViewModel @Inject constructor(
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-               /* _stateMain.value = _stateMain.value.copy(
+                /*_stateMain.value = _stateMain.value.copy(
                     isLoadingCivilId = false,
                     fingerPrintPage = true,
                     civilIdPage = false,
@@ -901,11 +965,16 @@ class MyViewModel @Inject constructor(
     }
 
     //finger print section
-    private val _orderAsc = mutableStateOf(true)
+    private val _orderAsc = mutableStateOf(false)
     val orderAsc: State<Boolean> = _orderAsc
     private val _sortingName = mutableStateOf("")
     val sortingName: State<String> = _sortingName
+    var globalColumnNumber = ""
     fun sortingList(columnNumber: String) {
+        if(columnNumber == globalColumnNumber){
+            _orderAsc.value = !_orderAsc.value
+        }
+        globalColumnNumber = columnNumber
         var list = _stateMain.value.employeeSearchList
         if (columnNumber == "1") {
             _sortingName.value ="1"
@@ -913,37 +982,41 @@ class MyViewModel @Inject constructor(
                 list = list.sortedBy {
                     it.EMPLOYEENUMBER
                 }
-                _orderAsc.value = false
             } else {
                 list = list.sortedByDescending { it.EMPLOYEENUMBER }
-                _orderAsc.value = true
             }
         } else if (columnNumber == "2") {
             _sortingName.value ="2"
             if (orderAsc.value) {
                 list = list.sortedBy { it.FULLNAME }
-                _orderAsc.value = false
             } else {
                 list = list.sortedByDescending { it.FULLNAME }
-                _orderAsc.value = true
             }
-        } else if (columnNumber == "3") {
-            _sortingName.value ="3"
-            if (orderAsc.value) {
+        } else if (columnNumber == "5") {
+            _sortingName.value ="5"
+
+            list =  list.sortedWith(compareBy<EmployeeData> { it.JOBID }.thenByDescending { it.SIGNATUREEXISTS })
+            /*if (orderAsc.value) {
                 list = list.sortedBy { it.ORGANIZATIONNAME }
-                _orderAsc.value = false
             } else {
                 list = list.sortedByDescending { it.ORGANIZATIONNAME }
-                _orderAsc.value = true
-            }
+            }*/
+        }
+        else if (columnNumber == "3") {
+            _sortingName.value ="3"
+
+            list =  list.sortedWith(compareBy<EmployeeData> { it.ORGANIZATIONNAME }.thenByDescending { it.SIGNATUREEXISTS }.thenBy { it.JOBID })
+            /*if (orderAsc.value) {
+                list = list.sortedBy { it.ORGANIZATIONNAME }
+            } else {
+                list = list.sortedByDescending { it.ORGANIZATIONNAME }
+            }*/
         } else if (columnNumber == "4") {
             _sortingName.value ="4"
             if (orderAsc.value) {
                 list = list.sortedBy { it.SIGNATUREEXISTS }
-                _orderAsc.value = false
             } else {
                 list = list.sortedByDescending { it.SIGNATUREEXISTS }
-                _orderAsc.value = true
             }
         }
         _stateMain.value = _stateMain.value.copy(employeeSearchList = list)
