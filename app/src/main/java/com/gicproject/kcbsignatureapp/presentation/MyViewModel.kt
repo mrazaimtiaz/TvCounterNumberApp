@@ -788,7 +788,7 @@ class MyViewModel @Inject constructor(
     }
 
 
-    fun readData(civilIdMatch: String = "") {
+    fun readData(civilIdMatch: String = "",employeeData: EmployeeData? = null) {
         _stateMain.value = _stateMain.value.copy(isLoadingCivilId = true, showToast = "")
         if (reader?.iccPowerOn() == true) {
             val ReaderHandler: ConcurrentHashMap<String?, PaciCardReaderAbstract?> =
@@ -830,6 +830,16 @@ class MyViewModel @Inject constructor(
                         civilidText = paci!!.GetData("", "CIVIL-NO")
                         if(civilIdMatch.isNotBlank()){
                             if(civilidText.equals(civilIdMatch)){
+                                //employeeData
+                                civilId =  employeeData?.NATIONALIDENTIFIER ?: ""
+                                name =   employeeData?.FULLNAME ?: ""
+                                jobName =  employeeData?.JOBNAME ?: ""
+                                jobPlaceName =  employeeData?.ORGANIZATIONNAME ?: ""
+                                date =
+                                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
+                                        Date()
+                                    )
+
                                 _stateMain.value = _stateMain.value.copy(
                                     isLoadingCivilId = false,
                                     fingerPrintPage = true,

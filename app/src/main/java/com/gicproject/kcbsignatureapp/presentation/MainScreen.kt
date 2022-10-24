@@ -85,8 +85,11 @@ fun MainScreen(
 
     val isShowTermDialog = remember { mutableStateOf(false) }
 
-    if(state.showTerms){
-        LaunchedEffect(key1 = true ){
+    val checkedState = remember { mutableStateOf(false) }
+
+    if (state.showTerms) {
+        LaunchedEffect(key1 = true) {
+            checkedState.value = false
             isShowTermDialog.value = true
         }
     }
@@ -119,23 +122,57 @@ fun MainScreen(
                     .padding(30.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = "إقرار وتعهد بعدم تغيير التوقيع\n" +
-                        "\n" +
-                        "أقر أنا الموقع أدناه بان التوقيع الثابت في هذا النموذج خاص بي ، وبأنني سألتزم باستخدامه في الكتب والمخاطبات الداخلية الإلكترونية وذلك في حدود الصلاحيات والاختصاصات المخولة لي حسب بطاقة الوصف الوظيفي للوظيفة التي أشغلها والمنصوص عليها في لوائح بنك الائتمان الكويتي، وبعد مراعاة التدرج الوظيفي، والضوابط المنصوص عليها في تعاميم البنك بشأن المراسلات الإلكترونية الداخلية.\n" +
-                        "\n" +
-                        "وبأنني أتعهد بعدم تغيير التوقيع الوارد في هذا النموذج إلا بعد مخاطبة مركز نظم المعلومات وتوقيعي على نموذج جديد، وإنني أعلم بأن مخالفة ما جاء في هذا الإقرار سيترتب عليه قيام مسئوليتي، وما يترتب على ذلك من آثار أهمها انعدام الآثار القانونية للمخاطبة الصادرة مني.\n" +
-                        "\n" +
-                        "${viewModel.name}الاسم الرباعي :\n" +
-                        "\n" +
-                        "${viewModel.civilId}الرقم المدني :\n" +
-                        "\n" +
-                        "${viewModel.jobName}الوظيفة:\n" +
-                        "\n" +
-                        "${viewModel.jobPlaceName}مركز العمل :\n" +
-                        "\n" +
-                        "${viewModel.date}التاريخ :\n" +
-                        "\n" +
-                        "الخلية أدناه مخصصة لإثبات التوقيع", fontSize = 15.sp)
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text("إقرار وتعهد بعدم تغيير التوقيع\n", fontWeight = FontWeight.Bold,fontSize = 18.sp)
+                    Text(
+                        text =
+                                "أقر أنا الموقع أدناه بان التوقيع الثابت في هذا النموذج خاص بي ، وبأنني سألتزم باستخدامه في الكتب والمخاطبات الداخلية الإلكترونية وذلك في حدود الصلاحيات والاختصاصات المخولة لي حسب بطاقة الوصف الوظيفي للوظيفة التي أشغلها والمنصوص عليها في لوائح بنك الائتمان الكويتي، وبعد مراعاة التدرج الوظيفي، والضوابط المنصوص عليها في تعاميم البنك بشأن المراسلات الإلكترونية الداخلية.\n" +
+                                "\n" +
+                                "وبأنني أتعهد بعدم تغيير التوقيع الوارد في هذا النموذج إلا بعد مخاطبة مركز نظم المعلومات وتوقيعي على نموذج جديد، وإنني أعلم بأن مخالفة ما جاء في هذا الإقرار سيترتب عليه قيام مسئوليتي، وما يترتب على ذلك من آثار أهمها انعدام الآثار القانونية للمخاطبة الصادرة مني.\n" +
+                                "\n" +
+                                "الاسم الرباعي :${viewModel.name}\n" +
+                                "\n" +
+                                "الرقم المدني :${viewModel.civilId}\n" +
+                                "\n" +
+                                "الوظيفة:${viewModel.jobName}\n" +
+                                "\n" +
+                                "مركز العمل :${viewModel.jobPlaceName}\n" +
+                                "\n" +
+                                "التاريخ :${viewModel.date}\n" +
+                                "\n" +
+                                "الخلية أدناه مخصصة لإثبات التوقيع", fontSize = 15.sp
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("أوافق على هذه الشروط والأحكام",fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Checkbox(
+                        checked = checkedState.value,
+                        onCheckedChange = { checkedState.value = it }
+                    )
+                }
+
+                Row(horizontalArrangement = Arrangement.SpaceAround) {
+                    Button(modifier = Modifier.padding(top = 20.dp), onClick = {
+                        isShowTermDialog.value = false
+                        viewModel.openSignaturePage()
+                    }, enabled = checkedState.value) {
+                        Text(
+                            text = "التقاط التوقيع \nCapture Signature",
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Button(
+                        modifier = Modifier.padding(top = 20.dp),
+                        onClick = {
+                            viewModel.setShowTermsToFalse()
+                            isShowTermDialog.value = false
+                        },
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
+                    ) {
+                        Text(text = "إلغاء\nCancel", textAlign = TextAlign.Center, color = Color.White)
+                    }
+                }
+
 
             }
         }
@@ -155,7 +192,10 @@ fun MainScreen(
                     .padding(30.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = "تم حفظ التوقيع بنجاح \n Signature Saved Successfully", fontSize = 30.sp)
+                Text(
+                    text = "تم حفظ التوقيع بنجاح \n Signature Saved Successfully",
+                    fontSize = 30.sp
+                )
                 DoneAnimation()
             }
         }
@@ -205,8 +245,8 @@ fun MainScreen(
                         CivilIdPage(state.isLoadingCivilId, onClick = {
                             //viewModel.emptyMainState()
                             //viewModel.readData()
-                            viewModel.onEvent(MyEvent.GetEmployeeListData)
-                            viewModel.openEmployeeListPage()
+                              viewModel.onEvent(MyEvent.GetEmployeeListData)
+                                viewModel.openEmployeeListPage()
                         }, onClickAutoDetect = {
                             viewModel.setAutoDetect(it)
                         }, isAutoDetect = viewModel.isAutoDetectCard.value)
@@ -214,7 +254,9 @@ fun MainScreen(
                     if (state.fingerPrintPage) {
                         FingerPrintPage(onClickBack = {
                             viewModel.backToCivilIdPage()
-                        }, viewModel = viewModel, outputDirectory, executor)
+                        }, viewModel = viewModel, outputDirectory, executor, onClickSignature = {
+                            isShowTermDialog.value = true
+                        })
                     }
                     if (state.signaturePage) {
                         SignaturePadPage(
@@ -264,6 +306,7 @@ fun FingerPrintPage(
     onClickBack: () -> Unit, viewModel: MyViewModel,
     outputDirectory: File,
     executor: Executor,
+    onClickSignature: () -> Unit,
 ) {
 
     val civilIdText = viewModel.stateMain.value.civilidText
@@ -333,9 +376,7 @@ fun FingerPrintPage(
             )
         }
         Spacer(modifier = Modifier.width(20.dp))
-        Button(modifier = Modifier.padding(top = 20.dp), onClick = {
-            viewModel.openSignaturePage()
-        }) {
+        Button(modifier = Modifier.padding(top = 20.dp), onClick =  onClickSignature) {
             Text(text = "التقاط التوقيع \nCapture Signature", textAlign = TextAlign.Center)
         }
     }
@@ -677,8 +718,12 @@ fun EmployeeListPage(
         )
     }
 
-    if(stateEmployeeList.isLoadingEmployeeList){
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+    if (stateEmployeeList.isLoadingEmployeeList) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
             CircularProgressIndicator()
         }
     }
@@ -698,10 +743,10 @@ fun EmployeeListPage(
             item {
                 Row(Modifier.background(Color.Gray)) {
 
-                    TableCell(text = if(viewModel.sortingName.value == "1" && viewModel.orderAsc.value)
+                    TableCell(text = if (viewModel.sortingName.value == "1" && viewModel.orderAsc.value)
                         "▼ رقم الموظف"
-                        else if(viewModel.sortingName.value == "1" && !viewModel.orderAsc.value)
-                            "▲ رقم الموظف" else "رقم الموظف",
+                    else if (viewModel.sortingName.value == "1" && !viewModel.orderAsc.value)
+                        "▲ رقم الموظف" else "رقم الموظف",
                         weight = column1Weight,
                         Modifier
                             .border(0.dp, MaterialTheme.colors.onBackground.copy(alpha = 0.5f))
@@ -710,9 +755,9 @@ fun EmployeeListPage(
                             .clickable {
                                 viewModel.sortingList("1")
                             })
-                    TableCell(text =  if(viewModel.sortingName.value == "2" && viewModel.orderAsc.value)
+                    TableCell(text = if (viewModel.sortingName.value == "2" && viewModel.orderAsc.value)
                         "▼ اسم الموظف"
-                    else if(viewModel.sortingName.value == "2" && !viewModel.orderAsc.value)
+                    else if (viewModel.sortingName.value == "2" && !viewModel.orderAsc.value)
                         "▲ اسم الموظف" else "اسم الموظف",
                         weight = column2Weight,
                         Modifier
@@ -722,9 +767,9 @@ fun EmployeeListPage(
                             .clickable {
                                 viewModel.sortingList("2")
                             })
-                    TableCell(text =  if(viewModel.sortingName.value == "5" && viewModel.orderAsc.value)
+                    TableCell(text = if (viewModel.sortingName.value == "5" && viewModel.orderAsc.value)
                         "▼ تعيين"
-                    else if(viewModel.sortingName.value == "5" && !viewModel.orderAsc.value)
+                    else if (viewModel.sortingName.value == "5" && !viewModel.orderAsc.value)
                         "▲ تعيين" else "تعيين",
                         weight = column2Weight,
                         Modifier
@@ -734,9 +779,9 @@ fun EmployeeListPage(
                             .clickable {
                                 viewModel.sortingList("5")
                             })
-                    TableCell(text = if(viewModel.sortingName.value == "3" && viewModel.orderAsc.value)
+                    TableCell(text = if (viewModel.sortingName.value == "3" && viewModel.orderAsc.value)
                         "▼ اسم القسم"
-                    else if(viewModel.sortingName.value == "3" && !viewModel.orderAsc.value)
+                    else if (viewModel.sortingName.value == "3" && !viewModel.orderAsc.value)
                         "▲ اسم القسم" else "اسم القسم",
                         weight = column3Weight,
                         Modifier
@@ -746,9 +791,9 @@ fun EmployeeListPage(
                             .clickable {
                                 viewModel.sortingList("3")
                             })
-                    TableCell(text = if(viewModel.sortingName.value == "4" && viewModel.orderAsc.value)
+                    TableCell(text = if (viewModel.sortingName.value == "4" && viewModel.orderAsc.value)
                         "▼ الحالة"
-                    else if(viewModel.sortingName.value == "4" && !viewModel.orderAsc.value)
+                    else if (viewModel.sortingName.value == "4" && !viewModel.orderAsc.value)
                         "▲ الحالة" else "الحالة",
                         weight = column4Weight,
                         Modifier
@@ -843,9 +888,11 @@ fun EmployeeInfoPage(
         }
     }
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(2.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(2.dp)
+        ) {
             Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
                 ShowRowText(
                     title = "رقم الموظف",
@@ -878,9 +925,9 @@ fun EmployeeInfoPage(
             Log.d("TAG", "EmployeeInfoPage: not loading into")
             LazyRow(
                 modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(1.dp)
-            ){
+            ) {
                 try {
-                    items(stateEmployeeInfo.employeeSignatures){item ->
+                    items(stateEmployeeInfo.employeeSignatures) { item ->
                         var finalBitmap: Bitmap? = null
                         try {
                             val decodeValue: ByteArray = Base64.decode(
@@ -890,12 +937,14 @@ fun EmployeeInfoPage(
                             val svg = SVG.getFromString(text)
                             val drawable = PictureDrawable(svg.renderToPicture())
                             val bitmap = Bitmap.createBitmap(
-                                drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
+                                drawable.intrinsicWidth,
+                                drawable.intrinsicHeight,
+                                Bitmap.Config.ARGB_8888
                             )
                             val canvas = Canvas(bitmap)
                             canvas.drawPicture(drawable.picture)
                             finalBitmap = bitmap
-                        }catch (e: java.lang.Exception){
+                        } catch (e: java.lang.Exception) {
                             e.printStackTrace()
                         }
 
@@ -917,19 +966,27 @@ fun EmployeeInfoPage(
                             Text(text = item.ATTACHMENTDATE)
                         }
                     }
-                }catch (e: java.lang.Exception){
+                } catch (e: java.lang.Exception) {
                     e.printStackTrace()
                 }
 
             }
-            if(stateEmployeeInfo.employeeSignatures.isEmpty()){
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            if (stateEmployeeInfo.employeeSignatures.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(text = "No Signature Found - لم يتم العثور على توقيع", color = Color.Red)
 //
                     if (!stateEmployeeInfo.isLoadingCivilId) {
                         Button(onClick = {
                             viewModel.emptyUri()
-                            viewModel.readData(employeeData?.NATIONALIDENTIFIER ?: "1") }) {
+                            viewModel.readData(
+                                employeeData?.NATIONALIDENTIFIER ?: "1",
+                                employeeData
+                            )
+                        }) {
                             Text("أضف التوقيع \n Add Signature", textAlign = TextAlign.Center)
                         }
                     } else {
@@ -937,8 +994,12 @@ fun EmployeeInfoPage(
                     }
 
                 }
-            }else{
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     if (!stateEmployeeInfo.isLoadingCivilId) {
                         Button(onClick = {
                             viewModel.emptyUri()
@@ -953,7 +1014,11 @@ fun EmployeeInfoPage(
             }
         } else {
             Log.d("TAG", "EmployeeInfoPage:  loading into")
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 CircularProgressIndicator()
             }
         }

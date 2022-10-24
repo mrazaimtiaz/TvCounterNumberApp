@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
             viewModel?.setAssets(getAssets)
 
 
-            viewModel?.initUsbListener(this,mUsbManager)
+           viewModel?.initUsbListener(this,mUsbManager)
 
 
             val systemUiController = rememberSystemUiController()
