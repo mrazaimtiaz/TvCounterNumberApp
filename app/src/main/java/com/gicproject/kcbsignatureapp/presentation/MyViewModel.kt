@@ -56,6 +56,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.charset.Charset
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -161,6 +162,10 @@ class MyViewModel @Inject constructor(
         }
     }
 
+    fun setShowTermsToFalse(){
+        _stateMain.value = _stateMain.value.copy(showTerms = false)
+    }
+
     fun setCameraInitialized(value: Boolean) {
         _isCameraInitialized.value = value
     }
@@ -203,8 +208,11 @@ class MyViewModel @Inject constructor(
         _shouldShowCamera.value = true
     }
 
-
-
+    var jobName: String = ""
+    var jobPlaceName: String = ""
+    var name: String = ""
+    var date: String = ""
+    var civilId: String =""
 
     fun onEvent(event: MyEvent) {
         when (event) {
@@ -269,6 +277,11 @@ class MyViewModel @Inject constructor(
                 }.launchIn(viewModelScope)
             }
             is MyEvent.GetEmployeeData -> {
+                civilId =  ""
+                name =  ""
+                jobName = ""
+                jobPlaceName = ""
+                date =""
                 d("TAG", "onEvent: error event getemployeedata1")
                 surveyUseCases.getEmployeeData(
                     GetPersonSendModel(
@@ -282,6 +295,14 @@ class MyViewModel @Inject constructor(
 
                             result.data?.let {
                                 if (it.isNotEmpty()) {
+                                   civilId = it[0].NATIONALIDENTIFIER ?: ""
+                                    name = it[0].FULLNAME ?: ""
+                                    jobName = it[0].JOBNAME ?: ""
+                                    jobPlaceName = it[0].ORGANIZATIONNAME ?:""
+                                    date =
+                                        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
+                                            Date()
+                                        )
                                     if (it[0].NATIONALIDENTIFIER.toString() == event.id) {
                                         _stateMain.value = _stateMain.value.copy(
                                             isLoadingCivilId = false,

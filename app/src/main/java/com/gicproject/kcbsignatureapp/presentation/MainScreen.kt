@@ -82,6 +82,14 @@ fun MainScreen(
     val context = LocalContext.current
 
     val isShowDialog = remember { mutableStateOf(false) }
+
+    val isShowTermDialog = remember { mutableStateOf(false) }
+
+    if(state.showTerms){
+        LaunchedEffect(key1 = true ){
+            isShowTermDialog.value = true
+        }
+    }
     if (state.showToast.isNotBlank()) {
         if (state.showToast == "S") {
             LaunchedEffect(key1 = true) {
@@ -95,6 +103,42 @@ fun MainScreen(
         }
 
 
+    }
+
+    if (isShowTermDialog.value) {
+        Dialog(
+            onDismissRequest = {
+                viewModel.setShowTermsToFalse()
+                isShowTermDialog.value = false
+            },
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .background(Color.White)
+                    .padding(30.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(text = "إقرار وتعهد بعدم تغيير التوقيع\n" +
+                        "\n" +
+                        "أقر أنا الموقع أدناه بان التوقيع الثابت في هذا النموذج خاص بي ، وبأنني سألتزم باستخدامه في الكتب والمخاطبات الداخلية الإلكترونية وذلك في حدود الصلاحيات والاختصاصات المخولة لي حسب بطاقة الوصف الوظيفي للوظيفة التي أشغلها والمنصوص عليها في لوائح بنك الائتمان الكويتي، وبعد مراعاة التدرج الوظيفي، والضوابط المنصوص عليها في تعاميم البنك بشأن المراسلات الإلكترونية الداخلية.\n" +
+                        "\n" +
+                        "وبأنني أتعهد بعدم تغيير التوقيع الوارد في هذا النموذج إلا بعد مخاطبة مركز نظم المعلومات وتوقيعي على نموذج جديد، وإنني أعلم بأن مخالفة ما جاء في هذا الإقرار سيترتب عليه قيام مسئوليتي، وما يترتب على ذلك من آثار أهمها انعدام الآثار القانونية للمخاطبة الصادرة مني.\n" +
+                        "\n" +
+                        "${viewModel.name}الاسم الرباعي :\n" +
+                        "\n" +
+                        "${viewModel.civilId}الرقم المدني :\n" +
+                        "\n" +
+                        "${viewModel.jobName}الوظيفة:\n" +
+                        "\n" +
+                        "${viewModel.jobPlaceName}مركز العمل :\n" +
+                        "\n" +
+                        "${viewModel.date}التاريخ :\n" +
+                        "\n" +
+                        "الخلية أدناه مخصصة لإثبات التوقيع", fontSize = 15.sp)
+
+            }
+        }
     }
 
 
@@ -866,7 +910,8 @@ fun EmployeeInfoPage(
                                             1.dp,
                                             MaterialTheme.colors.primary,
                                             shape = RoundedCornerShape(10.dp)
-                                        ).size(500.dp,240.dp)
+                                        )
+                                        .size(500.dp, 240.dp)
                                 )
                             }
                             Text(text = item.ATTACHMENTDATE)

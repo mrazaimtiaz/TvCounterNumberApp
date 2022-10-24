@@ -5,6 +5,7 @@ import com.gicproject.kcbsignatureapp.domain.model.EmployeeSignature
 
 
 data class MainScreenState(
+    val showTerms: Boolean = false,
     val employeeSignatures:  List<EmployeeSignature> = emptyList(),
     val isLoadingEmployeeInfo: Boolean = false,
     val employeeInfoShow: EmployeeData? = null,
