@@ -151,7 +151,7 @@ fun MainScreen(
                     )
                 }
 
-                Row(horizontalArrangement = Arrangement.SpaceAround) {
+                Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
                     Button(modifier = Modifier.padding(top = 20.dp), onClick = {
                         isShowTermDialog.value = false
                         viewModel.openSignaturePage()
