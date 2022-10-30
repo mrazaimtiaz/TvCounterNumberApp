@@ -15,8 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.gicproject.salamkioskapp.presentation.MyViewModel
-import com.gicproject.salamkioskapp.presentation.SelectOptionScreen
+import com.gicproject.salamkioskapp.presentation.*
 import com.gicproject.salamkioskapp.ui.theme.SalamKioskAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -46,6 +45,31 @@ class MainActivity : ComponentActivity() {
                             route = Screen.SelectOptionScreen.route
                         ) {
                             SelectOptionScreen(navController, viewModel!!)
+                        }
+                        composable(
+                            route = Screen.SelectDepartmentScreen.route
+                        ) {
+                            SelectDepartmentScreen(navController, viewModel!!)
+                        }
+                        composable(
+                            route = Screen.SelectDoctorScreen.route
+                        ) {
+                            SelectDoctorScreen(navController, viewModel!!)
+                        }
+                        composable(
+                            route = Screen.SelectDoctorTimeScreen.route
+                        ) {
+                            SelectDoctorTimeScreen(navController, viewModel!!)
+                        }
+                        composable(
+                            route = Screen.DoctorPayScreen.route
+                        ) {
+                            DoctorPayScreen(navController, viewModel!!)
+                        }
+                        composable(
+                            route = Screen.InsertKnetScreen.route
+                        ) {
+                            InsertKnetScreen(navController, viewModel!!)
                         }
                     }
                 }
