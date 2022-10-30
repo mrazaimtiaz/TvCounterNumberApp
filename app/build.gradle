@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace 'com.gicproject.kcbsignatureapp'
+    namespace 'com.gicproject.salamkioskapp'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.gicproject.kcbsignatureapp"
+        applicationId "com.gicproject.salamkioskapp"
         minSdk 24
         targetSdk 33
         versionCode 1
