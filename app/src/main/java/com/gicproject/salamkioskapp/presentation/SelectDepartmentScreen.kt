@@ -11,7 +11,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -26,13 +28,13 @@ import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
+import com.gicproject.salamkioskapp.common.Constants
 import com.gicproject.salamkioskapp.common.Constants.Companion.heartBeatJson
 import kotlinx.coroutines.delay
 import java.util.*
 
 
-
-
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SelectDepartmentScreen(
     navController: NavController,
@@ -47,31 +49,37 @@ fun SelectDepartmentScreen(
     if (showDialog.value) {
         if (showDialog.value) {
             Dialog(
-                properties = DialogProperties(
-
-                ),
+                properties =  DialogProperties(
+                        dismissOnBackPress = false,
+                        dismissOnClickOutside = true,
+                        usePlatformDefaultWidth = false
+                    ),
                 onDismissRequest = {
                     showDialog.value = false
                 },
 
-            ) {
+                ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .background(Color.White)
-                        .fillMaxWidth(),
+                        .fillMaxWidth().padding(vertical=80.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Row(modifier = Modifier
-                        .background(Color.White)
-                        .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    Row(
+                        modifier = Modifier
+                            .background(Color.White)
+                            .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        CustomButton(onClick = {
+                            navController.currentBackStackEntry?.savedStateHandle?.set(
+                                Constants.STATE_EXTRA, false
+                            )
+                            navController.navigate(Screen.InsertCivilIdScreen.route)
+                        }, text = "Appointment")
                         CustomButton(onClick = {
                             navController.navigate(Screen.SelectDoctorTimeScreen.route)
-                          //  navController.navigate(Screen.SelectDoctorScreen.route)
-                        },text = "Appointment")
-                        CustomButton(onClick = {
-                            navController.navigate(Screen.SelectDoctorTimeScreen.route)
-                        },text = "Without Appointment")
+                        }, text = "Without Appointment")
                     }
                 }
             }
@@ -81,8 +89,8 @@ fun SelectDepartmentScreen(
     LaunchedEffect(key1 = Unit, block = {
         while (true) {
             delay(1000)
-            second.value =  second.value - 1
-            if(second.value == 0){
+            second.value = second.value - 1
+            if (second.value == 0) {
                 navController.popBackStack()
             }
         }
@@ -110,27 +118,23 @@ fun SelectDepartmentScreen(
 
             }
             Column(
-                modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.Bottom
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Bottom
             ) {
-                Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(20.dp)){
-                   Button(onClick = { navController.popBackStack() }) {
-                       Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "", tint = Color.Black)
-                       Text("Go Back", color = Color.Black)
-                   }
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(20.dp)
+                ) {
+                   GoBack(navController)
                 }
             }
-            Column(
-                modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.Bottom
-            ) {
-                Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically){
-                    HeartBeatAnimation()
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Text(second.value.toString(), fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                }
-            }
+            HeartBeatTime(second = second)
             HeaderDesign("Select Department")
 
-            Column( modifier = Modifier.fillMaxSize(),
+            Column(
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -141,11 +145,11 @@ fun SelectDepartmentScreen(
                 ) {
                     CustomButton(onClick = {
                         showDialog.value = true
-                    },text = "Surgery")
+                    }, text = "Surgery")
 
                     CustomButton(onClick = {
                         showDialog.value = true
-                    },text = "Paediatrics")
+                    }, text = "Paediatrics")
                 }
                 Spacer(modifier = Modifier.height(30.dp))
                 Row(
@@ -155,11 +159,11 @@ fun SelectDepartmentScreen(
                 ) {
                     CustomButton(onClick = {
                         showDialog.value = true
-                    },text = "Cardiology")
+                    }, text = "Cardiology")
 
                     CustomButton(onClick = {
                         showDialog.value = true
-                    },text = "ENT")
+                    }, text = "ENT")
                 }
             }
 
@@ -181,11 +185,53 @@ fun SelectDepartmentScreen(
 
 @Composable
 fun HeartBeatAnimation() {
-    val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(heartBeatJson),)
+    val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(heartBeatJson))
     LottieAnimation(
         composition,
-        iterations = LottieConstants.IterateForever,  modifier = Modifier.size(100.dp), isPlaying = true,
+        iterations = LottieConstants.IterateForever,
+        modifier = Modifier.size(80.dp),
+        isPlaying = true,
 
-    )
+        )
+}
+
+
+@Composable
+fun GoBack(navController: NavController){
+    Button(onClick = { navController.popBackStack() },
+        modifier = Modifier
+            .padding(20.dp)
+            .shadow(50.dp, shape = RoundedCornerShape(5.dp)),
+        shape = RoundedCornerShape(30.dp)
+    ) {
+        Icon(
+            Icons.Default.KeyboardArrowLeft,
+            contentDescription = "",
+            tint = Color.Black,
+            modifier = Modifier.size(50.dp)
+        )
+        Spacer(modifier = Modifier.width(20.dp))
+        Text("Go Back", color = Color.Black, fontSize = 25.sp)
+        Spacer(modifier = Modifier.width(10.dp))
+    }
+}
+
+@Composable
+fun HeartBeatTime(second: MutableState<Int>){
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HeartBeatAnimation()
+            Spacer(modifier = Modifier.width(20.dp))
+            Text(second.value.toString(), fontSize = 40.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.width(20.dp))
+        }
+    }
 }
 

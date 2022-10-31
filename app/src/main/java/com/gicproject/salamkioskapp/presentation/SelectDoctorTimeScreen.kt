@@ -50,7 +50,7 @@ fun SelectDoctorTimeScreen(
             delay(1000)
             second.value = second.value - 1
             if (second.value == 0) {
-                navController.popBackStack()
+                navController.popBackStack(Screen.SelectOptionScreen.route,false)
             }
         }
     })
@@ -81,34 +81,14 @@ fun SelectDoctorTimeScreen(
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Bottom
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(20.dp)
-                ) {
-                    Button(onClick = { navController.popBackStack(Screen.SelectOptionScreen.route,false) }) {
-                        Icon(
-                            Icons.Default.KeyboardArrowLeft,
-                            contentDescription = "",
-                            tint = Color.Black
-                        )
-                        Text("Go Back", color = Color.Black)
-                    }
-                }
+                GoBack(navController = navController)
             }
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Bottom
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HeartBeatAnimation()
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Text(second.value.toString(), fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                }
+                HeartBeatTime(second = second)
             }
             HeaderDesign("Select Doctor")
 
@@ -122,8 +102,8 @@ fun SelectDoctorTimeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    DoctorInfoTime("Dr Emad", "1: AM", "01-Nov-2022","ENT", "30 KD",R.drawable.doctorsample,navController)
-                    DoctorInfoTime("Dr Wasim", "2: AM", "01-Nov-2022","ENT", "25 KD",R.drawable.doctorsampletwo,navController)
+                    DoctorInfoTime("Dr Emad", "01:00 AM", "01-Nov-2022","ENT", "30 KD",R.drawable.doctorsample,navController)
+                    DoctorInfoTime("Dr Wasim", "02:00 AM", "01-Nov-2022","ENT", "25 KD",R.drawable.doctorsampletwo,navController)
                 }
             }
 
@@ -148,7 +128,8 @@ fun DoctorInfoTime(name: String,time: String, date: String, deptName: String, pr
     Box(
         modifier = Modifier
             .background(color = Color.White, shape = RoundedCornerShape(20.dp))
-            .padding(20.dp).clickable {
+            .padding(20.dp)
+            .clickable {
                 navController.navigate(Screen.DoctorPayScreen.route)
             }
     ) {
@@ -157,9 +138,18 @@ fun DoctorInfoTime(name: String,time: String, date: String, deptName: String, pr
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Time: $time" , color = MaterialTheme.colors.secondary, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-            Text("Date: $date", color = MaterialTheme.colors.secondary, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-
+            Text(
+                "Time: $time",
+                color = MaterialTheme.colors.secondary,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                "Date: $date",
+                color = MaterialTheme.colors.secondary,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -169,14 +159,17 @@ fun DoctorInfoTime(name: String,time: String, date: String, deptName: String, pr
                     painter = painterResource(id = image),
                     contentDescription = "",
                     modifier = Modifier
-                        .width(120.dp)
-                        .height(120.dp)
+                        .width(250.dp)
+                        .height(140.dp)
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text("Name: $name", color = Color.Black, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-            Text("Department: $deptName", color = Color.Black, fontSize = 22.sp)
+            Text("Name: $name", color = Color.Black, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(20.dp))
+            Text("Department: $deptName", color = Color.Black, fontSize = 28.sp)
+
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 "Price: $price",
                 color = Color.Black,
@@ -186,6 +179,5 @@ fun DoctorInfoTime(name: String,time: String, date: String, deptName: String, pr
         }
     }
 }
-
 
 

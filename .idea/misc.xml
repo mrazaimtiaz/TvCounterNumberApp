@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/ic_drop_down.xml" value="0.1355" />
+        <entry key="app/src/main/res/drawable/keyboard_del.xml" value="0.1335" />
+        <entry key="app/src/main/res/drawable/vd_vector_del.xml" value="0.1335" />
       </map>
     </option>
   </component>

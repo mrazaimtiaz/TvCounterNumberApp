@@ -7,6 +7,7 @@ class Constants {
         const val BASE_URL = "http://kcbg2gweb.kcb.gov.kw/"
         //kcbg2gweb.kcb.gov.kw instead of 10.10.15.61
         const val KEY_AUTO_DETECT_CARD = "auto detect card"
+        const val STATE_EXTRA = "state extrs"
         const val STATE_MSG_EN = "state msg en"
         const val STATE_MSG_AR = "state msg ar"
         const val STATE_ANSWER = "answer"

@@ -9,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
+import com.gicproject.salamkioskapp.common.Constants
 
 @Composable
 fun SelectOptionScreen(
@@ -51,16 +53,21 @@ fun SelectOptionScreen(
                 )
             }
             HeaderDesign("Select Option")
-            Row(
+            Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                CustomButton(onClick = {
+                CustomButtonLarge(onClick = {
                     navController.navigate(Screen.SelectDepartmentScreen.route)
-                }, text = "Consult Visit")
-
-                CustomButton(onClick = {}, text = "Services")
+                }, text = "Consultation Visit")
+                Spacer(modifier = Modifier.height(40.dp))
+                CustomButtonLarge(onClick = {
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        Constants.STATE_EXTRA, true
+                    )
+                    navController.navigate(Screen.InsertCivilIdScreen.route)
+                }, text = "Services")
             }
             /* if (state.error.isNotBlank()) {
 
@@ -78,24 +85,48 @@ fun SelectOptionScreen(
 }
 
 @Composable
+fun CustomButtonLarge(onClick: () -> Unit, text: String) {
+    Button(onClick = onClick,
+        modifier = Modifier
+            .width(500.dp)
+            .height(180.dp)
+            .shadow(50.dp, shape = RoundedCornerShape(5.dp)), shape = RoundedCornerShape(30.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text,
+                fontSize = 60.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        }
+
+    }
+}
+
+@Composable
 fun CustomButton(onClick: () -> Unit, text: String) {
-    Button(onClick = onClick) {
-        Text(
-            text,
-            fontSize = 30.sp,
-            color = Color.Black,
+    Button(onClick = onClick,
             modifier = Modifier
-                .padding(horizontal = 50.dp, vertical = 20.dp)
-                .width(200.dp)
-                .height(50.dp),
-            textAlign = TextAlign.Center
-        )
+                .width(300.dp)
+                .height(130.dp)
+                .shadow(30.dp, shape = RoundedCornerShape(5.dp)), shape = RoundedCornerShape(15.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text,
+                fontSize = 40.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        }
+
     }
 }
 
 @Composable
 fun HeaderDesign(title: String) {
-    Box(modifier = Modifier.padding(horizontal = 10.dp, vertical = 30.dp)) {
+    Box(modifier = Modifier.padding(horizontal = 10.dp, vertical = 20.dp)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -104,7 +135,7 @@ fun HeaderDesign(title: String) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 20.dp),
+                    .padding(horizontal = 10.dp, vertical = 30.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
@@ -112,15 +143,15 @@ fun HeaderDesign(title: String) {
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "bg",
                     modifier = Modifier
-                        .width(120.dp)
-                        .height(50.dp)
+                        .width(180.dp)
+                        .height(55.dp)
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(title, fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text(title, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.Black)
                 }
             }
 

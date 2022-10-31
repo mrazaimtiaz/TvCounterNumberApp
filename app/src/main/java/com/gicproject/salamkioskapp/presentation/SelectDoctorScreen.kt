@@ -49,7 +49,7 @@ fun SelectDoctorScreen(
             delay(1000)
             second.value = second.value - 1
             if (second.value == 0) {
-                navController.popBackStack()
+                navController.popBackStack(Screen.SelectOptionScreen.route,false)
             }
         }
     })
@@ -85,14 +85,7 @@ fun SelectDoctorScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(20.dp)
                 ) {
-                    Button(onClick = { navController.popBackStack(Screen.SelectOptionScreen.route,false) }) {
-                        Icon(
-                            Icons.Default.KeyboardArrowLeft,
-                            contentDescription = "",
-                            tint = Color.Black
-                        )
-                        Text("Go Back", color = Color.Black)
-                    }
+                    GoBack(navController = navController)
                 }
             }
             Column(
@@ -100,14 +93,7 @@ fun SelectDoctorScreen(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Bottom
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HeartBeatAnimation()
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Text(second.value.toString(), fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                }
+                HeartBeatTime(second = second)
             }
             HeaderDesign("Select Doctor")
 
@@ -147,7 +133,8 @@ fun DoctorInfo(name: String, deptName: String, price: String,image: Int,navContr
     Box(
         modifier = Modifier
             .background(color = Color.White, shape = RoundedCornerShape(20.dp))
-            .padding(20.dp).clickable {
+            .padding(20.dp)
+            .clickable {
                 navController.navigate(Screen.DoctorPayScreen.route)
             }
     ) {
@@ -165,14 +152,17 @@ fun DoctorInfo(name: String, deptName: String, price: String,image: Int,navContr
                     painter = painterResource(id = image),
                     contentDescription = "",
                     modifier = Modifier
-                        .width(120.dp)
-                        .height(120.dp)
+                        .width(250.dp)
+                        .height(140.dp)
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text("Name: $name", color = Color.Black, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-            Text("Department: $deptName", color = Color.Black, fontSize = 22.sp)
+            Text("Name: $name", color = Color.Black, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(20.dp))
+            Text("Department: $deptName", color = Color.Black, fontSize = 28.sp)
+
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 "Price: $price",
                 color = Color.Black,

@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.gicproject.kcbsignatureapp",
+  "applicationId": "com.gicproject.salamkioskapp",
   "variantName": "release",
   "elements": [
     {

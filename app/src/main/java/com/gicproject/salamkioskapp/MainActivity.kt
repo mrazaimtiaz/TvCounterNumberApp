@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.gicproject.salamkioskapp.common.Constants
 import com.gicproject.salamkioskapp.presentation.*
 import com.gicproject.salamkioskapp.ui.theme.SalamKioskAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -70,6 +71,29 @@ class MainActivity : ComponentActivity() {
                             route = Screen.InsertKnetScreen.route
                         ) {
                             InsertKnetScreen(navController, viewModel!!)
+                        }
+                        composable(
+                            route = Screen.InsertCivilIdScreen.route
+                        ) {
+                            var extra = navController.previousBackStackEntry?.savedStateHandle?.get<Boolean?>(
+                            Constants.STATE_EXTRA)
+                            InsertCivilIdScreen(extra,navController, viewModel!!,)
+                        }
+                        composable(
+                            route = Screen.SelectServiceScreen.route
+                        ) {
+                            SelectServiceScreen(navController, viewModel!!)
+                        }
+                        composable(
+                            route = Screen.SelectChildServiceScreen.route
+                        ) {
+                            SelectChildServiceScreen(navController, viewModel!!)
+                        }
+
+                        composable(
+                            route = Screen.LinkPayScreen.route
+                        ) {
+                            LinkPayScreen(navController, viewModel!!)
                         }
                     }
                 }

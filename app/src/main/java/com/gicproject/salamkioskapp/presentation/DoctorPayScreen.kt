@@ -13,13 +13,16 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -28,21 +31,30 @@ import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
+import com.gicproject.salamkioskapp.common.Constants
 import com.gicproject.salamkioskapp.common.Constants.Companion.heartBeatJson
 import kotlinx.coroutines.delay
 import java.util.*
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DoctorPayScreen(
     navController: NavController,
     viewModel: MyViewModel,
-) {
+
+    ) {
 
     val listState = rememberLazyListState()
 
     val second = remember { mutableStateOf(120) }
 
+    var showDialog = remember { mutableStateOf(false) }
+    if (showDialog.value) {
+        if (showDialog.value) {
+            PaymentDialog(showDialog, navController)
+        }
+    }
 
 
     LaunchedEffect(key1 = Unit, block = {
@@ -50,7 +62,7 @@ fun DoctorPayScreen(
             delay(1000)
             second.value = second.value - 1
             if (second.value == 0) {
-                navController.popBackStack()
+                navController.popBackStack(Screen.SelectOptionScreen.route, false)
             }
         }
     })
@@ -86,14 +98,7 @@ fun DoctorPayScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(20.dp)
                 ) {
-                    Button(onClick = {  navController.popBackStack(Screen.SelectOptionScreen.route,false) }) {
-                        Icon(
-                            Icons.Default.KeyboardArrowLeft,
-                            contentDescription = "",
-                            tint = Color.Black
-                        )
-                        Text("Go Back", color = Color.Black)
-                    }
+                    GoBack(navController = navController)
                 }
             }
             Column(
@@ -101,39 +106,31 @@ fun DoctorPayScreen(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Bottom
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HeartBeatAnimation()
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Text(second.value.toString(), fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                }
+                HeartBeatTime(second = second)
             }
-            HeaderDesign("Proceed to Pay")
+            HeaderDesign("Appointment Information")
 
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                Text("Patient Name: Hussam Ali", fontSize = 40.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(20.dp))
+                Text("You Have an Appointment with Fallowing Doctor", fontSize = 28.sp)
+                Spacer(modifier = Modifier.height(20.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    DoctorPay("Dr Emad", "ENT", "30 KD",R.drawable.doctorsample)
+                    DoctorPay("Dr Emad", "ENT", "30 KD", R.drawable.doctorsample)
                 }
                 Spacer(modifier = Modifier.height(60.dp))
-                Button(onClick = {  navController.popBackStack(Screen.SelectOptionScreen.route,false) }) {
-                    Icon(
-                        Icons.Default.Send,
-                        contentDescription = "",
-                        tint = Color.Black, modifier = Modifier.size(30.dp)
-                    )
-                    Spacer(modifier = Modifier.width(40.dp))
-                    Text("Pay", color = Color.Black, fontSize = 30.sp)
-                }
+                SubmitButton(
+                    { showDialog.value = true },
+                    "Proceed to Pay"
+                )
 
 
             }
@@ -155,7 +152,7 @@ fun DoctorPayScreen(
 }
 
 @Composable
-fun DoctorPay(name: String, deptName: String, price: String,image: Int) {
+fun DoctorPay(name: String, deptName: String, price: String, image: Int) {
     Box(
         modifier = Modifier
             .background(color = Color.White, shape = RoundedCornerShape(20.dp))
@@ -175,14 +172,17 @@ fun DoctorPay(name: String, deptName: String, price: String,image: Int) {
                     painter = painterResource(id = image),
                     contentDescription = "",
                     modifier = Modifier
-                        .width(120.dp)
-                        .height(120.dp)
+                        .width(250.dp)
+                        .height(140.dp)
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text("Name: $name", color = Color.Black, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-            Text("Department: $deptName", color = Color.Black, fontSize = 22.sp)
+            Text("Name: $name", color = Color.Black, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(20.dp))
+            Text("Department: $deptName", color = Color.Black, fontSize = 28.sp)
+
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 "Price: $price",
                 color = Color.Black,
@@ -191,6 +191,73 @@ fun DoctorPay(name: String, deptName: String, price: String,image: Int) {
             )
         }
     }
+}
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun PaymentDialog(showDialog: MutableState<Boolean>,navController: NavController){
+    Dialog(
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = true,
+            usePlatformDefaultWidth = false
+        ),
+        onDismissRequest = {
+            showDialog.value = false
+        },
+
+        ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .background(Color.White)
+                .fillMaxWidth()
+                .padding(vertical = 80.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                "Select Payment Option!",
+                fontWeight = FontWeight.Bold,
+                fontSize = 40.sp,
+                color = Color.Black,
+            )
+            Row(
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                CustomButton(onClick = {
+                    navController.navigate(Screen.LinkPayScreen.route)
+                    showDialog.value = false
+                }, text = "Send Link")
+                CustomButton(onClick = {
+                    navController.navigate(Screen.InsertKnetScreen.route)
+                }, text = "Knet Card")
+            }
+        }
+    }
+}
+
+@Composable
+fun SubmitButton(onClick: () -> Unit, text: String) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .padding(vertical = 30.dp)
+            .shadow(50.dp, shape = RoundedCornerShape(5.dp)),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Spacer(modifier = Modifier.width(20.dp))
+        Icon(
+            Icons.Default.Send,
+            contentDescription = "",
+            tint = Color.Black,
+            modifier = Modifier.size(25.dp)
+        )
+        Spacer(modifier = Modifier.width(30.dp))
+        Text(text, color = Color.Black, fontSize = 30.sp)
+        Spacer(modifier = Modifier.width(10.dp))
+    }
+
 }
 
 
