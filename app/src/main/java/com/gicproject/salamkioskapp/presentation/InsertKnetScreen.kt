@@ -30,6 +30,7 @@ import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
+import com.gicproject.salamkioskapp.common.Constants
 import com.gicproject.salamkioskapp.common.Constants.Companion.heartBeatJson
 import com.gicproject.salamkioskapp.common.Constants.Companion.insertCardJson
 import kotlinx.coroutines.delay
@@ -71,7 +72,7 @@ fun InsertKnetScreen(
             ) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.background),
+                    painter = painterResource(id = Constants.BACKGROUND_IMAGE),
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "bg",
                     modifier = Modifier.fillMaxSize()

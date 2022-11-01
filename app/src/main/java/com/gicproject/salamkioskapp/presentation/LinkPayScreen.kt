@@ -95,7 +95,7 @@ fun LinkPayScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.background),
+                    painter = painterResource(id = Constants.BACKGROUND_IMAGE),
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "bg",
                     modifier = Modifier.fillMaxSize()

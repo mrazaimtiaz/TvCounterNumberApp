@@ -32,6 +32,7 @@ import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
+import com.gicproject.salamkioskapp.common.Constants
 import com.gicproject.salamkioskapp.common.Constants.Companion.heartBeatJson
 import kotlinx.coroutines.delay
 import java.util.*
@@ -76,7 +77,7 @@ fun SelectChildServiceScreen(
             ) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.background),
+                    painter = painterResource(id = Constants.BACKGROUND_IMAGE),
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "bg",
                     modifier = Modifier.fillMaxSize()
@@ -118,7 +119,7 @@ fun SelectChildServiceScreen(
                 val isTest4 = remember { mutableStateOf(false) }
                 MyCheckBox("Test4", "09", isTest4, total)
                 Spacer(modifier = Modifier.height(10.dp))
-                Text("Total: ${total.value} KD", fontSize = 35.sp, fontWeight = FontWeight.Bold)
+                Text("Total: ${total.value} KD ", fontSize = 35.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(80.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),

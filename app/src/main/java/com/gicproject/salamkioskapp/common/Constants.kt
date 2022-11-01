@@ -1,9 +1,12 @@
 package com.gicproject.salamkioskapp.common
 
+import com.gicproject.salamkioskapp.R
+
 class Constants {
     companion object {
         //const val BASE_URL = "http://10.15.10.61/"
-
+        const val LOGO = R.drawable.logo
+        const val BACKGROUND_IMAGE = R.drawable.background
         const val BASE_URL = "http://kcbg2gweb.kcb.gov.kw/"
         //kcbg2gweb.kcb.gov.kw instead of 10.10.15.61
         const val KEY_AUTO_DETECT_CARD = "auto detect card"

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
+import com.gicproject.salamkioskapp.common.Constants
 import kotlinx.coroutines.delay
 
 
@@ -70,7 +71,7 @@ fun InsertCivilIdScreen(
             ) {
 
                 Image(
-                    painter = painterResource(id = R.drawable.background),
+                    painter = painterResource(id = Constants.BACKGROUND_IMAGE),
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "bg",
                     modifier = Modifier.fillMaxSize()

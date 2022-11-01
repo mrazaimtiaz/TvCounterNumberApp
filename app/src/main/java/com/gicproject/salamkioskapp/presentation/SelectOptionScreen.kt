@@ -46,7 +46,7 @@ fun SelectOptionScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.background),
+                    painter = painterResource(id = Constants.BACKGROUND_IMAGE),
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "bg",
                     modifier = Modifier.fillMaxSize()
@@ -139,7 +139,7 @@ fun HeaderDesign(title: String) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.logo),
+                    painter = painterResource(id = Constants.LOGO),
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "bg",
                     modifier = Modifier

@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Salam KIOSK App</string>
+  <!--  <string name="app_name">Salam KIOSK App</string> //alsalam-->
+   <string name="app_name">DAS KIOSK App</string>
 </resources>
