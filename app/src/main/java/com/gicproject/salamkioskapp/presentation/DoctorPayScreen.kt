@@ -242,7 +242,7 @@ fun SubmitButton(onClick: () -> Unit, text: String) {
     Button(
         onClick = onClick,
         modifier = Modifier
-            .padding(vertical = 30.dp)
+            .padding(vertical = 40.dp)
             .shadow(50.dp, shape = RoundedCornerShape(5.dp)),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -254,7 +254,7 @@ fun SubmitButton(onClick: () -> Unit, text: String) {
             modifier = Modifier.size(25.dp)
         )
         Spacer(modifier = Modifier.width(30.dp))
-        Text(text, color = Color.Black, fontSize = 30.sp)
+        Text(text, color = Color.Black, fontSize = 35.sp)
         Spacer(modifier = Modifier.width(10.dp))
     }
 

@@ -107,15 +107,18 @@ fun SelectChildServiceScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                val total = remember { mutableStateOf(0) }
 
                 val isTest1 = remember { mutableStateOf(false) }
-                MyCheckBox("Test1", "15 KD", isTest1)
+                MyCheckBox("Test1", "15", isTest1, total)
                 val isTest2 = remember { mutableStateOf(false) }
-                MyCheckBox("Test2", "10 KD", isTest2)
+                MyCheckBox("Test2", "10", isTest2, total)
                 val isTest3 = remember { mutableStateOf(false) }
-                MyCheckBox("Test3", "12 KD", isTest3)
+                MyCheckBox("Test3", "12", isTest3, total)
                 val isTest4 = remember { mutableStateOf(false) }
-                MyCheckBox("Test4", "09 KD", isTest4)
+                MyCheckBox("Test4", "09", isTest4, total)
+                Spacer(modifier = Modifier.height(10.dp))
+                Text("Total: ${total.value} KD", fontSize = 35.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(80.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -124,7 +127,7 @@ fun SelectChildServiceScreen(
                 ) {
                     SubmitButton(onClick = {
                         showDialog.value = true
-                    }, text ="Proceed to Pay" )
+                    }, text = "Proceed to Pay")
                 }
 
             }
@@ -146,66 +149,73 @@ fun SelectChildServiceScreen(
 }
 
 @Composable
-fun MyCheckBox(title: String, price: String, isCheck: MutableState<Boolean>) {
+fun MyCheckBox(
+    title: String,
+    price: String,
+    isCheck: MutableState<Boolean>,
+    total: MutableState<Int>
+) {
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(10.dp))
-                .height(60.dp)
-                .width(300.dp)
-                .clickable {
-                    isCheck.value = !isCheck.value
-                },
-        ) {
-            Row(modifier = Modifier.weight(2f)){
-                Spacer(modifier = Modifier.width(5.dp))
-                Card(
-                    modifier = Modifier.background(Color.White),
-                    elevation = 0.dp,
-                    shape = RoundedCornerShape(6.dp),
-                    border = BorderStroke(1.5.dp, color = MaterialTheme.colors.secondary)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .background(color = Color.White, shape = RoundedCornerShape(10.dp))
+            .height(60.dp)
+            .width(300.dp)
+            .clickable {
+                isCheck.value = !isCheck.value
+                if (isCheck.value) {
+                    total.value = total.value + price.toInt()
+                } else {
+                    total.value = total.value - price.toInt()
+                }
+            },
+    ) {
+        Row(modifier = Modifier.weight(2f)) {
+            Spacer(modifier = Modifier.width(5.dp))
+            Card(
+                modifier = Modifier.background(Color.White),
+                elevation = 0.dp,
+                shape = RoundedCornerShape(6.dp),
+                border = BorderStroke(1.5.dp, color = MaterialTheme.colors.secondary)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(35.dp)
+                        .background(if (isCheck.value) MaterialTheme.colors.secondary else Color.White),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(35.dp)
-                            .background(if (isCheck.value) MaterialTheme.colors.secondary else Color.White)
-                            .clickable {
-                                isCheck.value = !isCheck.value
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (isCheck.value)
-                            Icon(
-                                Icons.Default.Check,
-                                contentDescription = "",
-                                tint = Color.White,
-                                modifier = Modifier.size(35.dp)
-                            )
-                    }
+                    if (isCheck.value)
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = "",
+                            tint = Color.White,
+                            modifier = Modifier.size(35.dp)
+                        )
                 }
             }
-            Row(modifier = Modifier.weight(5f)){
-                Text(
-                    text = title,
-                    modifier = Modifier.padding(16.dp),
-                    fontSize = 25.sp,
-                    color = Color.Black
-                )
-            }
-
-            Row(modifier = Modifier.weight(4f)){
-                Text(
-                    text = price,
-                    modifier = Modifier.padding(16.dp),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp,
-                    color = Color.Black
-                )
-            }
         }
-        Spacer(modifier = Modifier.height(30.dp))
+        Row(modifier = Modifier.weight(5f)) {
+            Text(
+                text = title,
+                modifier = Modifier.padding(16.dp),
+                fontSize = 25.sp,
+                color = Color.Black
+            )
+        }
+
+        Row(modifier = Modifier.weight(4f)) {
+            Text(
+                text = "$price KD",
+                modifier = Modifier.padding(16.dp),
+                fontWeight = FontWeight.Bold,
+                fontSize = 25.sp,
+                color = Color.Black
+            )
+        }
+    }
+    Spacer(modifier = Modifier.height(30.dp))
 
 
 }
