@@ -207,11 +207,10 @@ fun GoBack(navController: NavController){
         Icon(
             Icons.Default.KeyboardArrowLeft,
             contentDescription = "",
-            tint = Color.Black,
             modifier = Modifier.size(50.dp)
         )
         Spacer(modifier = Modifier.width(20.dp))
-        Text("Go Back", color = Color.Black, fontSize = 25.sp)
+        Text("Go Back",  fontSize = 25.sp)
         Spacer(modifier = Modifier.width(10.dp))
     }
 }

@@ -96,7 +96,6 @@ fun CustomButtonLarge(onClick: () -> Unit, text: String) {
             Text(
                 text,
                 fontSize = 60.sp,
-                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         }
@@ -116,7 +115,6 @@ fun CustomButton(onClick: () -> Unit, text: String) {
             Text(
                 text,
                 fontSize = 40.sp,
-                color = Color.Black,
                 textAlign = TextAlign.Center
             )
         }

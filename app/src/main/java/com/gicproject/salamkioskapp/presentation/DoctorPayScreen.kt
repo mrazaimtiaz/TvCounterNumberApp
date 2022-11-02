@@ -117,14 +117,14 @@ fun DoctorPayScreen(
             ) {
                 Text("Patient Name: Hussam Ali", fontSize = 40.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(20.dp))
-                Text("You Have an Appointment with Fallowing Doctor", fontSize = 28.sp)
+                Text("You Have an Appointment with Fallowing Doctor", fontSize = 25.sp)
                 Spacer(modifier = Modifier.height(20.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    DoctorPay("Dr Emad", "ENT", "30 KD", R.drawable.doctorsample)
+                    DoctorPay("Dr Emad", "ENT", "30 KD", Constants.DOCTOR_SAMPLE_IMAGE)
                 }
                 Spacer(modifier = Modifier.height(60.dp))
                 SubmitButton(
@@ -250,11 +250,10 @@ fun SubmitButton(onClick: () -> Unit, text: String) {
         Icon(
             Icons.Default.Send,
             contentDescription = "",
-            tint = Color.Black,
             modifier = Modifier.size(25.dp)
         )
         Spacer(modifier = Modifier.width(30.dp))
-        Text(text, color = Color.Black, fontSize = 35.sp)
+        Text(text, fontSize = 35.sp)
         Spacer(modifier = Modifier.width(10.dp))
     }
 

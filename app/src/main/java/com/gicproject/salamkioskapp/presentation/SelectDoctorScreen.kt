@@ -108,8 +108,8 @@ fun SelectDoctorScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    DoctorInfo("Dr Emad", "ENT", "30 KD",R.drawable.doctorsample,navController)
-                    DoctorInfo("Dr Wasim", "ENT", "25 KD",R.drawable.doctorsampletwo,navController)
+                    DoctorInfo("Dr Emad", "ENT", "30 KD",Constants.DOCTOR_SAMPLE_IMAGE,navController)
+                    DoctorInfo("Dr Wasim", "ENT", "25 KD",Constants.DOCTOR_SAMPLE_IMAGE_TWO,navController)
                 }
             }
 

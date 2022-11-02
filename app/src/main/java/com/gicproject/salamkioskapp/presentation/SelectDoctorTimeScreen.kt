@@ -103,8 +103,8 @@ fun SelectDoctorTimeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    DoctorInfoTime("Dr Emad", "01:00 AM", "01-Nov-2022","ENT", "30 KD",R.drawable.doctorsample,navController)
-                    DoctorInfoTime("Dr Wasim", "02:00 AM", "01-Nov-2022","ENT", "25 KD",R.drawable.doctorsampletwo,navController)
+                    DoctorInfoTime("Dr Emad", "01:00 AM", "01-Nov-2022","ENT", "30 KD",Constants.DOCTOR_SAMPLE_IMAGE,navController)
+                    DoctorInfoTime("Dr Wasim", "02:00 AM", "01-Nov-2022","ENT", "25 KD",Constants.DOCTOR_SAMPLE_IMAGE_TWO,navController)
                 }
             }
 

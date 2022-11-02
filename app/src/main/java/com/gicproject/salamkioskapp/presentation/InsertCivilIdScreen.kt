@@ -321,7 +321,7 @@ fun NumberKeypad(
             } else {
 
                 Text(
-                    text, fontSize = 40.sp, color = Color.Black, textAlign = TextAlign.Center
+                    text, fontSize = 40.sp,  textAlign = TextAlign.Center
                 )
             }
         }
