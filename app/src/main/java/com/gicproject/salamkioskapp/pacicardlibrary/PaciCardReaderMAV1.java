@@ -5,6 +5,8 @@ package com.gicproject.salamkioskapp.pacicardlibrary;
 // (powered by FernFlower decompiler)
 //
 
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
 import android.util.Log;
 
 import com.telpo.tps550.api.reader.SmartCardReader;
@@ -22,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
 
     SmartCardReader reader;
-    public PaciCardReaderMAV1(boolean var1,SmartCardReader mReader) {
-        super(var1,mReader);
+    public PaciCardReaderMAV1(boolean var1, SmartCardReader mReader, UsbDeviceConnection usbDeviceConnection, UsbEndpoint epOut,UsbEndpoint epIn) {
+        super(var1,mReader,usbDeviceConnection,epOut,epIn);
         this.AID = DataConstants.MAV1_AID;
         this.reader = mReader;
         super.GemAID = DataConstants.MAV1_GEM_AID;

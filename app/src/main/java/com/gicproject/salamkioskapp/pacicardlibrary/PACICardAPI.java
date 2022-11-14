@@ -7,6 +7,8 @@ package com.gicproject.salamkioskapp.pacicardlibrary;
 
 
 import android.content.Context;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
 
 import com.telpo.tps550.api.reader.SmartCardReader;
 
@@ -136,20 +138,20 @@ public final class PACICardAPI extends CardAndReaderEventsAbstract {
         super.finalize();
     }
 
-    public PACICardAPI(Context context,SmartCardReader reader) throws PaciException {
-        this.Initialize(true,context,reader);
+    public PACICardAPI(Context context, SmartCardReader reader, UsbDeviceConnection connection, UsbEndpoint epOut, UsbEndpoint epIn) throws PaciException {
+        this.Initialize(true,context,reader,connection,epOut,epIn);
     }
 
-    public PACICardAPI(boolean var1,Context context,SmartCardReader reader) throws PaciException {
-        this.Initialize(var1,context,reader);
+    public PACICardAPI(boolean var1,Context context,SmartCardReader reader, UsbDeviceConnection connection, UsbEndpoint epOut,UsbEndpoint epIn) throws PaciException {
+        this.Initialize(var1,context,reader,connection,epOut,epIn);
     }
 
-    void Initialize(boolean var1, Context context, SmartCardReader reader) throws PaciException {
+    void Initialize(boolean var1, Context context, SmartCardReader reader, UsbDeviceConnection connection, UsbEndpoint epOut,UsbEndpoint epIn) throws PaciException {
         System.setProperty("sun.security.smartcardio.t0GetResponse", "true");
         System.setProperty("sun.security.smartcardio.t1GetResponse", "true");
         this.MyEvent = new ArrayList();
-        this.MAV1CardReaders = new PaciCardReaderMAV1("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")),reader);
-        this.MAV3CardReaders = new PaciCardReaderMAV3("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")), reader);
+        this.MAV1CardReaders = new PaciCardReaderMAV1("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")),reader,connection,epOut,epIn);
+        this.MAV3CardReaders = new PaciCardReaderMAV3("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")), reader,connection,epOut,epIn);
         this.EventsHandler = new CardAndReaderEventsSmartCardIO(context);
         this.ConnectedCardATRs = new ConcurrentHashMap();
         this.EventsHandler.AddEventHandler(this);

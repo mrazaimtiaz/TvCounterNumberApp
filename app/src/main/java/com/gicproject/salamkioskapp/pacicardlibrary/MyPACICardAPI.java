@@ -5,6 +5,9 @@
 
 package com.gicproject.salamkioskapp.pacicardlibrary;
 
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+
 import com.telpo.tps550.api.reader.SmartCardReader;
 
 import java.io.InputStream;
@@ -129,20 +132,20 @@ public final class MyPACICardAPI {
         super.finalize();
     }
 
-    public MyPACICardAPI(SmartCardReader reader) throws PaciException {
-        this.Initialize(true,reader);
+    public MyPACICardAPI(SmartCardReader reader, UsbDeviceConnection connection, UsbEndpoint epOut,UsbEndpoint epIn) throws PaciException {
+        this.Initialize(true,reader,connection,epOut,epIn);
     }
 
-    public MyPACICardAPI(boolean var1, SmartCardReader reader) throws PaciException {
-        this.Initialize(var1,reader);
+    public MyPACICardAPI(boolean var1, SmartCardReader reader, UsbDeviceConnection connection, UsbEndpoint epOut,UsbEndpoint epIn) throws PaciException {
+        this.Initialize(var1,reader,connection,epOut,epIn);
     }
 
-    public void Initialize(boolean var1, SmartCardReader reader) throws PaciException {
+    public void Initialize(boolean var1, SmartCardReader reader, UsbDeviceConnection connection, UsbEndpoint epOut,UsbEndpoint epIn) throws PaciException {
         System.setProperty("sun.security.smartcardio.t0GetResponse", "true");
         System.setProperty("sun.security.smartcardio.t1GetResponse", "true");
      //   this.MyEvent = new ArrayList();
-        this.MAV1CardReaders = new PaciCardReaderMAV1("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")), reader);
-        this.MAV3CardReaders = new PaciCardReaderMAV3("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")), reader);
+        this.MAV1CardReaders = new PaciCardReaderMAV1("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")), reader,connection,epOut,epIn);
+        this.MAV3CardReaders = new PaciCardReaderMAV3("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")), reader,connection,epOut,epIn);
      //   this.EventsHandler = new CardAndReaderEventsSmartCardIO();
         this.ConnectedCardATRs = new ConcurrentHashMap();
        // this.EventsHandler.AddEventHandler(this);

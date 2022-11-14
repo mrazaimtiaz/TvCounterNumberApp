@@ -1,6 +1,9 @@
 package com.gicproject.salamkioskapp.pacicardlibrary;
 
 
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+
 import com.telpo.tps550.api.reader.SmartCardReader;
 
 import java.io.UnsupportedEncodingException;
@@ -15,11 +18,17 @@ import java.util.Iterator;
 public class PaciCardReaderMAV3 extends PaciCardReaderAbstract {
 
     SmartCardReader reader;
-    public PaciCardReaderMAV3(boolean var1, SmartCardReader mReader) {
-        super(var1,mReader);
+    UsbDeviceConnection connection;
+    UsbEndpoint endPointOut;
+    UsbEndpoint endPointIn;
+    public PaciCardReaderMAV3(boolean var1, SmartCardReader mReader, UsbDeviceConnection usbDeviceConnection, UsbEndpoint epOut, UsbEndpoint epIn) {
+        super(var1,mReader,usbDeviceConnection,epOut,epIn);
         this.AID = DataConstants.MAV3_AID;
         this.GemAID = DataConstants.MAV3_GEM_AID;
         this.reader = mReader;
+        this.connection = usbDeviceConnection;
+        this.endPointOut = epOut;
+        this.endPointIn = epIn;
         this.schema = new SchemaContentMAV3("");
         this.CetificateMatchString = "\\bThe Public Authority for Civil Information ID\\b";
         this.AOID = "3f0052005003";
@@ -33,6 +42,24 @@ public class PaciCardReaderMAV3 extends PaciCardReaderAbstract {
         }
 
     }
+
+    private byte[] sendApdu(byte[] data) throws Exception {
+
+         int dataTransferred = this.connection.bulkTransfer(endPointOut, data, data.length, 10000);
+        if(!(dataTransferred == 0 || dataTransferred == data.length)) {
+            throw new Exception("Error durring sending command [" + dataTransferred + " ; " + data.length + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
+
+        final byte[] responseBuffer = new byte[endPointIn.getMaxPacketSize()];
+        dataTransferred = this.connection.bulkTransfer(this.endPointIn, responseBuffer, responseBuffer.length, 10000);
+      //  Console.writeLine("USB Retrieve: " + dataTransferred + " " + responseBuffer.length);
+        if(dataTransferred >= 0){
+            return responseBuffer;
+        }
+        throw new Exception("Error durring receinving response [" + dataTransferred + "]");
+    }
+
+
 
     byte[] ReadSpecificObject(String var1, ModelDataLocation var2) throws PaciException {
       /*  PACICardCommunicatorInterface var3 = (PACICardCommunicatorInterface)this.Cards.get(var1);
@@ -102,15 +129,17 @@ public class PaciCardReaderMAV3 extends PaciCardReaderAbstract {
            //     throw new PaciException("Requested card was not found");
          //   } else {
             //    var2.BeginTransaction();
-
-                ModelAPDUResponse var3 = new ModelAPDUResponse(reader.transmit(DataConstants.MAV3_GEM_AID));
+            ModelAPDUResponse var3 = new ModelAPDUResponse(sendApdu(DataConstants.MAV3_GEM_AID));
+              //  ModelAPDUResponse var3 = new ModelAPDUResponse(reader.transmit(DataConstants.MAV3_GEM_AID));
                // ModelAPDUResponse var3 = var2.SendAPDU(DataConstants.MAV3_GEM_AID);
                 if (!var3.ResponseOK()) {
              //       var2.EndTransaction(0);
                     throw new PaciException("Card internal application could not be selected");
                 } else {
                     byte[] var4 = new byte[]{0, 32, 0, 17, 0};
-                     var3 = new ModelAPDUResponse(reader.transmit(var4));
+
+                     var3 = new ModelAPDUResponse(sendApdu(var4));
+                 //    var3 = new ModelAPDUResponse(reader.transmit(var4));
 
                    // var3 = var2.SendAPDU(var4);
                     if (var3.SW1 != 99) {
@@ -124,6 +153,8 @@ public class PaciCardReaderMAV3 extends PaciCardReaderAbstract {
           //  }
         } catch (PaciException var5) {
             throw new PaciException("Card internal file could not be selected");
+        } catch (Exception e) {
+            throw new PaciException("Send Apdu crashed");
         }
     }
 

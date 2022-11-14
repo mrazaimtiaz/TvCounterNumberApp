@@ -5,6 +5,10 @@
     <uses-feature android:name="android.hardware.camera.any"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
+    <uses-permission android:name="org.simalliance.openmobileapi.SMARTCARD" />
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -18,6 +22,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.KcbSignatureApp"
         tools:targetApi="31">
+
+        <uses-library android:name="org.simalliance.openmobileapi" android:required="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

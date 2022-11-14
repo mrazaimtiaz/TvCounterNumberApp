@@ -1,6 +1,9 @@
 package com.gicproject.salamkioskapp.pacicardlibrary;
 
 
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+
 import com.telpo.tps550.api.reader.SmartCardReader;
 
 import java.nio.charset.StandardCharsets;
@@ -24,8 +27,32 @@ class PACICardCommunicatorSmartCardIO implements PACICardCommunicatorInterface, 
         super.finalize();
     }
 
-    public PACICardCommunicatorSmartCardIO(String var1,SmartCardReader reader) throws PaciException {
+
+    SmartCardReader reader;
+    UsbDeviceConnection connection;
+    UsbEndpoint endPointOut;
+    UsbEndpoint endPointIn;
+    private byte[] sendApdu(byte[] data) throws Exception {
+
+        int dataTransferred = this.connection.bulkTransfer(endPointOut, data, data.length, 10000);
+        if(!(dataTransferred == 0 || dataTransferred == data.length)) {
+            throw new Exception("Error durring sending command [" + dataTransferred + " ; " + data.length + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
+
+        final byte[] responseBuffer = new byte[endPointIn.getMaxPacketSize()];
+        dataTransferred = this.connection.bulkTransfer(this.endPointIn, responseBuffer, responseBuffer.length, 10000);
+        //  Console.writeLine("USB Retrieve: " + dataTransferred + " " + responseBuffer.length);
+        if(dataTransferred >= 0){
+            return responseBuffer;
+        }
+        throw new Exception("Error durring receinving response [" + dataTransferred + "]");
+    }
+
+    public PACICardCommunicatorSmartCardIO(String var1,SmartCardReader reader, UsbDeviceConnection usbDeviceConnection, UsbEndpoint epOut, UsbEndpoint epIn) throws PaciException {
         mReader = reader;
+        this.connection = usbDeviceConnection;
+        this.endPointOut = epOut;
+        this.endPointIn = epIn;
     //    this.Terminals = this.TerminalFac.terminals();
         try {
          //   this.Readers = this.Terminals.list();
@@ -56,7 +83,10 @@ class PACICardCommunicatorSmartCardIO implements PACICardCommunicatorInterface, 
 
     public ModelAPDUResponse SendAPDU(byte[] var1) throws PaciException {
         try {
-            mReader.transmit(var1);
+           // mReader.transmit(var1);
+         sendApdu(var1);
+
+
           /*  CommandAPDU var2 = new CommandAPDU(var1);
 
             try {

@@ -5,6 +5,8 @@ package com.gicproject.salamkioskapp.pacicardlibrary;
 // (powered by FernFlower decompiler)
 //
 
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
 import android.util.Log;
 
 import com.telpo.tps550.api.reader.SmartCardReader;
@@ -41,12 +43,18 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
     ArrayList<X509Certificate> CachedCertificates;
     String cachedSerialNumber;
     SmartCardReader reader;
+    UsbDeviceConnection connection;
+    UsbEndpoint endPointOut;
+    UsbEndpoint endPointIn;
 
-    public PaciCardReaderAbstract(boolean var1, SmartCardReader mReader) {
+    public PaciCardReaderAbstract(boolean var1, SmartCardReader mReader,UsbDeviceConnection usbDeviceConnection, UsbEndpoint epOut, UsbEndpoint epIn) {
         this.GetResponseIsAutomaticallyRecalled = var1;
  //       this.CurrentImplementationType = var2;
         this.CardEFCertificatePath = null;
         reader = mReader;
+        this.connection = usbDeviceConnection;
+        this.endPointOut = epOut;
+        this.endPointIn = epIn;
         this.AllAOID = new ArrayList();
         this.CachedCertificates = new ArrayList();
         this.cachedSerialNumber = null;
@@ -95,6 +103,25 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
         this.CachedCertificates.clear();
         this.cachedSerialNumber = null;
     }
+
+    private byte[] sendApdu(byte[] data) throws PaciException {
+
+
+
+        int dataTransferred = this.connection.bulkTransfer(endPointOut, data, data.length, 10000);
+        if(!(dataTransferred == 0 || dataTransferred == data.length)) {
+            throw new PaciException("Error durring sending command [" + dataTransferred + " ; " + data.length + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
+
+        final byte[] responseBuffer = new byte[endPointIn.getMaxPacketSize()];
+        dataTransferred = this.connection.bulkTransfer(this.endPointIn, responseBuffer, responseBuffer.length, 10000);
+        //  Console.writeLine("USB Retrieve: " + dataTransferred + " " + responseBuffer.length);
+        if(dataTransferred >= 0){
+            return responseBuffer;
+        }
+        throw new PaciException("Error durring receinving response [" + dataTransferred + "]");
+    }
+
 
     byte[] GetDataFromCache(String var1, String var2, String var3, int var4) throws PaciException {
         ConcurrentHashMap var5 = (ConcurrentHashMap)this.CachedFiles.get(var1);
@@ -145,11 +172,12 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
             throw new PaciException("Requested card was not found");
         } else {*/
             if (var2) {
-                reader.getATRString();
+//              reader.getATRString();
              //   var3.GetATR();
             }
-            ModelAPDUResponse var4 = new ModelAPDUResponse(reader.transmit(this.AID));
-            Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var4.ResponseData));
+           // ModelAPDUResponse var4 = new ModelAPDUResponse(reader.transmit(this.AID));
+        ModelAPDUResponse var4=  new ModelAPDUResponse(sendApdu(this.AID));
+            Log.d("TAG", "SelectCertFile:  bytetoarray end " + Arrays.toString(var4.ResponseData));
 
            // ModelAPDUResponse var4 = var3.SendAPDU(this.AID);
             if (var4.SW1 != 97 && (var4.SW1 != -112 || var4.SW2 != 0)) {
@@ -181,7 +209,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
             if (var2.equalsIgnoreCase("3f00")) {
                 var9 = new byte[]{63, 0};
                 var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)0, (byte)12, var9);
-                 var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+               //  var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+              //   var4 = new ModelAPDUResponse(sendApdu(var5.ToArray()));
                 Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var4.ResponseData));
 
              //   var4 = var3.SendAPDU(var5);
@@ -195,7 +224,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
                 String var7 = var2.substring(4);
                 byte[] var8 = Utilities.hexToByteArray(var7);
                 var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)8, (byte)0, var8);
-                var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+              //  var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+                var4 = new ModelAPDUResponse(sendApdu(var5.ToArray()));
                 Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var4.ResponseData));
 
               //  var4 = var3.SendAPDU(var5);
@@ -208,7 +238,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
             } else {
                 var9 = Utilities.hexToByteArray(var2);
                 var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)4, (byte)0, var9);
-                var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+              //  var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+                var4 = new ModelAPDUResponse(sendApdu(var5.ToArray()));
                 Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var4.ResponseData));
 
                // var4 = var3.SendAPDU(var5);
@@ -224,7 +255,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
                 var5 = new ModelAPDUCommand((byte)0, (byte)-64, (byte)0, (byte)0, (byte[])null, var4.SW2);
 
 
-                ModelAPDUResponse var10 = this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112 ? new ModelAPDUResponse(var4.ResponseData) : new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+                ModelAPDUResponse var10 = this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112 ? new ModelAPDUResponse(var4.ResponseData) :
+                        new ModelAPDUResponse(sendApdu(var5.ToArray()));;
                 Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var10.ResponseData));
 
                 if (var10.ResponseData[2] == -127) {
@@ -265,7 +297,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
             if (var2.equalsIgnoreCase("3f00")) {
                 var9 = new byte[]{63, 0};
                 var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)0, (byte)12, var9);
-                 var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+              //   var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+                var4 = new ModelAPDUResponse(sendApdu(var5.ToArray()));
                 Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var4.ResponseData));
 
                 //  var4 = var3.SendAPDU(var5);
@@ -279,7 +312,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
                 String var7 = var2.substring(4);
                 byte[] var8 = Utilities.hexToByteArray(var7);
                 var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)8, (byte)0, var8);
-                var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+               // var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+                var4 = new ModelAPDUResponse(sendApdu(var5.ToArray()));
                 Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var4.ResponseData));
 
 //                var4 = var3.SendAPDU(var5);
@@ -292,7 +326,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
             } else {
                 var9 = Utilities.hexToByteArray(var2);
                 var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)4, (byte)0, var9);
-                var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+              //  var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+                var4 = new ModelAPDUResponse(sendApdu(var5.ToArray()));
                 Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var4.ResponseData));
 
                 //var4 = var3.SendAPDU(var5);
@@ -308,7 +343,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
                 var5 = new ModelAPDUCommand((byte)0, (byte)-64, (byte)0, (byte)0, (byte[])null, var4.SW2);
 
 
-                ModelAPDUResponse var10 = this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112 ? new ModelAPDUResponse(var4.ResponseData) : new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+                ModelAPDUResponse var10 = this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112 ? new ModelAPDUResponse(var4.ResponseData) :
+                       new ModelAPDUResponse(sendApdu(var5.ToArray()));;
                 Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var10.ResponseData));
 
                 if (var10.ResponseData[2] == -127) {
@@ -367,7 +403,9 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
             ModelAPDUCommand var10 = new ModelAPDUCommand((byte)0, (byte)-80, var5, var6, (byte[])null, var7);
 
             while(var8) {
-                ModelAPDUResponse var11 = new ModelAPDUResponse(reader.transmit(var10.ToArray()));
+              //  ModelAPDUResponse var11 = new ModelAPDUResponse(reader.transmit(var10.ToArray()));
+
+                ModelAPDUResponse var11 = new ModelAPDUResponse(sendApdu(var10.ToArray()));
                 Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var11.ResponseData));
 
                 // ModelAPDUResponse var11 = var4.SendAPDU(var10);
@@ -577,9 +615,11 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
                 String var8;
             //    try {
                    // var3.BeginTransaction();
-                    new ModelAPDUResponse(reader.transmit(var4));
+                 //   new ModelAPDUResponse(reader.transmit(var4));
+                  new ModelAPDUResponse(sendApdu(var4));
                    // var3.SendAPDU(var4);
-                    ModelAPDUResponse var6 = new ModelAPDUResponse(reader.transmit(var5));
+               //    ModelAPDUResponse var6 = new ModelAPDUResponse(reader.transmit(var5));
+            ModelAPDUResponse var6  = new ModelAPDUResponse(sendApdu(var5));
             Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var6.ResponseData));
 
             //  ModelAPDUResponse var6 = var3.SendAPDU(var5);
@@ -674,7 +714,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
         try {
             PACICardCommunicatorInterface var3 = (PACICardCommunicatorInterface)this.Cards.get(var1);
             var3.BeginTransaction();
-            ModelAPDUResponse var12 = new ModelAPDUResponse(reader.transmit(this.GemAID));
+           // ModelAPDUResponse var12 = new ModelAPDUResponse(reader.transmit(this.GemAID));
+            ModelAPDUResponse var12=  new ModelAPDUResponse(sendApdu(this.GemAID));
             Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var12.ResponseData));
 
           //  ModelAPDUResponse var12 = var3.SendAPDU(this.GemAID);
@@ -922,7 +963,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
                 throw new PaciException("Requested card was not found");
             } else {
                 var3.BeginTransaction();
-                ModelAPDUResponse var4 = new ModelAPDUResponse(reader.transmit(this.GemAID));
+                //ModelAPDUResponse var4 = new ModelAPDUResponse(reader.transmit(this.GemAID));
+                ModelAPDUResponse var4 =  new ModelAPDUResponse(sendApdu(this.GemAID));
                 Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var4.ResponseData));
 
                 //ModelAPDUResponse var4 = var3.SendAPDU(this.GemAID);
@@ -1048,7 +1090,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
             String var7 = var2.substring(4);
             byte[] var8 = Utilities.hexToByteArray(var7);
             var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)8, (byte)0, var8);
-             var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+            // var4 = new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+             var4=  new ModelAPDUResponse(sendApdu(var5.ToArray()));
             Log.d("TAG", "SelectCertFile: bytetoarray " + Arrays.toString(var4.ResponseData));
             //var4 = var3.SendAPDU(var5);
             if (var4.SW1 == 97 || this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112) {
@@ -1056,7 +1099,8 @@ public abstract class PaciCardReaderAbstract implements DisposableInterface {
                 if (var4.SW1 == 97 || this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112) {
                     var5 = new ModelAPDUCommand((byte)0, (byte)-64, (byte)0, (byte)0, (byte[])null, var4.SW2);
 
-                    ModelAPDUResponse var9 = this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112 ? new ModelAPDUResponse(var4.ResponseData) :  new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+                    ModelAPDUResponse var9 = this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112 ? new ModelAPDUResponse(var4.ResponseData) :
+                            new ModelAPDUResponse(sendApdu(var5.ToArray()));
                     Log.d("TAG", "SelectCertFile:  bytetoarray " + Arrays.toString(var9.ResponseData));
                     if (var9.ResponseData[2] == -127) {
                         int var10 = var9.ResponseData[4] * 256 + var9.ResponseData[5];
