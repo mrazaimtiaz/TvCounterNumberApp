@@ -1,4 +1,74 @@
 <resources>
   <!--  <string name="app_name">Salam KIOSK App</string> //alsalam-->
-   <string name="app_name">DAS KIOSK App</string>
+   <string name="app_name">Sidra Queue KIOSK App</string>
+
+    <string name="Reader">Reader : </string>
+    <string name="atr">ATR Value : </string>
+    <string name="connect">Card Connect</string>
+    <string name="req">Select Req File</string>
+    <string name="Disconnect">Card Disconnect</string>
+    <string name="Reconnect">Card Reconnect</string>
+    <string name="Transmit">Transmit</string>
+    <string name="NextCommand">Next Command</string>
+    <string name="RunScenario">Run Scenario</string>
+    <string name="SelectReader">Select Reader</string>
+    <string name="GetStatus">Start Tracking</string>
+    <string name="scardcontrol">SCardControl</string>
+    <string name="SelectProtocol">Protocol type</string>
+    <string name="SelectInitialization">Initialization</string>
+    <string name="SelectMode">Mode</string>
+    <string name="ok">OK</string>
+    <string name="GetAttrib">Get Attribute</string>
+    <string name="SetAttrib">Set Attribute</string>
+    <string-array name="ScardGetAttribList">
+        <item >SCARD_ATTR_VENDOR_NAME</item>
+        <item >SCARD_ATTR_VENDOR_IFD_TYPE</item>
+        <item >SCARD_ATTR_VENDOR_IFD_VERSION</item>
+        <item >SCARD_ATTR_VENDOR_IFD_SERIAL_NO</item>
+        <item >SCARD_ATTR_CHANNEL_ID</item>
+        <item >SCARD_ATTR_PROTOCOL_TYPES</item>
+        <item >SCARD_ATTR_DEFAULT_CLK</item>
+        <item >SCARD_ATTR_MAX_CLK</item>
+        <item >SCARD_ATTR_DEFAULT_DATA_RATE</item>
+        <item >SCARD_ATTR_MAX_DATA_RATE</item>
+        <item >SCARD_ATTR_MAX_IFSD</item>
+        <item >SCARD_ATTR_POWER_MGMT_SUPPORT</item>
+        <item >SCARD_ATTR_CHARACTERISTICS</item>
+        <item >SCARD_ATTR_CURRENT_PROTOCOL_TYPE</item>
+        <item >SCARD_ATTR_CURRENT_CLK</item>
+        <item >SCARD_ATTR_CURRENT_F</item>
+        <item >SCARD_ATTR_CURRENT_D</item>
+        <item >SCARD_ATTR_CURRENT_N</item>
+        <item >SCARD_ATTR_CURRENT_W</item>
+        <item >SCARD_ATTR_CURRENT_IFSC</item>
+        <item >SCARD_ATTR_CURRENT_IFSD</item>
+        <item >SCARD_ATTR_CURRENT_BWT</item>
+        <item >SCARD_ATTR_CURRENT_CWT</item>
+        <item >SCARD_ATTR_CURRENT_EBC_ENCODING</item>
+        <item >SCARD_ATTR_ICC_PRESENCE</item>
+        <item >SCARD_ATTR_ICC_INTERFACE_STATUS</item>
+        <item >SCARD_ATTR_ATR_STRING</item>
+        <item >SCARD_ATTR_ICC_TYPE_PER_ATR</item>
+        <item >SCARD_ATTR_DEVICE_UNIT</item>
+        <item >SCARD_ATTR_DEVICE_IN_USE</item>
+        <item >SCARD_ATTR_DEVICE_FRIENDLY_NAME</item>
+        <item >SCARD_ATTR_DEVICE_SYSTEM_NAME</item>
+    </string-array>
+    <string-array name="SCardModeList">
+        <item >Exclusive Mode</item>
+        <item >Shared Mode</item>
+        <item >Direct Mode</item>
+    </string-array>
+    <string-array name="ScardProtocolList">
+        <item >Protocol T0</item>
+        <item >Protocol T1</item>
+        <item >Protocol Tx</item>
+    </string-array>
+    <string-array name="ScardInitializationList">
+        <item >Leave Card</item>
+        <item >Reset Card</item>
+        <item >Unpower Card</item>
+        <item >Eject Card</item>
+    </string-array>
+
 </resources>

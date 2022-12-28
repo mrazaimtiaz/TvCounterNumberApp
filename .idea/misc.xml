@@ -6,6 +6,9 @@
         <entry key="app/src/main/res/drawable/ic_drop_down.xml" value="0.1355" />
         <entry key="app/src/main/res/drawable/keyboard_del.xml" value="0.1335" />
         <entry key="app/src/main/res/drawable/vd_vector_del.xml" value="0.1335" />
+        <entry key="app/src/main/res/layout/connect.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/main.xml" value="0.1515625" />
+        <entry key="app/src/main/res/layout/reconnect.xml" value="0.1515625" />
       </map>
     </option>
   </component>

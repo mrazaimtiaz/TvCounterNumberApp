@@ -3,7 +3,9 @@ package com.gicproject.salamkioskapp.pacicardlibrary;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
+import android.util.Log;
 
+import com.identive.libs.SCard;
 import com.telpo.tps550.api.reader.SmartCardReader;
 
 import java.nio.charset.StandardCharsets;
@@ -20,7 +22,7 @@ class PACICardCommunicatorSmartCardIO implements PACICardCommunicatorInterface, 
     boolean Exclusive = false;
 
 
-    private SmartCardReader mReader;
+    private SCard mReader;
 
     protected void finalize() throws Throwable {
         this.Dispose();
@@ -28,31 +30,67 @@ class PACICardCommunicatorSmartCardIO implements PACICardCommunicatorInterface, 
     }
 
 
-    SmartCardReader reader;
+    SCard reader;
     UsbDeviceConnection connection;
-    UsbEndpoint endPointOut;
-    UsbEndpoint endPointIn;
     private byte[] sendApdu(byte[] data) throws Exception {
 
-        int dataTransferred = this.connection.bulkTransfer(endPointOut, data, data.length, 10000);
-        if(!(dataTransferred == 0 || dataTransferred == data.length)) {
-            throw new Exception("Error durring sending command [" + dataTransferred + " ; " + data.length + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        }
 
-        final byte[] responseBuffer = new byte[endPointIn.getMaxPacketSize()];
-        dataTransferred = this.connection.bulkTransfer(this.endPointIn, responseBuffer, responseBuffer.length, 10000);
-        //  Console.writeLine("USB Retrieve: " + dataTransferred + " " + responseBuffer.length);
-        if(dataTransferred >= 0){
-            return responseBuffer;
+        SCard.SCardIOBuffer transmit = reader.new SCardIOBuffer();
+        transmit.setnInBufferSize(data.length);
+        transmit.setAbyInBuffer(data);
+        transmit.setnOutBufferSize(0x8000);
+        transmit.setAbyOutBuffer(new byte[0x8000]);
+        Long status1 = reader.SCardTransmit(transmit);
+        Log.d(
+                "TAG",
+                "onClick:resul " + data + "---" + data.length
+        );
+        String rstr = "";
+        String sstr = "";
+
+        for(int i = 0; i < transmit.getnBytesReturned(); i++){
+            int temp = transmit.getAbyOutBuffer()[i] & 0xFF;
+            if(temp < 16){
+                rstr = rstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) ;
+                sstr = sstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) + " ";
+            }else{
+                rstr = rstr.toUpperCase() + Integer.toHexString(temp) ;
+                sstr = sstr.toUpperCase() + Integer.toHexString(temp) + " " ;
+            }
         }
-        throw new Exception("Error durring receinving response [" + dataTransferred + "]");
+        Log.d("TAG", "onClick:result " + rstr);
+        Log.d("TAG", "onClick:result1 " + sstr);
+        for(int i = 0; i < transmit.getnBytesReturned(); i++){
+            int temp = transmit.getAbyOutBuffer()[i] & 0xFF;
+            if(temp < 16){
+                rstr = rstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) ;
+                sstr = sstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) + " ";
+            }else{
+                rstr = rstr.toUpperCase() + Integer.toHexString(temp) ;
+                sstr = sstr.toUpperCase() + Integer.toHexString(temp) + " " ;
+            }
+        }
+        Log.d("TAG", "onClick:result " + rstr);
+        Log.d("TAG", "onClick:result1 " + sstr);
+        return  hexToByteArray(sstr);
     }
 
-    public PACICardCommunicatorSmartCardIO(String var1,SmartCardReader reader, UsbDeviceConnection usbDeviceConnection, UsbEndpoint epOut, UsbEndpoint epIn) throws PaciException {
+    public static byte[] hexToByteArray(String hexString) {
+        int len = hexString.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+                    | Character.digit(hexString.charAt(i + 1), 16));
+        }
+        return data;
+    }
+
+
+
+
+    public PACICardCommunicatorSmartCardIO(String var1,SCard reader, UsbDeviceConnection usbDeviceConnection, UsbEndpoint epOut, UsbEndpoint epIn) throws PaciException {
         mReader = reader;
         this.connection = usbDeviceConnection;
-        this.endPointOut = epOut;
-        this.endPointIn = epIn;
     //    this.Terminals = this.TerminalFac.terminals();
         try {
          //   this.Readers = this.Terminals.list();
@@ -112,7 +150,6 @@ class PACICardCommunicatorSmartCardIO implements PACICardCommunicatorInterface, 
     }
 
     public void Connect() throws PaciException {
-        mReader.iccPowerOn();
       /*  try {
             this.card = this.Terminal.connect("*");
             this.Channel = this.card.getBasicChannel();
@@ -122,7 +159,6 @@ class PACICardCommunicatorSmartCardIO implements PACICardCommunicatorInterface, 
     }
 
     public void Disconnect() throws PaciException {
-        mReader.iccPowerOff();
    /*     try {
             if (this.card != null) {
                 this.card.disconnect(false);
@@ -176,7 +212,7 @@ class PACICardCommunicatorSmartCardIO implements PACICardCommunicatorInterface, 
     }
 
     public byte[] GetATR() throws PaciException {
-        return this.mReader.getATRString().getBytes(StandardCharsets.UTF_8);
+        return "".getBytes();
     }
 
     public byte[] Control(byte[] var1, byte[] var2) throws PaciException {
@@ -207,6 +243,7 @@ class PACICardCommunicatorSmartCardIO implements PACICardCommunicatorInterface, 
 
             try {
                 if (this.Exclusive) {
+                    Log.d("TAG", "SelectAID: error2");
                     this.EndTransaction(0);
                 }
 

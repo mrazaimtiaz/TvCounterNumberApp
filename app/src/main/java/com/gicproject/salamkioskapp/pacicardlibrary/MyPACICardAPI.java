@@ -8,6 +8,7 @@ package com.gicproject.salamkioskapp.pacicardlibrary;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 
+import com.identive.libs.SCard;
 import com.telpo.tps550.api.reader.SmartCardReader;
 
 import java.io.InputStream;
@@ -132,20 +133,20 @@ public final class MyPACICardAPI {
         super.finalize();
     }
 
-    public MyPACICardAPI(SmartCardReader reader, UsbDeviceConnection connection, UsbEndpoint epOut,UsbEndpoint epIn) throws PaciException {
-        this.Initialize(true,reader,connection,epOut,epIn);
+    public MyPACICardAPI(SCard reader) throws PaciException {
+        this.Initialize(true,reader);
     }
 
-    public MyPACICardAPI(boolean var1, SmartCardReader reader, UsbDeviceConnection connection, UsbEndpoint epOut,UsbEndpoint epIn) throws PaciException {
-        this.Initialize(var1,reader,connection,epOut,epIn);
+    public MyPACICardAPI(boolean var1, SCard reader) throws PaciException {
+        this.Initialize(var1,reader);
     }
 
-    public void Initialize(boolean var1, SmartCardReader reader, UsbDeviceConnection connection, UsbEndpoint epOut,UsbEndpoint epIn) throws PaciException {
+    public void Initialize(boolean var1, SCard reader) throws PaciException {
         System.setProperty("sun.security.smartcardio.t0GetResponse", "true");
         System.setProperty("sun.security.smartcardio.t1GetResponse", "true");
      //   this.MyEvent = new ArrayList();
-        this.MAV1CardReaders = new PaciCardReaderMAV1("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")), reader,connection,epOut,epIn);
-        this.MAV3CardReaders = new PaciCardReaderMAV3("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")), reader,connection,epOut,epIn);
+        this.MAV1CardReaders = new PaciCardReaderMAV1("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")), reader);
+        this.MAV3CardReaders = new PaciCardReaderMAV3("true".equals(System.getProperty("sun.security.smartcardio.t0GetResponse", "true")), reader);
      //   this.EventsHandler = new CardAndReaderEventsSmartCardIO();
         this.ConnectedCardATRs = new ConcurrentHashMap();
        // this.EventsHandler.AddEventHandler(this);
@@ -552,7 +553,7 @@ public final class MyPACICardAPI {
         }
     }
 
-    public String getCard_Serial_No(int var1, boolean var2) throws PaciException {
+    public String getCard_Serial_No(int var1, boolean var2) throws Exception {
         if (var1 > this.ReadersNames.length - 1) {
             throw new PaciException("Reader index is out of range");
         } else {
@@ -732,7 +733,7 @@ public final class MyPACICardAPI {
         }
     }
 
-    public String ReadCardInfo(int var1, DataType var2, boolean var3) throws PaciException {
+    public String ReadCardInfo(int var1, DataType var2, boolean var3) throws Exception {
         if (var1 > this.ReadersNames.length - 1) {
             throw new PaciException("Reader index is out of range");
         } else {
@@ -766,7 +767,7 @@ public final class MyPACICardAPI {
         }
     }
 
-    public byte[] ReadPhoto(int var1) throws PaciException {
+    public byte[] ReadPhoto(int var1) throws Exception {
         if (var1 > this.ReadersNames.length - 1) {
             throw new PaciException("Wrong Reader Index", 136);
         } else {

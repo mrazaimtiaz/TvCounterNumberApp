@@ -9,6 +9,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.util.Log;
 
+import com.identive.libs.SCard;
 import com.telpo.tps550.api.reader.SmartCardReader;
 
 import java.io.UnsupportedEncodingException;
@@ -23,9 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
 
-    SmartCardReader reader;
-    public PaciCardReaderMAV1(boolean var1, SmartCardReader mReader, UsbDeviceConnection usbDeviceConnection, UsbEndpoint epOut,UsbEndpoint epIn) {
-        super(var1,mReader,usbDeviceConnection,epOut,epIn);
+    SCard reader;
+    public PaciCardReaderMAV1(boolean var1, SCard mReader) {
+        super(var1,mReader);
         this.AID = DataConstants.MAV1_AID;
         this.reader = mReader;
         super.GemAID = DataConstants.MAV1_GEM_AID;
@@ -35,6 +36,62 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
         this.AllAOID.add(this.AOID);
     }
 
+
+    private byte[] sendApdu(byte[] data) throws Exception {
+
+
+        SCard.SCardIOBuffer transmit = reader.new SCardIOBuffer();
+        transmit.setnInBufferSize(data.length);
+        transmit.setAbyInBuffer(data);
+        transmit.setnOutBufferSize(0x8000);
+        transmit.setAbyOutBuffer(new byte[0x8000]);
+        Long status1 = reader.SCardTransmit(transmit);
+        Log.d(
+                "TAG",
+                "onClick:resul " + data + "---" + data.length
+        );
+        String rstr = "";
+        String sstr = "";
+
+        for(int i = 0; i < transmit.getnBytesReturned(); i++){
+            int temp = transmit.getAbyOutBuffer()[i] & 0xFF;
+            if(temp < 16){
+                rstr = rstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) ;
+                sstr = sstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) + " ";
+            }else{
+                rstr = rstr.toUpperCase() + Integer.toHexString(temp) ;
+                sstr = sstr.toUpperCase() + Integer.toHexString(temp) + " " ;
+            }
+        }
+        Log.d("TAG", "onClick:result " + rstr);
+        Log.d("TAG", "onClick:result1 " + sstr);
+        for(int i = 0; i < transmit.getnBytesReturned(); i++){
+            int temp = transmit.getAbyOutBuffer()[i] & 0xFF;
+            if(temp < 16){
+                rstr = rstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) ;
+                sstr = sstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) + " ";
+            }else{
+                rstr = rstr.toUpperCase() + Integer.toHexString(temp) ;
+                sstr = sstr.toUpperCase() + Integer.toHexString(temp) + " " ;
+            }
+        }
+        Log.d("TAG", "onClick:result " + rstr);
+        Log.d("TAG", "onClick:result1 " + sstr);
+        return  hexToByteArray(sstr);
+    }
+
+    public static byte[] hexToByteArray(String hexString) {
+        int len = hexString.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+                    | Character.digit(hexString.charAt(i + 1), 16));
+        }
+        return data;
+    }
+
+
+
     public void Dispose() {
         if (!this.Disposed) {
         }
@@ -42,7 +99,7 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
         this.Disposed = true;
     }
 
-    ModelAPDUResponse SelectFile(String var1, String var2) throws PaciException {
+    ModelAPDUResponse SelectFile(String var1, String var2) throws Exception {
         PACICardCommunicatorInterface var3 = (PACICardCommunicatorInterface)this.Cards.get(var1);
         ModelAPDUResponse var4 = null;
         if (!var3.IsConnected()) {
@@ -59,10 +116,11 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
             if (var2.equalsIgnoreCase("3f00")) {
                 var7 = new byte[]{63, 0};
                 var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)0, (byte)12, var7);
-                byte[] var4Temp = reader.transmit(var5.ToArray());
+                byte[] var4Temp = sendApdu(var5.ToArray());
                 var4 = new ModelAPDUResponse(var4Temp);
               //  var4 = var3.SendAPDU(var5);
                 if (var4.SW1 != 144 || var4.SW2 != 0) {
+                    Log.d("TAG", "SelectAID: error5");
                     var3.EndTransaction(0);
                     throw new PaciException("Card internal file could not be selected");
                 }
@@ -73,7 +131,7 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
                     var7 = new byte[]{63, 0};
                     var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)0, (byte)12, var7);
 
-                    byte[] var4Temp = reader.transmit(var5.ToArray());
+                    byte[] var4Temp = sendApdu(var5.ToArray());
                     var4 = new ModelAPDUResponse(var4Temp);
                    // var4 = var3.SendAPDU(var5);
                     if (var4.SW1 != -112 || var4.SW2 != 0) {
@@ -88,7 +146,7 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
                     byte[] var11 = Utilities.hexToByteArray(var6.substring(var9, var9 + 4));
                     var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)1, (byte)12, var11);
 
-                    byte[] var4Temp = reader.transmit(var5.ToArray());
+                    byte[] var4Temp = sendApdu(var5.ToArray());
                     var4 = new ModelAPDUResponse(var4Temp);
 
                    // var4 = var3.SendAPDU(var5);
@@ -100,7 +158,7 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
                 var5 = new ModelAPDUCommand((byte)0, (byte)-92, (byte)2, (byte)0, var7);
               //  var4 = var3.SendAPDU(var5);
 
-                byte[] var4Temp = reader.transmit(var5.ToArray());
+                byte[] var4Temp = sendApdu(var5.ToArray());
                 var4 = new ModelAPDUResponse(var4Temp);
 
                 if (var4.SW1 != 97 && (var4.SW1 != -112 || var4.SW2 != 0)) {
@@ -134,7 +192,7 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
                 var5 = new ModelAPDUCommand((byte)0, (byte)-64, (byte)0, (byte)0, (byte[])null, var4.SW2);
 
               //  var8 = this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112 ? new ModelAPDUResponse(var4.ResponseData) : var3.SendAPDU(var5);
-               var8 = this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112 ? new ModelAPDUResponse(var4.ResponseData) : new ModelAPDUResponse(reader.transmit(var5.ToArray()));
+               var8 = this.GetResponseIsAutomaticallyRecalled && var4.SW1 == -112 ? new ModelAPDUResponse(var4.ResponseData) : new ModelAPDUResponse(sendApdu(var5.ToArray()));
 
                 if (var8.ResponseData[0] == -123) {
                     int var12 = var8.ResponseData[8] * 256 + var8.ResponseData[9];
@@ -155,7 +213,7 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
         }
     }
 
-    byte[] ReadSpecificObject(String var1, ModelDataLocation var2) throws PaciException {
+    byte[] ReadSpecificObject(String var1, ModelDataLocation var2) throws Exception {
         PACICardCommunicatorInterface var3 = (PACICardCommunicatorInterface)this.Cards.get(var1);
         if (!var3.IsConnected()) {
             var3.Connect();
@@ -240,7 +298,7 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
       //      } else {
             //    var2.BeginTransaction();
 
-                byte[] var4Temp = reader.transmit(DataConstants.MAV1_GEM_AID);
+                byte[] var4Temp = sendApdu(DataConstants.MAV1_GEM_AID);
                 ModelAPDUResponse var3 = new ModelAPDUResponse(var4Temp);
               //  ModelAPDUResponse var3 = var2.SendAPDU(DataConstants.MAV1_GEM_AID);
             Log.d("TAG", "PINAttemptsStatus: response " + var3.SW1 + "  " + var3.SW2);
@@ -250,7 +308,7 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
                 } else {
                     byte[] var4 = new byte[]{0, 32, 0, -127, 0};
 
-                    byte[] var3Temp = reader.transmit(var4);
+                    byte[] var3Temp =sendApdu(var4);
                      var3 = new ModelAPDUResponse(var3Temp);
                   //  var3 = var2.SendAPDU(var4);
                     if (var3.SW1 != 99) {
@@ -262,7 +320,7 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
                     }
                 }
            // }
-        } catch (PaciException var5) {
+        } catch (Exception var5) {
             throw new PaciException("Card internal file could not be selected");
         }
     }
@@ -281,6 +339,8 @@ public class PaciCardReaderMAV1 extends PaciCardReaderAbstract {
                     var2.addAll(var6);
                 }
             } catch (PaciException var7) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 

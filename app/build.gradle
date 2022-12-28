@@ -14,7 +14,7 @@ android {
    //     applicationId "com.gicproject.salamkioskapp"  //alsalam
         applicationId "com.gicproject.daskioskapp"  //das
         minSdk 24
-        targetSdk 33
+        targetSdk 31
         versionCode 1
         versionName "1.0"
 
@@ -62,6 +62,12 @@ android {
 dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+
+
+
+
+
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'com.google.android.material:material:1.4.0'
   //  implementation 'com.android.support:support-v4:23.0.0'
@@ -75,7 +81,7 @@ dependencies {
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
     implementation 'androidx.compose.material:material:1.1.1'
     implementation files('libs/libBioMini.aar')
-    testImplementation 'junit:junit:4.13.2'
+    implementation files('libs/androidScard-1.30.aar')
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
@@ -144,5 +150,9 @@ dependencies {
 
     // Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:2.3.0"
+    implementation files('libs\\icod_3.1.6.jar')
+
 
 }
+
+

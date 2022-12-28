@@ -7,6 +7,7 @@ package com.gicproject.salamkioskapp.pacicardlibrary;
 
 import android.content.Context;
 
+import com.identive.libs.SCard;
 import com.telpo.tps550.api.reader.SmartCardReader;
 
 import java.util.Iterator;
@@ -21,7 +22,7 @@ final class CardAndReaderEventsSmartCardIO extends CardAndReaderEventsAbstract i
   //  ConcurrentHashMap<CardTerminal, Integer> ReadersStates;
 
 
-    private SmartCardReader reader;
+    private SCard reader;
 
     protected void finalize() throws Throwable {
         this.Dispose();
@@ -34,7 +35,6 @@ final class CardAndReaderEventsSmartCardIO extends CardAndReaderEventsAbstract i
 
     public void Initialize(Context context) {
 
-        reader = new SmartCardReader(context);
         //this.ReadersStates = new ConcurrentHashMap();
        // this.TerminalFac = TerminalFactory.getDefault();
         //this.Terminals = this.TerminalFac.terminals();
@@ -74,8 +74,6 @@ final class CardAndReaderEventsSmartCardIO extends CardAndReaderEventsAbstract i
         int var3;
         Iterator var4;
        // CardTerminal var5;
-        this.reader.open(1);
-        reader.iccPowerOn();
         while(!this.Disposed && var2) {
           //  try {
              /*   if (this.Readers.size() > 0) {

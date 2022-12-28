@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="1dp">
+
+        <EditText
+            android:id="@+id/editText4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/editText2"
+            android:ems="10"
+            android:inputType="textMultiLine" />
+
+        <Spinner
+            android:id="@+id/spinner1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/button09"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/button10"
+            android:layout_below="@id/spinner1"
+            android:onClick="onCLickSelectReader"
+            android:text="@string/SelectReader"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/button13"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/button12"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/spinner1"
+            android:onClick="onCLickSelectReq"
+            android:text="@string/req"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/button10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/button16"
+            android:layout_below="@id/button09"
+            android:onClick="onCLickCardConnect"
+            android:text="@string/connect"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/button12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/button10"
+            android:layout_alignBottom="@id/button10"
+            android:layout_alignParentRight="true"
+            android:onClick="onCLickCardDisConnect"
+            android:text="@string/Disconnect"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/button16"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/button15"
+            android:layout_below="@id/button10"
+            android:onClick="onCLickTransmit"
+            android:text="@string/Transmit"
+            android:textSize="15dp"
+            android:typeface="sans" />
+
+        <Button
+            android:id="@+id/button14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/button16"
+            android:layout_alignBottom="@id/button16"
+            android:layout_alignLeft="@id/button12"
+            android:layout_alignParentRight="true"
+            android:onClick="onCLickNextCommand"
+            android:text="@string/NextCommand"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/button11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/button14"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/button14"
+            android:onClick="onCLickCardReConnect"
+            android:text="@string/Reconnect"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/button08"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/button11"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/button11"
+            android:onClick="onCLickSCardControl"
+            android:padding="15dp"
+            android:text="@string/scardcontrol"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/Button06"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/button08"
+            android:layout_alignBottom="@id/button08"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/button07"
+            android:onClick="onClickGetAttrib"
+            android:padding="15dp"
+            android:text="@string/GetAttrib"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/button07"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/Button06"
+            android:onClick="onCLickTracking"
+            android:text="@string/GetStatus"
+            android:textSize="15dp" />
+
+        <Button
+            android:id="@+id/button15"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/button08"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@id/Button06"
+            android:onClick="onCLickRunScenario"
+            android:text="@string/RunScenario"
+            android:textSize="15dp" />
+
+        <EditText
+            android:id="@+id/editText1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/button07"
+            android:ems="10"
+            android:focusable="false"
+            android:inputType="text"
+            android:padding="1dp"
+            android:textSize="20dp" />
+
+        <EditText
+            android:id="@+id/editText2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/editText1"
+            android:ems="10"
+            android:focusable="true"
+            android:inputType="text"
+            android:padding="1dp"
+            android:textSize="20dp" >
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/Button05"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/button08"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/button07"
+            android:onClick="onClickSetAttrib"
+            android:padding="15dp"
+            android:text="@string/SetAttrib"
+            android:textSize="15dp"
+            android:visibility="invisible" />
+
+    </RelativeLayout>

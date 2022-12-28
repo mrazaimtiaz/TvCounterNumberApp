@@ -3,7 +3,9 @@ package com.gicproject.salamkioskapp.pacicardlibrary;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
+import android.util.Log;
 
+import com.identive.libs.SCard;
 import com.telpo.tps550.api.reader.SmartCardReader;
 
 import java.io.UnsupportedEncodingException;
@@ -17,18 +19,15 @@ import java.util.Iterator;
 
 public class PaciCardReaderMAV3 extends PaciCardReaderAbstract {
 
-    SmartCardReader reader;
+    SCard reader;
     UsbDeviceConnection connection;
     UsbEndpoint endPointOut;
     UsbEndpoint endPointIn;
-    public PaciCardReaderMAV3(boolean var1, SmartCardReader mReader, UsbDeviceConnection usbDeviceConnection, UsbEndpoint epOut, UsbEndpoint epIn) {
-        super(var1,mReader,usbDeviceConnection,epOut,epIn);
+    public PaciCardReaderMAV3(boolean var1, SCard mReader) {
+        super(var1,mReader);
         this.AID = DataConstants.MAV3_AID;
         this.GemAID = DataConstants.MAV3_GEM_AID;
         this.reader = mReader;
-        this.connection = usbDeviceConnection;
-        this.endPointOut = epOut;
-        this.endPointIn = epIn;
         this.schema = new SchemaContentMAV3("");
         this.CetificateMatchString = "\\bThe Public Authority for Civil Information ID\\b";
         this.AOID = "3f0052005003";
@@ -45,23 +44,62 @@ public class PaciCardReaderMAV3 extends PaciCardReaderAbstract {
 
     private byte[] sendApdu(byte[] data) throws Exception {
 
-         int dataTransferred = this.connection.bulkTransfer(endPointOut, data, data.length, 10000);
-        if(!(dataTransferred == 0 || dataTransferred == data.length)) {
-            throw new Exception("Error durring sending command [" + dataTransferred + " ; " + data.length + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        }
 
-        final byte[] responseBuffer = new byte[endPointIn.getMaxPacketSize()];
-        dataTransferred = this.connection.bulkTransfer(this.endPointIn, responseBuffer, responseBuffer.length, 10000);
-      //  Console.writeLine("USB Retrieve: " + dataTransferred + " " + responseBuffer.length);
-        if(dataTransferred >= 0){
-            return responseBuffer;
+        SCard.SCardIOBuffer transmit = reader.new SCardIOBuffer();
+        transmit.setnInBufferSize(data.length);
+        transmit.setAbyInBuffer(data);
+        transmit.setnOutBufferSize(0x8000);
+        transmit.setAbyOutBuffer(new byte[0x8000]);
+        Long status1 = reader.SCardTransmit(transmit);
+        Log.d(
+                "TAG",
+                "onClick:resul " + data + "---" + data.length
+        );
+        String rstr = "";
+        String sstr = "";
+
+        for(int i = 0; i < transmit.getnBytesReturned(); i++){
+            int temp = transmit.getAbyOutBuffer()[i] & 0xFF;
+            if(temp < 16){
+                rstr = rstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) ;
+                sstr = sstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) + " ";
+            }else{
+                rstr = rstr.toUpperCase() + Integer.toHexString(temp) ;
+                sstr = sstr.toUpperCase() + Integer.toHexString(temp) + " " ;
+            }
         }
-        throw new Exception("Error durring receinving response [" + dataTransferred + "]");
+        Log.d("TAG", "onClick:result " + rstr);
+        Log.d("TAG", "onClick:result1 " + sstr);
+        for(int i = 0; i < transmit.getnBytesReturned(); i++){
+            int temp = transmit.getAbyOutBuffer()[i] & 0xFF;
+            if(temp < 16){
+                rstr = rstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) ;
+                sstr = sstr.toUpperCase() + "0" + Integer.toHexString(transmit.getAbyOutBuffer()[i]) + " ";
+            }else{
+                rstr = rstr.toUpperCase() + Integer.toHexString(temp) ;
+                sstr = sstr.toUpperCase() + Integer.toHexString(temp) + " " ;
+            }
+        }
+        Log.d("TAG", "onClick:result " + rstr);
+        Log.d("TAG", "onClick:result1 " + sstr);
+        return  hexToByteArray(sstr);
+    }
+
+    public static byte[] hexToByteArray(String hexString) {
+        int len = hexString.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
+                    | Character.digit(hexString.charAt(i + 1), 16));
+        }
+        return data;
     }
 
 
 
-    byte[] ReadSpecificObject(String var1, ModelDataLocation var2) throws PaciException {
+
+
+    byte[] ReadSpecificObject(String var1, ModelDataLocation var2) throws Exception {
       /*  PACICardCommunicatorInterface var3 = (PACICardCommunicatorInterface)this.Cards.get(var1);
         if (!var3.IsConnected()) {
             var3.Connect();
@@ -177,6 +215,8 @@ public class PaciCardReaderMAV3 extends PaciCardReaderAbstract {
                     var2.addAll(var7);
                 }
             } catch (PaciException var8) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
