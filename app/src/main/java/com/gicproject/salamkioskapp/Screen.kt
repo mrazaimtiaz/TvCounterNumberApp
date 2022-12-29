@@ -1,6 +1,7 @@
 package com.gicproject.salamkioskapp
 
 sealed class Screen(val route: String){
+    object SettingScreen: Screen("setting_screen")
     object SelectOptionScreen: Screen("select_option_screen")
     object SelectDoctorScreen: Screen("select_doctor_screen")
     object SelectDoctorTimeScreen: Screen("select_doctor_time_screen")

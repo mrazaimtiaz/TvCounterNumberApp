@@ -1,62 +1,25 @@
 package com.gicproject.salamkioskapp.presentation
 
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
 import android.content.IntentFilter
-import android.content.res.AssetManager
-import android.graphics.Bitmap
-import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.util.Log.d
-import android.widget.Filter
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.net.toFile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gicproject.salamkioskapp.OkhttpManager
-import com.gicproject.salamkioskapp.common.Constants
+import com.gicproject.salamkioskapp.UsbBroadCastReceiver
 import com.gicproject.salamkioskapp.common.Resource
 import com.gicproject.salamkioskapp.domain.repository.DataStoreRepository
 import com.gicproject.salamkioskapp.domain.use_case.MyUseCases
-import com.gicproject.salamkioskapp.pacicardlibrary.PaciCardReaderAbstract
-import com.gicproject.salamkioskapp.pacicardlibrary.PaciCardReaderMAV3
-import com.suprema.BioMiniFactory
-import com.suprema.CaptureResponder
-import com.suprema.IBioMiniDevice
-import com.suprema.IBioMiniDevice.*
-import com.suprema.IUsbEventHandler
-import com.suprema.util.Logger
-import com.telpo.tps550.api.fingerprint.FingerPrint
-import com.telpo.tps550.api.reader.SmartCardReader
+import com.szsicod.print.escpos.PrinterAPI
+import com.szsicod.print.io.InterfaceAPI
+import com.szsicod.print.io.USBAPI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.asRequestBody
-import org.json.JSONException
-import org.json.JSONObject
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.nio.charset.Charset
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 
@@ -66,9 +29,125 @@ class MyViewModel @Inject constructor(
     val repository: DataStoreRepository
 ) : ViewModel() {
 
+    private val _stateSetting = mutableStateOf(SettingScreenState())
+    val stateSetting: State<SettingScreenState> = _stateSetting
+
+    private val _stateSelectDepartment = mutableStateOf(SelectDepartmentScreenState())
+    val stateSelectDepartment: State<SelectDepartmentScreenState> = _stateSelectDepartment
+
+
+    private val _isRefreshingSetting = MutableStateFlow(false)
+    val isRefreshingSetting: StateFlow<Boolean>
+        get() = _isRefreshingSetting.asStateFlow()
+
+    var isFirst = true
+
     fun onEvent(event: MyEvent) {
         when (event) {
+            is MyEvent.GetDepartment -> {
+                surveyUseCases.getDeparments().onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            result.data?.let {
+                                isFirst = false
+                                viewModelScope.launch {
+                                    _stateSelectDepartment.value = SelectDepartmentScreenState(departments = it)
 
+                                }
+                            }
+                        }
+                        is Resource.Error -> {
+                            _stateSelectDepartment.value = _stateSelectDepartment.value.copy(
+                                error = result.message ?: "An unexpected error occurred",
+                                isLoading = false,
+                            )
+                           // delay(2000)
+                          //  onEvent(MyEvent.GetDepartment)
+                        }
+                        is Resource.Loading -> {
+                            if(isFirst){
+                                _stateSelectDepartment.value = SelectDepartmentScreenState(isLoading = true)
+
+                            }
+                        }
+                    }
+                }.launchIn(viewModelScope)
+            }
+        }
+    }
+
+    private var mUsbBroadCastReceiver: UsbBroadCastReceiver? = null
+
+    private var mPrinter: PrinterAPI? = null
+    private var mContext: Context? = null
+
+     fun initPrinter( printer: PrinterAPI?, context: Context){
+        mPrinter = printer
+        mContext = context
+    }
+     fun funcPrinterConnect() {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (mPrinter?.isConnect == true) {
+                mPrinter?.disconnect()
+            }
+
+
+
+            var io: InterfaceAPI? = null                   // USB
+            io = USBAPI(mContext)
+
+            //  io = UsbNativeAPI()
+
+
+
+            if (io != null) {
+                val ret = mPrinter?.connect(io)
+            }
+
+            try {
+                // 打印方法：printString
+                // 打印例范文本
+                val str = """
+                WelcomeWelcomeWelcome
+                Welcome
+                Welcome
+                Welcome
+                Welcome
+                Welcome
+                Welcome
+                123456789
+                123456789
+                123456789
+                123456789
+                
+                """.trimIndent()
+                mPrinter!!.setPrintColorSize(4)
+                mPrinter?.printString("Text test printing:\n")
+                mPrinter?.printFeed()
+                mPrinter?.printString(str, "GBK", true)
+                mPrinter?.printFeed()
+                mPrinter?.halfCut()
+               val ret = mPrinter?.cutPaper(66, 0)
+                mPrinter?.fullCut()
+                mPrinter?.cutMark()
+
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // 打印机断开连接
+    private fun funcPrinterDisConnect() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // 打印方法：disconnect
+                // 打印例范文本
+                val ret = mPrinter!!.disconnect()
+
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

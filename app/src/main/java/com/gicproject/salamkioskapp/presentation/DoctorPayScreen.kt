@@ -62,7 +62,7 @@ fun DoctorPayScreen(
             delay(1000)
             second.value = second.value - 1
             if (second.value == 0) {
-                navController.popBackStack(Screen.SelectOptionScreen.route, false)
+                navController.popBackStack(Screen.SelectDepartmentScreen.route, false)
             }
         }
     })
@@ -108,7 +108,7 @@ fun DoctorPayScreen(
             ) {
                 HeartBeatTime(second = second)
             }
-            HeaderDesign("Appointment Information")
+            HeaderDesign("Appointment Information",navController)
 
             Column(
                 modifier = Modifier.fillMaxSize(),

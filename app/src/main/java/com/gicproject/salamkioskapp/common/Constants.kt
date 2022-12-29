@@ -6,16 +6,16 @@ class Constants {
     companion object {
         //const val BASE_URL = "http://10.15.10.61/"
       //das
-        const val LOGO = R.drawable.daslogo
-      const val BACKGROUND_IMAGE = R.drawable.dasbackground
-      const val DOCTOR_SAMPLE_IMAGE = R.drawable.doctorsampledas
-      const val DOCTOR_SAMPLE_IMAGE_TWO = R.drawable.doctorsampletwodas
+     //   const val LOGO = R.drawable.daslogo
+     // const val BACKGROUND_IMAGE = R.drawable.dasbackground
+     // const val DOCTOR_SAMPLE_IMAGE = R.drawable.doctorsampledas
+     // const val DOCTOR_SAMPLE_IMAGE_TWO = R.drawable.doctorsampletwodas
 
       //alsalam
-       // const val LOGO = R.drawable.logo
-      //  const val BACKGROUND_IMAGE = R.drawable.background
-     // const val DOCTOR_SAMPLE_IMAGE = R.drawable.doctorsample
-     // const val DOCTOR_SAMPLE_IMAGE_TWO = R.drawable.doctorsampletwo
+        const val LOGO = R.drawable.logo
+        const val BACKGROUND_IMAGE = R.drawable.background
+      const val DOCTOR_SAMPLE_IMAGE = R.drawable.doctorsample
+      const val DOCTOR_SAMPLE_IMAGE_TWO = R.drawable.doctorsampletwo
 
 
         const val BASE_URL = "http://kcbg2gweb.kcb.gov.kw/"

@@ -50,7 +50,7 @@ fun SelectDoctorScreen(
             delay(1000)
             second.value = second.value - 1
             if (second.value == 0) {
-                navController.popBackStack(Screen.SelectOptionScreen.route,false)
+                navController.popBackStack(Screen.SelectDepartmentScreen.route,false)
             }
         }
     })
@@ -96,7 +96,7 @@ fun SelectDoctorScreen(
             ) {
                 HeartBeatTime(second = second)
             }
-            HeaderDesign("Select Doctor")
+            HeaderDesign("Select Doctor",navController)
 
             Column(
                 modifier = Modifier.fillMaxSize(),

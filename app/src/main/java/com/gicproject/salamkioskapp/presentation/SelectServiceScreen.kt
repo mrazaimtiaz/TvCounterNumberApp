@@ -49,7 +49,7 @@ fun SelectServiceScreen(
             delay(1000)
             second.value = second.value - 1
             if (second.value == 0) {
-                navController.popBackStack()
+                navController.popBackStack(Screen.SelectDepartmentScreen.route, false)
             }
         }
     })
@@ -89,7 +89,7 @@ fun SelectServiceScreen(
                 }
             }
             HeartBeatTime(second = second)
-            HeaderDesign("Select Service")
+            HeaderDesign("Select Service",navController)
 
             Column(
                 modifier = Modifier.fillMaxSize(),

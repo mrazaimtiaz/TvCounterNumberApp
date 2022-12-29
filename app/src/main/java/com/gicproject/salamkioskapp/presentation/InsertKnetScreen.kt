@@ -54,7 +54,7 @@ fun InsertKnetScreen(
             delay(1000)
             second.value = second.value - 1
             if (second.value == 0) {
-                navController.popBackStack()
+                navController.popBackStack(Screen.SelectDepartmentScreen.route, false)
             }
         }
     })
@@ -100,7 +100,7 @@ fun InsertKnetScreen(
             ) {
                 HeartBeatTime(second = second)
             }
-            HeaderDesign("Insert Knet")
+            HeaderDesign("Insert Knet",navController)
 
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -116,7 +116,7 @@ fun InsertKnetScreen(
                 }
                 Spacer(modifier = Modifier.height(60.dp))
                 SubmitButton({
-                    navController.popBackStack(Screen.SelectOptionScreen.route, false)
+                    navController.popBackStack(Screen.SelectDepartmentScreen.route, false)
                 }, "Pay")
             }
 

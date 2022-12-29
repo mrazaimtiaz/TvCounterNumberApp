@@ -53,7 +53,7 @@ fun InsertCivilIdScreen(
             delay(1000)
             second.value = second.value - 1
             if (second.value == 0) {
-                navController.popBackStack()
+                navController.popBackStack(Screen.SelectDepartmentScreen.route, false)
             }
         }
     })
@@ -93,7 +93,7 @@ fun InsertCivilIdScreen(
                 }
             }
             HeartBeatTime(second = second)
-            HeaderDesign("Insert 12 Digit Civil ID")
+            HeaderDesign("Insert Civil ID of Patient",navController)
 
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -101,6 +101,13 @@ fun InsertCivilIdScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    PayKnetAnimation()
+                }
+               /* Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp),
@@ -256,7 +263,7 @@ fun InsertCivilIdScreen(
                             }
                         }, text = "Proceed")
                     }
-                }
+                }*/
 
             }
 

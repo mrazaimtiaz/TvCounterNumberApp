@@ -14,7 +14,7 @@ android {
    //     applicationId "com.gicproject.salamkioskapp"  //alsalam
         applicationId "com.gicproject.daskioskapp"  //das
         minSdk 24
-        targetSdk 31
+        targetSdk 30
         versionCode 1
         versionName "1.0"
 
@@ -25,6 +25,10 @@ android {
         ndk {
             abiFilters "armeabi", "armeabi-v7a", "x86", "mips","arm64-v8a"
         }
+    }
+
+    lintOptions{
+        abortOnError false
     }
 
     sourceSets {
@@ -142,6 +146,8 @@ dependencies {
 
     //CoilImageLoader
     implementation "dev.chrisbanes.accompanist:accompanist-coil:0.2.1"
+
+    implementation "com.google.accompanist:accompanist-flowlayout:0.25.0"
 
 
     // Room

@@ -10,7 +10,6 @@ import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
-import android.os.Environment
 import android.os.Parcelable
 import android.util.Log
 import android.widget.Toast
@@ -87,9 +86,7 @@ class MainActivity : ComponentActivity() {
 
     init {
         System.loadLibrary("usb1.0");
-        //串口
         System.loadLibrary("serial_icod");
-        //图片
         System.loadLibrary("image_icod");
     }
 
@@ -106,6 +103,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -152,12 +152,21 @@ class MainActivity : ComponentActivity() {
 
         mPrinter = PrinterAPI.getInstance()
 
+
         initPermission()
 
-
        CoroutineScope(Dispatchers.IO).launch {
-           delay(7000)
-           funcPrinterConnect();
+           delay(3000)
+           if (mUsbBroadCastReceiver == null) {
+               val intentFilter = IntentFilter()
+               intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+               intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+               mUsbBroadCastReceiver = UsbBroadCastReceiver()
+               registerReceiver(mUsbBroadCastReceiver, intentFilter)
+               viewModel?.initPrinter(mPrinter,this@MainActivity)
+
+           }
+
        }
 
 
@@ -282,7 +291,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.SelectOptionScreen.route
+                        startDestination = Screen.SelectDepartmentScreen.route
                     ) {
                         composable(
                             route = Screen.SelectOptionScreen.route
@@ -338,6 +347,11 @@ class MainActivity : ComponentActivity() {
                             route = Screen.LinkPayScreen.route
                         ) {
                             LinkPayScreen(navController, viewModel!!)
+                        }
+                        composable(
+                            route = Screen.SettingScreen.route
+                        ) {
+                            SettingScreen(navController, viewModel!!)
                         }
                     }
                 }
@@ -569,75 +583,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private var mUsbBroadCastReceiver: UsbBroadCastReceiver? = null
-     private fun funcPrinterConnect() {
-      CoroutineScope(Dispatchers.IO).launch {
-            if (mPrinter!!.isConnect) {
-                mPrinter?.disconnect()
-            }
 
-
-            if (mUsbBroadCastReceiver == null) {
-                val intentFilter = IntentFilter()
-                intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
-                intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
-                mUsbBroadCastReceiver = UsbBroadCastReceiver()
-                registerReceiver(mUsbBroadCastReceiver, intentFilter)
-            }
-
-            var io: InterfaceAPI? = null                   // USB
-                  //  io = USBAPI(this@MainActivity)
-
-                    io = UsbNativeAPI()
-
-
-
-            if (io != null) {
-                val ret = mPrinter?.connect(io)
-            }
-
-          try {
-              // 打印方法：printString
-              // 打印例范文本
-              val str = """
-                WelcomeWelcomeWelcome
-                Welcome
-                Welcome
-                Welcome
-                Welcome
-                Welcome
-                Welcome
-                123456789
-                123456789
-                123456789
-                123456789
-                
-                """.trimIndent()
-              mPrinter!!.setPrintColorSize(4)
-              mPrinter?.printString("Text test printing:\n")
-              mPrinter?.printFeed()
-              mPrinter?.printString(str, "GBK", true)
-              mPrinter?.printFeed()
-              val ret = mPrinter?.cutPaper(66, 0)
-
-          } catch (e: java.lang.Exception) {
-              e.printStackTrace()
-          }
-        }
-    }
-
-    // 打印机断开连接
-     private fun funcPrinterDisConnect() {
-       CoroutineScope(Dispatchers.IO).launch {
-            try {
-                // 打印方法：disconnect
-                // 打印例范文本
-                val ret = mPrinter!!.disconnect()
-
-            } catch (e: java.lang.Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 
 
     // 打印文本
@@ -662,7 +608,7 @@ fun DefaultPreview() {
 
 
 //usb 插拔监听
-private class UsbBroadCastReceiver : BroadcastReceiver() {
+class UsbBroadCastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val device = intent.getParcelableExtra<Parcelable>(UsbManager.EXTRA_DEVICE) as UsbDevice?
     /*    when (intent.action) {
