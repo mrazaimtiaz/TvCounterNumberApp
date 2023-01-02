@@ -128,8 +128,11 @@ fun DoctorPayScreen(
                 }
                 Spacer(modifier = Modifier.height(60.dp))
                 SubmitButton(
-                    { showDialog.value = true },
-                    "Proceed to Pay"
+                    {
+                     //   showDialog.value = true
+                    viewModel.funcPrinterConnect()
+                    },
+                    "Print Ticket"
                 )
 
 

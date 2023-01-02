@@ -209,7 +209,6 @@ fun LinkPayScreen(
 
             }
 
-
             /* if (state.error.isNotBlank()) {
 
              }

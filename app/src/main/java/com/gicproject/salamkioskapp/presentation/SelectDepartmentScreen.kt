@@ -175,7 +175,7 @@ fun SelectDepartmentScreen(
                         state = rememberLazyGridState(),
                         contentPadding = PaddingValues(30.dp),
                         modifier = Modifier
-                            .width(730.dp),
+                            .width(730.dp).height(950.dp),
                         columns = GridCells.Fixed(2),
                     ) {
                         items(state.departments.size) { index ->

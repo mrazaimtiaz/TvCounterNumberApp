@@ -1,6 +1,8 @@
 package com.gicproject.salamkioskapp.presentation
 
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -48,15 +50,25 @@ fun InsertCivilIdScreen(
 
     var textCivilId = remember { mutableStateOf("") }
 
+
+    val state = viewModel.stateInsertCivilId.value
+
     LaunchedEffect(key1 = Unit, block = {
         while (true) {
             delay(1000)
-            second.value = second.value - 1
-            if (second.value == 0) {
-                navController.popBackStack(Screen.SelectDepartmentScreen.route, false)
+            Log.d("TAG", "InsertCivilIdScreen1: ${state.isLoading}")
+            if(!state.isLoading){
+                Log.d("TAG", "InsertCivilIdScreen2: ${state.isLoading}")
+                second.value = second.value - 1
+                if (second.value == 0) {
+                    navController.popBackStack(Screen.SelectDepartmentScreen.route, false)
+                }
             }
+
         }
     })
+
+
     Scaffold { innerPadding ->
         Box(
             modifier = Modifier
@@ -279,8 +291,28 @@ fun InsertCivilIdScreen(
 
                  }
              }*/
+
+        }
+
+        if (state.success.isNotBlank()) {
+            LaunchedEffect(key1 = true) {
+                navController.navigate(Screen.DoctorPayScreen.route)
+            }
+        }
+        if (state.isLoading) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.6f)),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                CircularProgressIndicator()
+            }
         }
     }
+
+
 }
 
 

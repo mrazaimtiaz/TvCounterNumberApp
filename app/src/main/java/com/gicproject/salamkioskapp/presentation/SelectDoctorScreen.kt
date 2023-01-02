@@ -5,6 +5,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -29,6 +32,9 @@ import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
 import com.gicproject.salamkioskapp.common.Constants
 import com.gicproject.salamkioskapp.common.Constants.Companion.heartBeatJson
+import com.google.accompanist.flowlayout.FlowColumn
+import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
+import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import kotlinx.coroutines.delay
 import java.util.*
 
@@ -43,8 +49,11 @@ fun SelectDoctorScreen(
 
     val second = remember { mutableStateOf(120) }
 
+    val state = viewModel.stateSelectDoctor.value
 
-
+    LaunchedEffect(true) {
+        viewModel.onEvent(MyEvent.GetDoctor)
+    }
     LaunchedEffect(key1 = Unit, block = {
         while (true) {
             delay(1000)
@@ -97,21 +106,26 @@ fun SelectDoctorScreen(
                 HeartBeatTime(second = second)
             }
             HeaderDesign("Select Doctor",navController)
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+            FlowColumn(
+                Modifier.fillMaxSize(),
+                crossAxisAlignment = FlowCrossAxisAlignment.Center,
+                mainAxisAlignment = FlowMainAxisAlignment.Center,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                LazyVerticalGrid(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.Center,
+                    state = rememberLazyGridState(),
+                    contentPadding = PaddingValues(30.dp),
+                    modifier = Modifier
+                        .width(730.dp),
+                    columns = GridCells.Fixed(2),
                 ) {
-                    DoctorInfo("Dr Emad", "ENT", "30 KD",Constants.DOCTOR_SAMPLE_IMAGE,navController)
-                    DoctorInfo("Dr Wasim", "ENT", "25 KD",Constants.DOCTOR_SAMPLE_IMAGE_TWO,navController)
+                    items(state.doctors.size) { index ->
+                        DoctorInfo("Dr Emad", state.doctors[index].nameEn ?: "", "30 KD",Constants.DOCTOR_SAMPLE_IMAGE,navController)
+                    }
                 }
             }
+
 
 
             /* if (state.error.isNotBlank()) {
@@ -125,6 +139,17 @@ fun SelectDoctorScreen(
 
                  }
              }*/
+        }
+        if (state.isLoading) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.6f)),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                CircularProgressIndicator()
+            }
         }
     }
 }
@@ -171,6 +196,8 @@ fun DoctorInfo(name: String, deptName: String, price: String,image: Int,navContr
                 fontWeight = FontWeight.Bold
             )
         }
+
+
     }
 }
 

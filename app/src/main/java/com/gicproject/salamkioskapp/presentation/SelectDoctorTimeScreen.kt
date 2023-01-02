@@ -6,6 +6,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -17,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +34,9 @@ import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
 import com.gicproject.salamkioskapp.common.Constants
 import com.gicproject.salamkioskapp.common.Constants.Companion.heartBeatJson
+import com.google.accompanist.flowlayout.FlowColumn
+import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
+import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import kotlinx.coroutines.delay
 import java.util.*
 
@@ -44,7 +51,11 @@ fun SelectDoctorTimeScreen(
 
     val second = remember { mutableStateOf(120) }
 
+    val state = viewModel.stateSelectDoctor.value
 
+    LaunchedEffect(true) {
+        viewModel.onEvent(MyEvent.GetDoctor)
+    }
 
     LaunchedEffect(key1 = Unit, block = {
         while (true) {
@@ -92,19 +103,24 @@ fun SelectDoctorTimeScreen(
                 HeartBeatTime(second = second)
             }
             HeaderDesign("Select Doctor",navController)
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+            FlowColumn(
+                Modifier.fillMaxSize(),
+                crossAxisAlignment = FlowCrossAxisAlignment.Center,
+                mainAxisAlignment = FlowMainAxisAlignment.Center,
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                LazyVerticalGrid(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    state = rememberLazyGridState(),
+                    contentPadding = PaddingValues(30.dp),
+                    modifier = Modifier
+                        .width(730.dp)
+                        .height(950.dp),
+                    columns = GridCells.Fixed(2),
                 ) {
-                    DoctorInfoTime("Dr Emad", "01:00 AM", "01-Nov-2022","ENT", "30 KD",Constants.DOCTOR_SAMPLE_IMAGE,navController)
-                    DoctorInfoTime("Dr Wasim", "02:00 AM", "01-Nov-2022","ENT", "25 KD",Constants.DOCTOR_SAMPLE_IMAGE_TWO,navController)
+                    items(state.doctors.size) { index ->
+                        DoctorInfoTime("Dr Emad", "01:00 AM", "01-Nov-2022","ENT", "30 KD",Constants.DOCTOR_SAMPLE_IMAGE,navController)
+                    }
                 }
             }
 
@@ -121,64 +137,81 @@ fun SelectDoctorTimeScreen(
                  }
              }*/
         }
+        if (state.isLoading) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.6f)),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
     }
 }
 
 @Composable
 fun DoctorInfoTime(name: String,time: String, date: String, deptName: String, price: String,image: Int,navController: NavController) {
-    Box(
-        modifier = Modifier
-            .background(color = Color.White, shape = RoundedCornerShape(20.dp))
-            .padding(20.dp)
-            .clickable {
-                navController.navigate(Screen.DoctorPayScreen.route)
-            }
-    ) {
-        Column(
-            modifier = Modifier.width(250.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                "Time: $time",
-                color = MaterialTheme.colors.secondary,
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                "Date: $date",
-                color = MaterialTheme.colors.secondary,
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(id = image),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .width(250.dp)
-                        .height(140.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
 
-            Text("Name: $name", color = Color.Black, fontSize = 30.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(20.dp))
-            Text("Department: $deptName", color = Color.Black, fontSize = 28.sp)
+   Column() {
+       Box(
+           modifier = Modifier
+               .background(color = Color.White, shape = RoundedCornerShape(20.dp))
+               .padding(horizontal = 8.dp, vertical = 12.dp)
+               .clickable {
+                   navController.navigate(Screen.DoctorPayScreen.route)
+               }, contentAlignment = Alignment.Center
+       ) {
+           Column(
+               modifier = Modifier.width(300.dp),
+               horizontalAlignment = Alignment.CenterHorizontally,
+               verticalArrangement = Arrangement.Center
+           ) {
+               Text(
+                   "Time: $time",
+                   color = MaterialTheme.colors.secondary,
+                   fontSize = 25.sp,
+                   fontWeight = FontWeight.Bold
+               )
+               Text(
+                   "Date: $date",
+                   color = MaterialTheme.colors.secondary,
+                   fontSize = 25.sp,
+                   fontWeight = FontWeight.Bold
+               )
+               Row(
+                   modifier = Modifier.fillMaxWidth(),
+                   horizontalArrangement = Arrangement.Center,
+                   verticalAlignment = Alignment.CenterVertically
+               ) {
+                   Image(
+                       painter = painterResource(id = image),
+                       contentDescription = "",
+                       modifier = Modifier
+                           .width(250.dp)
+                           .height(140.dp)
+                   )
+               }
+               Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                "Price: $price",
-                color = Color.Black,
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
+               Text("Name: $name", color = Color.Black, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+               Spacer(modifier = Modifier.height(20.dp))
+               Text("Department: $deptName", color = Color.Black, fontSize = 28.sp)
+
+               Spacer(modifier = Modifier.height(20.dp))
+               Text(
+                   "Price: $price",
+                   color = Color.Black,
+                   fontSize = 30.sp,
+                   fontWeight = FontWeight.Bold
+               )
+           }
+
+       }
+       Spacer(modifier = Modifier.height(10.dp))
+   }
+
 }
 
 

@@ -9,6 +9,7 @@ import com.gicproject.salamkioskapp.data.repository.MyRepositoryImpl
 import com.gicproject.salamkioskapp.domain.repository.DataStoreRepository
 import com.gicproject.salamkioskapp.domain.repository.MyRepository
 import com.gicproject.salamkioskapp.domain.use_case.GetDeparments
+import com.gicproject.salamkioskapp.domain.use_case.GetDoctors
 import com.gicproject.salamkioskapp.domain.use_case.MyUseCases
 import dagger.Module
 import dagger.Provides
@@ -53,7 +54,8 @@ class AppModule {
     ): MyUseCases {
         return MyUseCases(
             getResult = GetResult(repository = repository),
-            getDeparments = GetDeparments(repository = repository)
+            getDeparments = GetDeparments(repository = repository),
+            getDoctors = GetDoctors(repository = repository)
         )
     }
 }
