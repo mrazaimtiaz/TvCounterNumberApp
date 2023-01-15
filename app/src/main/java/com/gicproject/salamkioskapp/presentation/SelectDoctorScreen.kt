@@ -47,7 +47,7 @@ fun SelectDoctorScreen(
 
     val listState = rememberLazyListState()
 
-    val second = remember { mutableStateOf(120) }
+    val second = remember { mutableStateOf(20) }
 
     val state = viewModel.stateSelectDoctor.value
 

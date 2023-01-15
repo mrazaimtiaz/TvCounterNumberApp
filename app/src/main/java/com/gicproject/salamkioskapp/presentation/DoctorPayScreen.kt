@@ -42,12 +42,11 @@ import java.util.*
 fun DoctorPayScreen(
     navController: NavController,
     viewModel: MyViewModel,
-
     ) {
 
     val listState = rememberLazyListState()
 
-    val second = remember { mutableStateOf(120) }
+    val second = remember { mutableStateOf(20) }
 
     var showDialog = remember { mutableStateOf(false) }
     if (showDialog.value) {

@@ -1,7 +1,9 @@
 package com.gicproject.salamkioskapp.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,10 +23,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import androidx.navigation.NavController
 import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
 import com.gicproject.salamkioskapp.common.Constants
+import com.gicproject.salamkioskapp.ui.theme.primarySidra
 
 @Composable
 fun SelectOptionScreen(
@@ -107,12 +111,15 @@ fun CustomButtonLarge(onClick: () -> Unit, text: String) {
 
 @Composable
 fun CustomButton(onClick: () -> Unit, text: String) {
-    Button(onClick = onClick,
+    OutlinedButton(onClick = onClick,
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = primarySidra),
+        border = BorderStroke(1.dp, primarySidra),
             modifier = Modifier
                 .width(300.dp)
                 .height(180.dp)
                 .padding(horizontal = 8.dp, vertical = 12.dp)
                 .shadow(15.dp, shape = RoundedCornerShape(5.dp)), shape = RoundedCornerShape(15.dp)
+
     ) {
         Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -127,12 +134,13 @@ fun CustomButton(onClick: () -> Unit, text: String) {
 
 @Composable
 fun HeaderDesign(title: String,navController: NavController) {
-    Box(modifier = Modifier.padding(horizontal = 10.dp, vertical = 20.dp)) {
+    Box(modifier = Modifier.padding(horizontal = 0.dp, vertical = 0.dp)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = Color.White, shape = RoundedCornerShape(10.dp))
-        ) {
+                .background(color = Color.White, shape = RoundedCornerShape(10.dp),).border(
+                    BorderStroke(2.dp, Color(0xFF1680bd))
+        ) ){
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -145,7 +153,7 @@ fun HeaderDesign(title: String,navController: NavController) {
                     contentDescription = "bg",
                     modifier = Modifier
                         .width(180.dp)
-                        .height(55.dp).pointerInput(Unit) {
+                        .height(70.dp).pointerInput(Unit) {
                             detectDragGestures { change, _ ->
                                 if (change.position.y > 400) {
                                    navController.navigate(Screen.SettingScreen.route)

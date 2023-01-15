@@ -46,7 +46,7 @@ fun InsertCivilIdScreen(
 
     val listState = rememberLazyListState()
 
-    val second = remember { mutableStateOf(120) }
+    val second = remember { mutableStateOf(20) }
 
     var textCivilId = remember { mutableStateOf("") }
 

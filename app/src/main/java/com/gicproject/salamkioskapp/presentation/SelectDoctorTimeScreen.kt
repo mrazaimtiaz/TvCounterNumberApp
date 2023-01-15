@@ -2,9 +2,7 @@ package com.gicproject.salamkioskapp.presentation
 
 import android.content.res.Resources.Theme
 import android.util.Log
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -13,7 +11,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,16 +28,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
 import com.gicproject.salamkioskapp.common.Constants
 import com.gicproject.salamkioskapp.common.Constants.Companion.heartBeatJson
+import com.gicproject.salamkioskapp.ui.theme.primarySidra
 import com.google.accompanist.flowlayout.FlowColumn
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import kotlinx.coroutines.delay
+import com.skydoves.balloon.ArrowPositionRules
+import com.skydoves.balloon.Balloon
+import com.skydoves.balloon.BalloonAnimation
+import com.skydoves.balloon.BalloonSizeSpec
+import com.skydoves.balloon.compose.Balloon
+import com.skydoves.balloon.compose.BalloonWindow
+import com.skydoves.balloon.compose.rememberBalloonBuilder
+import kotlinx.coroutines.*
 import java.util.*
 
 
@@ -49,7 +58,7 @@ fun SelectDoctorTimeScreen(
 
     val listState = rememberLazyListState()
 
-    val second = remember { mutableStateOf(120) }
+    val second = remember { mutableStateOf(20) }
 
     val state = viewModel.stateSelectDoctor.value
 
@@ -62,7 +71,7 @@ fun SelectDoctorTimeScreen(
             delay(1000)
             second.value = second.value - 1
             if (second.value == 0) {
-                navController.popBackStack(Screen.SelectDepartmentScreen.route,false)
+                navController.popBackStack(Screen.SelectDepartmentScreen.route, false)
             }
         }
     })
@@ -102,12 +111,16 @@ fun SelectDoctorTimeScreen(
             ) {
                 HeartBeatTime(second = second)
             }
-            HeaderDesign("Select Doctor",navController)
+            HeaderDesign("Select Doctor", navController)
+
             FlowColumn(
                 Modifier.fillMaxSize(),
                 crossAxisAlignment = FlowCrossAxisAlignment.Center,
                 mainAxisAlignment = FlowMainAxisAlignment.Center,
             ) {
+                if (state.error.isNotBlank()) {
+                    Text(state.error, color = MaterialTheme.colors.error, fontSize =30.sp, modifier = Modifier.padding(top= 30.dp))
+                }
                 LazyVerticalGrid(
                     verticalArrangement = Arrangement.Center,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -119,7 +132,42 @@ fun SelectDoctorTimeScreen(
                     columns = GridCells.Fixed(2),
                 ) {
                     items(state.doctors.size) { index ->
-                        DoctorInfoTime("Dr Emad", "01:00 AM", "01-Nov-2022","ENT", "30 KD",Constants.DOCTOR_SAMPLE_IMAGE,navController)
+                        val builder = rememberBalloonBuilder {
+                            setArrowSize(10)
+                            setArrowPosition(0.5f)
+                            setArrowPositionRules(ArrowPositionRules.ALIGN_ANCHOR)
+                            setWidth(BalloonSizeSpec.WRAP)
+                            setHeight(BalloonSizeSpec.WRAP)
+                            setPadding(12)
+                            setMarginHorizontal(12)
+                            setCornerRadius(8f)
+                            setBackgroundColorResource(R.color.greyKcb)
+                            setBalloonAnimation(BalloonAnimation.ELASTIC)
+                        }
+                        Balloon(
+                            modifier = Modifier.align(Alignment.Center),
+                            builder = builder,
+                            balloonContent = {
+                                Text(text = "Now you can edit your profile!")
+                            }
+                        ) { balloonWindow ->
+                            DoctorInfoTime(
+                                "Dr Emad",
+                                "01:00 AM",
+                                "01-Nov-2022",
+                                "ENT",
+                                "30 KD",
+                                Constants.DOCTOR_SAMPLE_IMAGE,
+                                navController,
+                                balloonWindow
+                            ) {
+                                if (!state.isLoading) {
+                                    navController.navigate(Screen.DoctorPayScreen.route)
+                                }
+                            }
+
+                        }
+
                     }
                 }
             }
@@ -151,66 +199,98 @@ fun SelectDoctorTimeScreen(
     }
 }
 
+var jobBallon: Job? = null;
+
 @Composable
-fun DoctorInfoTime(name: String,time: String, date: String, deptName: String, price: String,image: Int,navController: NavController) {
+fun DoctorInfoTime(
+    name: String,
+    time: String,
+    date: String,
+    deptName: String,
+    price: String,
+    image: Int,
+    navController: NavController,
+    ballonWindow: BalloonWindow,
+    onClick: () -> Unit,
+) {
 
-   Column() {
-       Box(
-           modifier = Modifier
-               .background(color = Color.White, shape = RoundedCornerShape(20.dp))
-               .padding(horizontal = 8.dp, vertical = 12.dp)
-               .clickable {
-                   navController.navigate(Screen.DoctorPayScreen.route)
-               }, contentAlignment = Alignment.Center
-       ) {
-           Column(
-               modifier = Modifier.width(300.dp),
-               horizontalAlignment = Alignment.CenterHorizontally,
-               verticalArrangement = Arrangement.Center
-           ) {
-               Text(
-                   "Time: $time",
-                   color = MaterialTheme.colors.secondary,
-                   fontSize = 25.sp,
-                   fontWeight = FontWeight.Bold
-               )
-               Text(
-                   "Date: $date",
-                   color = MaterialTheme.colors.secondary,
-                   fontSize = 25.sp,
-                   fontWeight = FontWeight.Bold
-               )
-               Row(
-                   modifier = Modifier.fillMaxWidth(),
-                   horizontalArrangement = Arrangement.Center,
-                   verticalAlignment = Alignment.CenterVertically
-               ) {
-                   Image(
-                       painter = painterResource(id = image),
-                       contentDescription = "",
-                       modifier = Modifier
-                           .width(250.dp)
-                           .height(140.dp)
-                   )
-               }
-               Spacer(modifier = Modifier.height(20.dp))
+    ConstraintLayout {
+        val someImage = createRef()
 
-               Text("Name: $name", color = Color.Black, fontSize = 30.sp, fontWeight = FontWeight.Bold)
-               Spacer(modifier = Modifier.height(20.dp))
-               Text("Department: $deptName", color = Color.Black, fontSize = 28.sp)
+        Column(modifier = Modifier.constrainAs(someImage) {
+            // Place it where you want
+        }) {
+            Box(
+                modifier = Modifier
+                    .background(color = Color.White, shape = RoundedCornerShape(20.dp))
+                    .border(
+                        width = 2.dp,
+                        color = primarySidra,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 12.dp)
+                    .clickable {
+                        onClick()
+                    }, contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier.width(300.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = image),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .width(250.dp)
+                                .height(140.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    IconButton(onClick = {
+                        jobBallon?.cancel()
+                        ballonWindow.showAlignTop()
+                        jobBallon = CoroutineScope(Dispatchers.Main).launch {
+                            delay(3000)
+                            ballonWindow.dismiss()
+                        }
+                    }) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = "",
+                            modifier = Modifier.size(25.dp)
+                        )
 
-               Spacer(modifier = Modifier.height(20.dp))
-               Text(
-                   "Price: $price",
-                   color = Color.Black,
-                   fontSize = 30.sp,
-                   fontWeight = FontWeight.Bold
-               )
-           }
+                    }
+                    Text(
+                        "Name: $name",
+                        color = Color.Black,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold
+                    )
 
-       }
-       Spacer(modifier = Modifier.height(10.dp))
-   }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text("Department: $deptName", color = Color.Black, fontSize = 28.sp)
+
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(
+                        "Price: $price",
+                        color = Color.Black,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+    }
+
 
 }
 

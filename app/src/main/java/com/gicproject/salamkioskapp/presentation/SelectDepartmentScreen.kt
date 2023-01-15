@@ -1,5 +1,6 @@
 package com.gicproject.salamkioskapp.presentation
 
+import android.view.LayoutInflater
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
@@ -29,6 +31,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.gicproject.salamkioskapp.R
 import com.gicproject.salamkioskapp.Screen
 import com.gicproject.salamkioskapp.common.Constants
 import com.gicproject.salamkioskapp.common.Constants.Companion.heartBeatJson
@@ -164,6 +167,20 @@ fun SelectDepartmentScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 HeaderDesign("Select Department", navController)
+              /*  AndroidView(
+                    factory = { context ->
+                        val view = LayoutInflater.from(context).inflate(R.layout.myfatoorah_layout, null, false)
+                        val paymentView = view.findViewById<MFPaymentCardView>(R.id.mfPaymentView)
+                        viewModel.setPaymentView(paymentView)
+                        viewModel.getPaymentView()?.startNfcReadCard()
+
+                        // do whatever you want...
+                        view // return the view
+                    },
+                    update = { view ->
+                        // Update the view
+                    }
+                )*/
                 FlowColumn(
                     Modifier.fillMaxSize(),
                     crossAxisAlignment = FlowCrossAxisAlignment.Center,
@@ -180,7 +197,8 @@ fun SelectDepartmentScreen(
                     ) {
                         items(state.departments.size) { index ->
                             CustomButton(onClick = {
-                                showDialog.value = true
+                               navController.navigate(Screen.SelectDoctorTimeScreen.route)
+                               // showDialog.value = true
                             }, text = state.departments[index].nameEn ?: "")
                         }
                     }

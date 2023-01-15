@@ -67,6 +67,10 @@ class MyViewModel @Inject constructor(
         _readCivilId.value = false
     }
 
+    fun initDoctorTimeScreenstate(){
+        _stateSelectDoctor.value = SelectDoctorScreenState()
+    }
+
     fun onEvent(event: MyEvent) {
         when (event) {
             is MyEvent.GetDepartment -> {
@@ -120,6 +124,32 @@ class MyViewModel @Inject constructor(
                         }
                         is Resource.Loading -> {
                                 _stateSelectDoctor.value = SelectDoctorScreenState(isLoading = true)
+                        }
+                    }
+                }.launchIn(viewModelScope)
+            }
+            is MyEvent.GetPrintTicket -> {
+                surveyUseCases.getPrintTicket().onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            result.data?.let {
+                                viewModelScope.launch {
+                                    _stateSelectDoctor.value = _stateSelectDoctor.value.copy()
+                                    funcPrinterConnect()
+
+                                }
+                            }
+                        }
+                        is Resource.Error -> {
+                            _stateSelectDoctor.value = _stateSelectDoctor.value.copy(
+                                error = result.message ?: "An unexpected error occurred",
+                                isLoading = false,
+                            )
+                            // delay(2000)
+                            //  onEvent(MyEvent.GetDepartment)
+                        }
+                        is Resource.Loading -> {
+                            _stateSelectDoctor.value = SelectDoctorScreenState(isLoading = true)
                         }
                     }
                 }.launchIn(viewModelScope)
@@ -181,6 +211,23 @@ class MyViewModel @Inject constructor(
                val ret = mPrinter?.cutPaper(66, 0)
                 mPrinter?.fullCut()
                 mPrinter?.cutMark()
+
+                //bitmap print
+          /*      mPrinter!!.setPrintColorSize(4)
+                mPrinter!!.printString("Picture test printing:\n")
+                mPrinter!!.printFeed()
+                mPrinter!!.printRasterBitmap(bmp)
+
+//                    byte[] bmpBytes = PrintImageUtils.parseBmpToByte(bmp);
+//                    mPrinter.sendOrder(bmpBytes);
+
+//                    byte[] bmpBytes = PrintImageUtils.parseBmpToByte(bmp);
+//                    mPrinter.sendOrder(bmpBytes);
+                mPrinter!!.printFeed()
+                mPrinter!!.printString("test is finished！\n")
+                mPrinter!!.printFeed()
+
+                mPrinter!!.cutPaper(66, 0)*/
 
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()

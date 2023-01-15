@@ -59,7 +59,7 @@ fun LinkPayScreen(
 
     val listState = rememberLazyListState()
 
-    val second = remember { mutableStateOf(120) }
+    val second = remember { mutableStateOf(20) }
 
     var numberEditText = remember { mutableStateOf("") }
 
