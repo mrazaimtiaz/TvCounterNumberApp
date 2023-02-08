@@ -16,7 +16,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -50,6 +52,7 @@ import kotlinx.coroutines.*
 import java.util.*
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SelectDoctorTimeScreen(
     navController: NavController,
@@ -65,6 +68,80 @@ fun SelectDoctorTimeScreen(
     LaunchedEffect(true) {
         viewModel.onEvent(MyEvent.GetDoctor)
     }
+
+    var showDialog = remember { mutableStateOf(false) }
+    if (showDialog.value) {
+        /*val second = remember { mutableStateOf(30) }
+        LaunchedEffect(key1 = Unit, block = {
+            while (true) {
+                delay(1000)
+                second.value = second.value - 1
+                if (second.value == 0) {
+                    showDialog.value = false
+                }
+            }
+        })*/
+        Dialog(
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = true,
+                usePlatformDefaultWidth = false
+            ),
+            onDismissRequest = {
+                showDialog.value = false
+            },
+
+            ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxWidth()
+                    .padding(top = 80.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    CustomButton(onClick = {
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            Constants.STATE_EXTRA, false
+                        )
+                        navController.navigate(Screen.InsertCivilIdScreen.route)
+                    }, text = "Appointment")
+                    CustomButton(onClick = {
+                        navController.navigate(Screen.SelectDoctorTimeScreen.route)
+                    }, text = "Without Appointment")
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Row() {
+                    Button(
+                        onClick = { showDialog.value = false },
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .shadow(50.dp, shape = RoundedCornerShape(5.dp)),
+                        shape = RoundedCornerShape(30.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
+                    ) {
+                        Icon(
+                            Icons.Default.KeyboardArrowLeft,
+                            contentDescription = "",
+                            modifier = Modifier.size(50.dp)
+                        )
+                        Spacer(modifier = Modifier.width(20.dp))
+                        Text("Go Back", fontSize = 25.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                    }
+                   // HeartBeatTimeRow(second = second)
+                }
+            }
+        }
+    }
+
+
 
     LaunchedEffect(key1 = Unit, block = {
         while (true) {
@@ -162,7 +239,8 @@ fun SelectDoctorTimeScreen(
                                 balloonWindow
                             ) {
                                 if (!state.isLoading) {
-                                    navController.navigate(Screen.DoctorPayScreen.route)
+                                    showDialog.value = true
+                                   // navController.navigate(Screen.DoctorPayScreen.route)
                                 }
                             }
 
