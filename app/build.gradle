@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
    //     applicationId "com.gicproject.salamkioskapp"  //alsalam
-        applicationId "com.gicproject.daskioskapp"  //das
+        applicationId "com.gicproject.hadikioskapp"  //das
         minSdk 24
         targetSdk 30
         versionCode 1
@@ -88,7 +88,16 @@ dependencies {
     implementation "com.github.skydoves:balloon-compose:1.5.2"
 
 
-    implementation 'com.github.devnied.emvnfccard:library:3.0.1'
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+   /* implementation ('com.myfatoorah:myfatoorah:2.2.15') {
+    }*/
+    implementation ('com.github.devnied.emvnfccard:library:3.0.1') {
+   //     exclude group: "com.github.devnied", module: "bit-lib4j"
+
+      //  exclude group: "org.apache.commons", module: "commons-collections4"
+      //  exclude group: "org.apache.commons", module: "commons-lang3"
+    }
+
     implementation files('libs/libBioMini.aar')
     implementation files('libs/androidScard-1.30.aar')
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

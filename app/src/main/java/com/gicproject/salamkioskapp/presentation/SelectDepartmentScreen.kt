@@ -199,7 +199,7 @@ fun SelectDepartmentScreen(
                             CustomButton(onClick = {
                                navController.navigate(Screen.SelectDoctorTimeScreen.route)
                                // showDialog.value = true
-                            }, text = state.departments[index].nameEn ?: "")
+                            }, text = state.departments[index].DepartmentNameEn ?: "")
                         }
                     }
                 }

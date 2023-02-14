@@ -32,14 +32,29 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.gicproject.salamkioskapp.common.Constants
+import com.gicproject.salamkioskapp.common.Constants.Companion.MY_FATOORAH_TOKEN
+import com.gicproject.salamkioskapp.emvnfccard.model.EmvCard
+import com.gicproject.salamkioskapp.emvnfccard.parser.EmvTemplate
+import com.gicproject.salamkioskapp.emvnfccard.parser.IProvider
 import com.gicproject.salamkioskapp.presentation.*
 import com.gicproject.salamkioskapp.ui.theme.SalamKioskAppTheme
 import com.gicproject.salamkioskapp.utils.PermissionUtil
 import com.gicproject.salamkioskapp.utils.Provider
-import com.github.devnied.emvnfccard.model.EmvCard
-import com.github.devnied.emvnfccard.parser.EmvTemplate
-import com.github.devnied.emvnfccard.parser.IProvider
+
+import com.google.gson.Gson
 import com.identive.libs.SCard
+/*import com.myfatoorah.sdk.entity.executepayment.MFExecutePaymentRequest
+import com.myfatoorah.sdk.entity.executepayment_cardinfo.MFCardInfo
+import com.myfatoorah.sdk.entity.executepayment_cardinfo.MFDirectPaymentResponse
+import com.myfatoorah.sdk.entity.initiatepayment.MFInitiatePaymentRequest
+import com.myfatoorah.sdk.entity.initiatepayment.MFInitiatePaymentResponse
+import com.myfatoorah.sdk.entity.paymentstatus.MFGetPaymentStatusResponse
+import com.myfatoorah.sdk.enums.MFAPILanguage
+import com.myfatoorah.sdk.enums.MFCountry
+import com.myfatoorah.sdk.enums.MFCurrencyISO
+import com.myfatoorah.sdk.enums.MFEnvironment
+import com.myfatoorah.sdk.views.MFResult
+import com.myfatoorah.sdk.views.MFSDK*/
 import com.szsicod.print.escpos.PrinterAPI
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.IOException
@@ -64,8 +79,9 @@ class MainActivity : ComponentActivity(){
 
     override fun onPause() {
         super.onPause()
+        //identiv card reader
         scard.setSCardListener(baseContext, "", null)
-        if (mNfcAdapter != null) mNfcAdapter!!.disableReaderMode(this)
+        //if (mNfcAdapter != null) mNfcAdapter!!.disableReaderMode(this)
     }
 
 
@@ -73,6 +89,69 @@ class MainActivity : ComponentActivity(){
         super.onNewIntent(intent)
     }
 
+/*
+    fun setMyFatoorah(){
+
+        MFSDK.init(MY_FATOORAH_TOKEN, MFCountry.OMAN, MFEnvironment.TEST)
+
+        val request = MFInitiatePaymentRequest(0.200, MFCurrencyISO.OMAN_OMR)
+        MFSDK.initiatePayment(
+            request,
+            MFAPILanguage.EN
+        ) { result: MFResult<MFInitiatePaymentResponse> ->
+            when (result) {
+                is MFResult.Success ->{
+
+                    Log.d(TAG, "Response: initate " + Gson().toJson(result.response))
+
+// executePayment
+
+                    val exectueRequest = MFExecutePaymentRequest(1, 0.200)
+                    MFSDK.executePayment(
+                        this,
+                        exectueRequest,
+                        MFAPILanguage.EN,
+                        onInvoiceCreated = {
+                            Log.d(TAG, "invoiceId: $it")
+                        }
+                    ) { invoiceId: String, result: MFResult<MFGetPaymentStatusResponse> ->
+                        when (result) {
+                            is MFResult.Success ->
+                                Log.d(TAG, "Response: execute " + Gson().toJson(result.response))
+                            is MFResult.Fail ->
+                                Log.d(TAG, "Fail: execute " + Gson().toJson(result.error))
+                        }
+                    }
+
+                    val mfCardInfo = MFCardInfo("8888880000000001", "09", "25", "1000", "test test")
+                    val requestDirect = MFExecutePaymentRequest(2, 0.100)
+
+                    MFSDK.executeDirectPayment(
+                        this,
+                        requestDirect,
+                        mfCardInfo,
+                        MFAPILanguage.EN,
+                        onInvoiceCreated = {
+                            Log.d(TAG, "invoiceId: $it")
+                        }
+                    ) { invoiceId: String, result: MFResult<MFDirectPaymentResponse> ->
+                        when (result) {
+                            is MFResult.Success ->
+                                Log.d(TAG, "Response:direct " + Gson().toJson(result.response))
+                            is MFResult.Fail ->
+                                Log.d(TAG, "Fail:direct " + Gson().toJson(result.error))
+                        }
+                    }
+                }
+
+                is MFResult.Fail ->
+                    Log.d(TAG, "Fail: initate " + Gson().toJson(result.error))
+            }
+        }
+
+
+    }
+*/
 /*    override fun onTagDiscovered(tag: Tag?){
 // Read and or write to Tag here to the appropriate Tag Technology type class
         // in this example the card should be an Ndef Technology Type
@@ -205,49 +284,26 @@ class MainActivity : ComponentActivity(){
         super.onCreate(savedInstanceState)
 
 
-        //final SCard scard = new SCard();
-        //  scard.USBRequestPermission(applicationContext)
-        var usbManager_ = getSystemService(USB_SERVICE) as UsbManager;
-        var permissionIntent = PendingIntent.getBroadcast(
-            this,
-            0,
-            Intent("com.android.example.USB_PERMISSION"),
-            PendingIntent.FLAG_IMMUTABLE
-        );
-
-        val deviceListTemp: HashMap<String, UsbDevice> = usbManager_.deviceList
-        val filter = IntentFilter("com.android.example.USB_PERMISSION")
-        Log.i(TAG, "registered broadcast receiver!")
-        val deviceIterator: Iterator<UsbDevice> = deviceListTemp.values.iterator()
-        while (deviceIterator.hasNext()) {
-            val device = deviceIterator.next()
-            Log.i(
-                TAG,
-                "Camera: device Id " + device.deviceId + " device mName : " + device.deviceName
-            )
-            if (!usbManager_.hasPermission(device)) {
-                Log.i(TAG, "requesting permission")
-                usbManager_.requestPermission(device, permissionIntent)
-            }
-        }
-
 
         mPrinter = PrinterAPI.getInstance()
 
 
-        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+     //   mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
 
         initPermission()
 
-
+      //  setMyFatoorah()
 
 
 
         setContent {
             viewModel = hiltViewModel()
-
-            viewModel?.initializedCardReader(scard, baseContext)
+            //telpo card reader
+           /* viewModel?.settingReader(this)
+            viewModel?.setAssets(assets)*/
+            //idnetiv card reader
+           viewModel?.initializedCardReader(scard, baseContext)
 
             if (mUsbBroadCastReceiver == null) {
                 val intentFilter = IntentFilter()
@@ -357,7 +413,7 @@ class MainActivity : ComponentActivity(){
 
     override fun onResume() {
         super.onResume()
-      /*  if (mNfcAdapter != null) {
+       /* if (mNfcAdapter != null) {
             val options = Bundle()
             // Work around for some broken Nfc firmware implementations that poll the card too fast
             options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 250)

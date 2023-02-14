@@ -5,10 +5,13 @@ import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 
-import com.github.devnied.emvnfccard.exception.CommunicationException;
-import com.github.devnied.emvnfccard.parser.IProvider;
+
+import com.gicproject.salamkioskapp.emvnfccard.exception.CommunicationException;
+import com.gicproject.salamkioskapp.emvnfccard.parser.IProvider;
 
 import java.io.IOException;
+
+import fr.devnied.bitlib.BytesUtils;
 
 public class Provider implements IProvider {
 
@@ -43,8 +46,9 @@ public class Provider implements IProvider {
 
     @Override
     public byte[] getAt() {
+
         // For NFC-A
-        return mTagCom.getHistoricalBytes();
+        return BytesUtils.fromString("00814D22088660300020E00001");
         // For NFC-B
         // return mTagCom.getHiLayerResponse();
     }
@@ -55,3 +59,4 @@ public class Provider implements IProvider {
     }
 
 }
+

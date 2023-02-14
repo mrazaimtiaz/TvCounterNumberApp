@@ -117,6 +117,20 @@ fun InsertCivilIdScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
+                   /* if (state.success.isNotBlank()) {
+                        Text(
+                            state.success.toString(),
+                        )
+                        Text(
+                        state.success.toString(),
+                        color = Color.Black,
+                        fontSize = 35.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    }*/
                     PayKnetAnimation()
                 }
                /* Row(

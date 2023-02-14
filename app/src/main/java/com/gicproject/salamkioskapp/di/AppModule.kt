@@ -8,10 +8,7 @@ import com.gicproject.salamkioskapp.data.repository.DataStoreRepositoryImpl
 import com.gicproject.salamkioskapp.data.repository.MyRepositoryImpl
 import com.gicproject.salamkioskapp.domain.repository.DataStoreRepository
 import com.gicproject.salamkioskapp.domain.repository.MyRepository
-import com.gicproject.salamkioskapp.domain.use_case.GetDeparments
-import com.gicproject.salamkioskapp.domain.use_case.GetDoctors
-import com.gicproject.salamkioskapp.domain.use_case.GetPrintTicket
-import com.gicproject.salamkioskapp.domain.use_case.MyUseCases
+import com.gicproject.salamkioskapp.domain.use_case.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,8 +51,9 @@ class AppModule {
         dataStoreRepository: DataStoreRepository
     ): MyUseCases {
         return MyUseCases(
-            getResult = GetResult(repository = repository),
-            getDeparments = GetDeparments(repository = repository),
+            getDepartments = GetDepartments(repository = repository),
+            getBranches = GetBranches(repository = repository),
+            getCounters = GetCounters(repository = repository),
             getDoctors = GetDoctors(repository = repository),
             getPrintTicket = GetPrintTicket(repository = repository)
         )
