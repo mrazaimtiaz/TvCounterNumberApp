@@ -1,14 +1,9 @@
 package com.gicproject.salamkioskapp.presentation
 
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.res.AssetManager
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbManager
-import android.os.Build
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.State
@@ -23,47 +18,20 @@ import com.gicproject.salamkioskapp.common.Constants.Companion.NO_DEPARTMENT_SEL
 import com.gicproject.salamkioskapp.common.Resource
 import com.gicproject.salamkioskapp.domain.repository.DataStoreRepository
 import com.gicproject.salamkioskapp.domain.use_case.MyUseCases
-import com.gicproject.salamkioskapp.emvnfccard.model.EmvCard
-import com.gicproject.salamkioskapp.emvnfccard.parser.EmvTemplate
-import com.gicproject.salamkioskapp.emvnfccard.parser.IProvider
 import com.gicproject.salamkioskapp.pacicardlibrary.PaciCardReaderAbstract
 import com.gicproject.salamkioskapp.pacicardlibrary.PaciCardReaderMAV3
-import com.gicproject.salamkioskapp.pacicardlibrary.PaciCardReaderMAV3Telpo
-import com.github.devnied.emvnfccard.enums.CommandEnum
-import com.github.devnied.emvnfccard.exception.CommunicationException
 import com.github.devnied.emvnfccard.iso7816emv.*
-import com.github.devnied.emvnfccard.model.enums.CountryCodeEnum
-import com.github.devnied.emvnfccard.model.enums.CurrencyEnum
-import com.github.devnied.emvnfccard.model.enums.TransactionTypeEnum
-import com.github.devnied.emvnfccard.utils.CommandApdu
-import com.github.devnied.emvnfccard.utils.TlvUtil
 import com.identive.libs.SCard
-import com.identive.libs.SCard.SCardIOBuffer
-import com.identive.libs.SCard.SCardState
 import com.identive.libs.WinDefs
-import com.suprema.BioMiniFactory
-import com.suprema.IBioMiniDevice
-import com.suprema.IUsbEventHandler
 import com.szsicod.print.escpos.PrinterAPI
 import com.szsicod.print.io.InterfaceAPI
 import com.szsicod.print.io.USBAPI
-import com.telpo.tps550.api.fingerprint.FingerPrint
-import com.telpo.tps550.api.reader.SmartCardReader
+import com.szsicod.print.utils.BitmapUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
-import fr.devnied.bitlib.BytesUtils
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import net.sf.scuba.tlv.TLVInputStream
-import net.sf.scuba.tlv.TLVUtil
 import okhttp3.internal.and
-import org.apache.commons.io.IOUtils
-import org.apache.commons.lang3.ArrayUtils
-import org.apache.commons.lang3.StringUtils
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.EOFException
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -119,6 +87,10 @@ class MyViewModel @Inject constructor(
     val stateInsertCivilId: State<InsertCivilIdScreenState> = _stateInsertCivilId
 
 
+    private val _stateSelectService = mutableStateOf(SelectServiceScreenState())
+    val stateSelectService: State<SelectServiceScreenState> = _stateSelectService
+
+
     private val _readCivilId = mutableStateOf(false)
 
 
@@ -132,6 +104,13 @@ class MyViewModel @Inject constructor(
     init {
         initPreference()
 
+    }
+
+    fun resetDepartmentScreen(){
+        _stateSelectDepartment.value = SelectDepartmentScreenState()
+    }
+    fun resetServicesScreen(){
+        _stateSelectService.value = SelectServiceScreenState()
     }
     //preferences
     private fun initPreference() {
@@ -165,8 +144,8 @@ class MyViewModel @Inject constructor(
             _selectedBranchName.value = branchName
         }
         if(setCounter){
-            onEvent(MyEvent.GetCounters)
-            onEvent(MyEvent.GetDepartments)
+          //  onEvent(MyEvent.GetCounters)
+           // onEvent(MyEvent.GetDepartments)
         }
     }
 
@@ -236,6 +215,22 @@ class MyViewModel @Inject constructor(
         _stateSelectDoctor.value = SelectDoctorScreenState()
     }
 
+
+    suspend fun convertBase64ToBitmap(b64: String): Bitmap? {
+        var bitmap: Bitmap? = null
+        try {
+            val job = CoroutineScope(Dispatchers.Default).async {
+                val imageAsBytes: ByteArray = Base64.decode(b64.toByteArray(), Base64.DEFAULT)
+                bitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.size)
+            }
+            job.await()
+        } catch (e: IOException) {
+            Log.d("TAG", "onResume: Exception 4 ")
+            println(e)
+        }
+        return bitmap
+    }
+    var isFirstSelectDepartmentApi = true
     fun onEvent(event: MyEvent) {
         when (event) {
             is MyEvent.GetBranches -> {
@@ -243,23 +238,181 @@ class MyViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             result.data?.let {
-                                _stateSetting.value = SettingScreenState(branches = it, error = "")
+                                _stateSetting.value=     _stateSetting.value.copy(branches = it, error = "")
                             }
                         }
                         is Resource.Error -> {
-                            _stateSetting.value = SettingScreenState(
-                                error = result.message ?: "An unexpected error occurred"
+                            _stateSetting.value = _stateSetting.value.copy(
+                                error = result.message ?: "An unexpected error occurred getting branches"
                             )
                         }
                         is Resource.Loading -> {
-                            _stateSetting.value = SettingScreenState(isLoading = true)
+                                _stateSetting.value = _stateSetting.value.copy(isLoading = true)
+
                         }
                     }
                 }.launchIn(viewModelScope)
             }
-            is MyEvent.GetDepartments -> {
+            is MyEvent.GetBookTicket -> {
                 if(_selectedBranchId.value.isNotEmpty()){
-                    surveyUseCases.getDepartments(selectedBranchId.value).onEach { result ->
+                    surveyUseCases.getBookTicket(
+                    event.serviceID,
+                        event.isHandicap,
+                        event.isVip,
+                        event.languageID,
+                        event.appointmentCode,
+                        event.isaapt,
+                        event.refid,
+                        event.DoctorServiceID).onEach { result ->
+                        when (result) {
+                            is Resource.Success -> {
+                                if(result.data == null){
+                                    _stateSelectService.value =  _stateSelectService.value.copy(isLoading = false,error = "Result Data in getBookTicket api is null")
+                                }
+                                result.data?.let {
+                                        surveyUseCases.getTicket(it.NewPKID ?: 1,1).onEach { result ->
+                                            when (result) {
+                                                is Resource.Success -> {
+                                                    result.data?.let {
+                                                        viewModelScope.launch {
+                                                            funcPrinterImage(Constants.baseImage.toBitmap())
+                                                            if(it.Ticket != null){
+                                                                convertBase64ToBitmap(Constants.baseImage2)?.let { it1 ->
+                                                                    funcPrinterImage(
+                                                                        it1
+                                                                    )
+                                                                }
+                                                            }else{
+                                                                _stateSelectService.value = _stateSelectService.value.copy(
+                                                                    error = result.message ?: "Empty Ticket String",
+                                                                    isLoading = false,
+                                                                )
+                                                            }
+                                                           /* convertBase64ToBitmap(Constants.baseImage2)?.let { it1 ->
+                                                                funcPrinterImage(
+                                                                    it1
+                                                                )
+                                                            }*/
+                                                        }
+                                                    }
+                                                    if(result.data == null){
+                                                        _stateSelectService.value =  _stateSelectService.value.copy(isLoading = false,error = "Result Data in getTicket api is null")
+                                                    }
+                                                }
+                                                is Resource.Error -> {
+                                                    _stateSelectService.value = _stateSelectService.value.copy(
+                                                        error = result.message ?: "An unexpected error occurred",
+                                                        isLoading = false,
+                                                    )
+                                                    // delay(2000)
+                                                    //  onEvent(MyEvent.GetDepartment)
+                                                }
+                                                is Resource.Loading -> {
+                                                    _stateSelectService.value = _stateSelectService.value.copy(isLoading = true)
+
+
+                                                }
+                                            }
+                                        }.launchIn(viewModelScope)
+                                }
+                            }
+                            is Resource.Error -> {
+                                _stateSelectService.value =  _stateSelectService.value.copy(
+                                    error = result.message ?: "An unexpected error occurred",
+                                    isLoading = false,
+                                )
+                                // delay(2000)
+                                //  onEvent(MyEvent.GetDepartment)
+                            }
+                            is Resource.Loading -> {
+                                _stateSelectService.value = _stateSelectService.value.copy(isLoading = true)
+
+
+                            }
+                        }
+                    }.launchIn(viewModelScope)
+                }else{
+                    _stateSelectService.value = _stateSelectService.value.copy(
+                        error =  "Select Branch First",
+                        isLoading = false,
+                    )
+                }
+
+            }
+            is MyEvent.GetSelectServices -> {
+                if(_selectedBranchId.value.isNotEmpty()){
+                    surveyUseCases.getSelectServices(_selectedBranchId.value,event.deptId).onEach { result ->
+                        when (result) {
+                            is Resource.Success -> {
+                                result.data?.let {
+                                    viewModelScope.launch {
+                                        _stateSelectService.value = SelectServiceScreenState(services = it)
+
+                                    }
+                                }
+                            }
+                            is Resource.Error -> {
+                                _stateSelectService.value = SelectServiceScreenState(
+                                    error = result.message ?: "An unexpected error occurred",
+                                    isLoading = false,
+                                )
+                                // delay(2000)
+                                //  onEvent(MyEvent.GetDepartment)
+                            }
+                            is Resource.Loading -> {
+                                    _stateSelectService.value = SelectServiceScreenState(isLoading = true)
+
+
+                            }
+                        }
+                    }.launchIn(viewModelScope)
+                }else{
+                    _stateSelectService.value = _stateSelectService.value.copy(
+                        error =  "Select Branch First",
+                        isLoading = false,
+                    )
+                }
+
+            }
+            is MyEvent.GetSelectDepartments -> {
+                if(_selectedBranchId.value.isNotEmpty() && _selectedDepartmentId.value.isNotEmpty()){
+                    surveyUseCases.getSelectDepartments(_selectedBranchId.value,_selectedDepartmentId.value).onEach { result ->
+                        when (result) {
+                            is Resource.Success -> {
+                                result.data?.let {
+                                    isFirstSelectDepartmentApi = false
+                                    viewModelScope.launch {
+                                        _stateSelectDepartment.value = SelectDepartmentScreenState(departments = it)
+
+                                    }
+                                }
+                            }
+                            is Resource.Error -> {
+                                _stateSelectDepartment.value = SelectDepartmentScreenState(
+                                    error = result.message ?: "An unexpected error occurred",
+                                    isLoading = false,
+                                )
+                                // delay(2000)
+                                //  onEvent(MyEvent.GetDepartment)
+                            }
+                            is Resource.Loading -> {
+                                if(isFirstSelectDepartmentApi){
+                                    _stateSelectDepartment.value = SelectDepartmentScreenState(isLoading = true)
+
+                                }
+                            }
+                        }
+                    }.launchIn(viewModelScope)
+                }else{
+                    _stateSelectDepartment.value = _stateSelectDepartment.value.copy(
+                        error =  "Select Department and Branch",
+                        isLoading = false,
+                    )
+                }
+
+            }
+            is MyEvent.GetDepartments -> {
+                    surveyUseCases.getDepartments().onEach { result ->
                         when (result) {
                             is Resource.Success -> {
                                 result.data?.let {
@@ -276,7 +429,6 @@ class MyViewModel @Inject constructor(
                             }
                         }
                     }.launchIn(viewModelScope)
-                }
             }
             is MyEvent.GetCounters -> {
                 if(_selectedBranchId.value.isNotEmpty()){
@@ -363,7 +515,57 @@ class MyViewModel @Inject constructor(
         mPrinter = printer
         mContext = context
     }
-     fun funcPrinterConnect() {
+
+    fun funcPrinterImage(bitmap: Bitmap) {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (mPrinter?.isConnect == true) {
+                mPrinter?.disconnect()
+            }
+
+
+            var io: InterfaceAPI? = null                   // USB
+            io = USBAPI(mContext)
+
+            //  io = UsbNativeAPI()
+
+
+            if (io != null) {
+                val ret = mPrinter?.connect(io)
+            }
+
+            try {
+
+
+                //bitmap print
+                mPrinter!!.setPrintColorSize(4)
+                mPrinter!!.printString("Picture test printing:\n")
+                mPrinter!!.printFeed()
+                mPrinter!!.printRasterBitmap(bitmap)
+
+                //                    byte[] bmpBytes = PrintImageUtils.parseBmpToByte(bmp);
+                //                    mPrinter.sendOrder(bmpBytes);
+
+                //                    byte[] bmpBytes = PrintImageUtils.parseBmpToByte(bmp);
+                //                    mPrinter.sendOrder(bmpBytes);
+                mPrinter!!.printFeed()
+                mPrinter!!.printString("test is finished！\n")
+                mPrinter!!.printFeed()
+
+                mPrinter?.halfCut()
+                _stateSelectService.value =  _stateSelectService.value.copy(isLoading = false,success = "printed")
+
+                // mPrinter!!.cutPaper(66, 0)
+
+            } catch (e: java.lang.Exception) {
+                _stateSelectService.value =  _stateSelectService.value.copy(isLoading = false,success = "printing error: ${e.printStackTrace()}")
+
+                e.printStackTrace()
+            }
+        }
+    }
+
+
+    fun funcPrinterConnect() {
         CoroutineScope(Dispatchers.IO).launch {
             if (mPrinter?.isConnect == true) {
                 mPrinter?.disconnect()

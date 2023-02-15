@@ -68,11 +68,9 @@ fun SettingScreen(
 
 
     LaunchedEffect(true) {
+        viewModel.onEvent(MyEvent.GetDepartments)
         viewModel.onEvent(MyEvent.GetBranches)
-        if(branchId.isNotEmpty()){
-            viewModel.onEvent(MyEvent.GetCounters)
-            viewModel.onEvent(MyEvent.GetDepartments)
-        }
+
     }
 
     Scaffold(
@@ -102,10 +100,8 @@ fun SettingScreen(
             onRefresh = {
                 Log.d("TAG", "SettingScreen: swipe refresh")
                 viewModel.onEvent(MyEvent.GetBranches)
-                if(branchId.isNotEmpty()){
-                    viewModel.onEvent(MyEvent.GetCounters)
-                    viewModel.onEvent(MyEvent.GetDepartments)
-                }
+                viewModel.onEvent(MyEvent.GetDepartments)
+
             },
         ) {
             Box(
@@ -138,7 +134,6 @@ fun SettingScreen(
                                         selectedIndexBranch = index
                                         isBranchExpanded = false
                                         viewModel.saveBranch(item.BranchNameEn,item.PKID)
-                                        viewModel.stateSettingResetAfterBranch()
 
 
                                     }) {
@@ -154,7 +149,7 @@ fun SettingScreen(
                             isBranchExpanded = true
                         },
                     )
-                    Spacer(modifier = Modifier.height(30.dp))
+             /*       Spacer(modifier = Modifier.height(30.dp))
                     ComposeMenu(
                         label = "Select Counter",
                         selectedText =  if (selectedIndexCounter != -1 && state.counters.size > selectedIndexCounter) state.counters[selectedIndexCounter].CounterName.toString() else "Select Counter",
@@ -177,7 +172,7 @@ fun SettingScreen(
                         updateExpandedValue = {
                             isCounterExpanded = true
                         },
-                    )
+                    )*/
                     Spacer(modifier = Modifier.height(30.dp))
                     ComposeMenu(
                         label = "Select Dept",
@@ -188,9 +183,9 @@ fun SettingScreen(
                                     onClick = {
                                         selectedIndexDept = index
                                         isDepartmentExpanded = false
-                                        viewModel.saveDepartment(item.DepartmentNameEn,item.DepartmentNameAr,item.PKID)
+                                        viewModel.saveDepartment(item.DepartmentNameEn,item.DepartmentNameAr,item.ParentID)
                                     }) {
-                                    Text(text = item.DepartmentNameEn.toString() + " " +item.PKID.toString())
+                                    Text(text = item.DepartmentNameEn.toString() + " " +item.ParentID.toString())
                                 }
                             }
                         },
@@ -217,7 +212,7 @@ fun SettingScreen(
                             modifier = Modifier.padding(top = 30.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(30.dp))
+                    /*Spacer(modifier = Modifier.height(30.dp))
                     Row() {
                         Text(
                             "Selected counter: $counterName",
@@ -232,7 +227,7 @@ fun SettingScreen(
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 30.dp)
                         )
-                    }
+                    }*/
                     Spacer(modifier = Modifier.width(30.dp))
                     Text(
                         "Version Name: $versionName   Version Code: $versionCode ",

@@ -1,5 +1,6 @@
 package com.gicproject.salamkioskapp.presentation
 
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,7 +52,11 @@ fun SelectDepartmentScreen(
     val state = viewModel.stateSelectDepartment.value
 
     LaunchedEffect(true) {
-        viewModel.onEvent(MyEvent.GetDepartment)
+        while (true) {
+            Log.d("TAG", "SelectDepartmentScreen: called GetSelectDepartments" )
+            viewModel.onEvent(MyEvent.GetSelectDepartments)
+            delay(4000)
+        }
     }
     var showDialog = remember { mutableStateOf(false) }
     if (showDialog.value) {
@@ -192,14 +197,20 @@ fun SelectDepartmentScreen(
                         state = rememberLazyGridState(),
                         contentPadding = PaddingValues(30.dp),
                         modifier = Modifier
-                            .width(730.dp).height(950.dp),
+                            .width(730.dp)
+                            .height(950.dp),
                         columns = GridCells.Fixed(2),
                     ) {
                         items(state.departments.size) { index ->
                             CustomButton(onClick = {
-                               navController.navigate(Screen.SelectDoctorTimeScreen.route)
+                                navController.currentBackStackEntry?.savedStateHandle?.set(
+                                    Constants.STATE_EXTRA, state.departments[index]
+                                )
+                               navController.navigate(Screen.SelectServiceScreen.route)
                                // showDialog.value = true
-                            }, text = state.departments[index].DepartmentNameEn ?: "")
+                            }, text = (state.departments[index].DepartmentNameEN
+                                ?: "") + "\n\n" + (state.departments[index].DepartmentNameAR ?: "")
+                            )
                         }
                     }
                 }

@@ -121,7 +121,7 @@ fun SelectDoctorScreen(
                     columns = GridCells.Fixed(2),
                 ) {
                     items(state.doctors.size) { index ->
-                        DoctorInfo("Dr Emad", state.doctors[index].nameEn ?: "", "30 KD",Constants.DOCTOR_SAMPLE_IMAGE,navController)
+                        DoctorInfo("Dr Emad", "dept" ?: "", "30 KD",Constants.DOCTOR_SAMPLE_IMAGE,navController)
                     }
                 }
             }

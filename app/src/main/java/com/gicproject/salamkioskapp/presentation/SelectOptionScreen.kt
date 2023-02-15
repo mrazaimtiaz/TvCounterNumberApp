@@ -115,8 +115,8 @@ fun CustomButton(onClick: () -> Unit, text: String) {
         colors = ButtonDefaults.outlinedButtonColors(contentColor = primarySidra),
         border = BorderStroke(1.dp, primarySidra),
             modifier = Modifier
-                .width(300.dp)
-                .height(180.dp)
+                .width(260.dp)
+                .height(200.dp)
                 .padding(horizontal = 8.dp, vertical = 12.dp)
                 .shadow(15.dp, shape = RoundedCornerShape(5.dp)), shape = RoundedCornerShape(15.dp)
 
@@ -124,7 +124,7 @@ fun CustomButton(onClick: () -> Unit, text: String) {
         Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text,
-                fontSize = 40.sp,
+                fontSize = 30.sp,
                 textAlign = TextAlign.Center
             )
         }

@@ -1,23 +1,29 @@
 package com.gicproject.salamkioskapp
 
 
+/*import com.myfatoorah.sdk.entity.executepayment.MFExecutePaymentRequest
+import com.myfatoorah.sdk.entity.executepayment_cardinfo.MFCardInfo
+import com.myfatoorah.sdk.entity.executepayment_cardinfo.MFDirectPaymentResponse
+import com.myfatoorah.sdk.entity.initiatepayment.MFInitiatePaymentRequest
+import com.myfatoorah.sdk.entity.initiatepayment.MFInitiatePaymentResponse
+import com.myfatoorah.sdk.entity.paymentstatus.MFGetPaymentStatusResponse
+import com.myfatoorah.sdk.enums.MFAPILanguage
+import com.myfatoorah.sdk.enums.MFCountry
+import com.myfatoorah.sdk.enums.MFCurrencyISO
+import com.myfatoorah.sdk.enums.MFEnvironment
+import com.myfatoorah.sdk.views.MFResult
+import com.myfatoorah.sdk.views.MFSDK*/
 import android.Manifest
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.BitmapFactory
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.media.RingtoneManager
-import android.net.Uri
-import android.nfc.*
-import android.nfc.tech.IsoDep
-import android.nfc.tech.Ndef
+import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,32 +38,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.gicproject.salamkioskapp.common.Constants
-import com.gicproject.salamkioskapp.common.Constants.Companion.MY_FATOORAH_TOKEN
-import com.gicproject.salamkioskapp.emvnfccard.model.EmvCard
-import com.gicproject.salamkioskapp.emvnfccard.parser.EmvTemplate
-import com.gicproject.salamkioskapp.emvnfccard.parser.IProvider
+import com.gicproject.salamkioskapp.domain.model.SelectDepartment
 import com.gicproject.salamkioskapp.presentation.*
 import com.gicproject.salamkioskapp.ui.theme.SalamKioskAppTheme
 import com.gicproject.salamkioskapp.utils.PermissionUtil
-import com.gicproject.salamkioskapp.utils.Provider
-
-import com.google.gson.Gson
 import com.identive.libs.SCard
-/*import com.myfatoorah.sdk.entity.executepayment.MFExecutePaymentRequest
-import com.myfatoorah.sdk.entity.executepayment_cardinfo.MFCardInfo
-import com.myfatoorah.sdk.entity.executepayment_cardinfo.MFDirectPaymentResponse
-import com.myfatoorah.sdk.entity.initiatepayment.MFInitiatePaymentRequest
-import com.myfatoorah.sdk.entity.initiatepayment.MFInitiatePaymentResponse
-import com.myfatoorah.sdk.entity.paymentstatus.MFGetPaymentStatusResponse
-import com.myfatoorah.sdk.enums.MFAPILanguage
-import com.myfatoorah.sdk.enums.MFCountry
-import com.myfatoorah.sdk.enums.MFCurrencyISO
-import com.myfatoorah.sdk.enums.MFEnvironment
-import com.myfatoorah.sdk.views.MFResult
-import com.myfatoorah.sdk.views.MFSDK*/
 import com.szsicod.print.escpos.PrinterAPI
+import com.szsicod.print.utils.BitmapUtils
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.IOException
 
 
 private const val TAG = "MainActivity"
@@ -296,6 +284,14 @@ class MainActivity : ComponentActivity(){
       //  setMyFatoorah()
 
 
+//        int printWidth = (80 - 8) * 8;
+       /* val printWidth = (58 - 10) * 8
+        var bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.icod_2)
+        bitmap = BitmapUtils.reSize(
+            bitmap,
+            printWidth,
+            bitmap.getHeight() * printWidth / bitmap.getWidth()
+        )*/
 
         setContent {
             viewModel = hiltViewModel()
@@ -304,6 +300,7 @@ class MainActivity : ComponentActivity(){
             viewModel?.setAssets(assets)*/
             //idnetiv card reader
            viewModel?.initializedCardReader(scard, baseContext)
+
 
             if (mUsbBroadCastReceiver == null) {
                 val intentFilter = IntentFilter()
@@ -314,6 +311,9 @@ class MainActivity : ComponentActivity(){
                 viewModel?.initPrinter(mPrinter, this@MainActivity)
 
             }
+
+
+            //viewModel?.funcPrinterImage(bitmap)
 
 
 
@@ -338,7 +338,20 @@ class MainActivity : ComponentActivity(){
                             route = Screen.SelectDepartmentScreen.route
                         ) {
                             viewModel?.readCivilIdOff()
+
+                            viewModel?.resetServicesScreen()
                             SelectDepartmentScreen(navController, viewModel!!)
+                        }
+                        composable(
+                            route = Screen.SelectServiceScreen.route
+                        ) {
+
+                            var selectDepartment =
+                                navController.previousBackStackEntry?.savedStateHandle?.get<SelectDepartment?>(
+                                    Constants.STATE_EXTRA
+                                )
+                            viewModel?.readCivilIdOff()
+                            SelectServiceScreen(selectDepartment,navController, viewModel!!)
                         }
                         composable(
                             route = Screen.SelectDoctorScreen.route
@@ -375,10 +388,10 @@ class MainActivity : ComponentActivity(){
                             InsertCivilIdScreen(extra, navController, viewModel!!)
                         }
                         composable(
-                            route = Screen.SelectServiceScreen.route
+                            route = Screen.SelectTestServiceScreen.route
                         ) {
                             viewModel?.readCivilIdOff()
-                            SelectServiceScreen(navController, viewModel!!)
+                            SelectTestServiceScreen(navController, viewModel!!)
                         }
                         composable(
                             route = Screen.SelectChildServiceScreen.route

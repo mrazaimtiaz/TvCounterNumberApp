@@ -1,11 +1,11 @@
 package com.gicproject.salamkioskapp.domain.use_case
 
 
-
 import com.gicproject.salamkioskapp.common.Resource
 import com.gicproject.salamkioskapp.data.remote.dto.DepartmentDto
 import com.gicproject.salamkioskapp.data.remote.dto.SelectDepartmentDto
 import com.gicproject.salamkioskapp.domain.model.Department
+import com.gicproject.salamkioskapp.domain.model.SelectDepartment
 import com.gicproject.salamkioskapp.domain.repository.MyRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -13,23 +13,21 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class GetDepartments @Inject constructor(
+class GetSelectDepartments @Inject constructor(
     private val repository: MyRepository
 ) {
     operator fun invoke(
-    ): Flow<Resource<List<Department>>> = flow {
+        branchId: String,
+        deptParentId: String): Flow<Resource<List<SelectDepartment>>> = flow {
         try {
             emit(Resource.Loading())
 
-           // var departments = repository.getDepartments()
-            var departments = listOf(
-                DepartmentDto(1,"Surgery Department"),
-                DepartmentDto(2,"Medical")
-            )
+        //   var selectDepartments = repository.getSelectDepartments(branchId,deptParentId)
 
-            if (!departments.isNullOrEmpty()) {
-                emit(Resource.Success(departments.map {
-                    it.toDepartment()
+            var selectDepartments = listOf(SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(2,"Medical"))
+            if (!selectDepartments.isNullOrEmpty()) {
+                emit(Resource.Success(selectDepartments.map {
+                    it.toSelectDepartment()
                 }))
             } else {
                 emit(Resource.Error("Empty Department List."))
