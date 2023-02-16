@@ -115,24 +115,28 @@ fun InsertCivilIdScreen(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                   /* if (state.success.isNotBlank()) {
+                    if (state.error.isNotBlank()) {
                         Text(
-                            state.success.toString(),
+                            state.error,
+                            color = MaterialTheme.colors.error,
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            textAlign = TextAlign.Center
                         )
-                        Text(
-                        state.success.toString(),
-                        color = Color.Black,
-                        fontSize = 35.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        textAlign = TextAlign.Center
-                    )
-                    }*/
-                    PayKnetAnimation()
+
+                    }
                 }
+                    Image(
+                        painter = painterResource(id = R.drawable.animatedcivilid),
+                        modifier = Modifier.size(350.dp),
+                        contentDescription = "civilid"
+                    )
+                  // PayKnetAnimation()
+
                /* Row(
                     modifier = Modifier
                         .fillMaxWidth()

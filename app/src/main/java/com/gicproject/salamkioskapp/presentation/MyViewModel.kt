@@ -16,6 +16,7 @@ import com.gicproject.salamkioskapp.common.Constants.Companion.NO_BRANCH_SELECTE
 import com.gicproject.salamkioskapp.common.Constants.Companion.NO_COUNTER_SELECTED
 import com.gicproject.salamkioskapp.common.Constants.Companion.NO_DEPARTMENT_SELECTED
 import com.gicproject.salamkioskapp.common.Resource
+import com.gicproject.salamkioskapp.domain.model.SelectService
 import com.gicproject.salamkioskapp.domain.repository.DataStoreRepository
 import com.gicproject.salamkioskapp.domain.use_case.MyUseCases
 import com.gicproject.salamkioskapp.pacicardlibrary.PaciCardReaderAbstract
@@ -44,7 +45,7 @@ class MyViewModel @Inject constructor(
     private val surveyUseCases: MyUseCases,
     val repository: DataStoreRepository
 ) : ViewModel() {
-
+     var selectService = SelectService()
     private val _selectedCounterName = MutableStateFlow(NO_COUNTER_SELECTED)
     val selectedCounterName: StateFlow<String>
         get() = _selectedCounterName.asStateFlow()
@@ -111,6 +112,9 @@ class MyViewModel @Inject constructor(
     }
     fun resetServicesScreen(){
         _stateSelectService.value = SelectServiceScreenState()
+    }
+    fun resetInsertCivilIdScreen(){
+        _stateInsertCivilId.value = InsertCivilIdScreenState()
     }
     //preferences
     private fun initPreference() {
@@ -537,9 +541,9 @@ class MyViewModel @Inject constructor(
 
 
                 //bitmap print
-                mPrinter!!.setPrintColorSize(4)
-                mPrinter!!.printString("Picture test printing:\n")
-                mPrinter!!.printFeed()
+               // mPrinter!!.setPrintColorSize(4)
+             //   mPrinter!!.printString("Picture test printing:\n")
+              //  mPrinter!!.printFeed()
                 mPrinter!!.printRasterBitmap(bitmap)
 
                 //                    byte[] bmpBytes = PrintImageUtils.parseBmpToByte(bmp);
@@ -547,11 +551,12 @@ class MyViewModel @Inject constructor(
 
                 //                    byte[] bmpBytes = PrintImageUtils.parseBmpToByte(bmp);
                 //                    mPrinter.sendOrder(bmpBytes);
-                mPrinter!!.printFeed()
-                mPrinter!!.printString("test is finished！\n")
-                mPrinter!!.printFeed()
+             //   mPrinter!!.printFeed()
+               // mPrinter!!.printFeed()
+              //  mPrinter!!.printString("test is finished！\n")
+               // mPrinter!!.printFeed()
 
-                mPrinter?.halfCut()
+                mPrinter?.fullCut()
                 _stateSelectService.value =  _stateSelectService.value.copy(isLoading = false,success = "printed")
 
                 // mPrinter!!.cutPaper(66, 0)
@@ -906,14 +911,19 @@ class MyViewModel @Inject constructor(
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                 }
-                                Log.d(TAG, "onCardEvent: get result $civilidText $firstNameArText $secondNameArText `6f")
+                                if(civilidText.isBlank()){
+                                    _stateInsertCivilId.value =  _stateInsertCivilId.value.copy(isLoading = false,error="Please Insert CivilID Correctly - Cannot Read Data")
+                                }else{
+                                    Log.d(TAG, "onCardEvent: get result $civilidText $firstNameArText $secondNameArText `6f")
 
-                                _stateInsertCivilId.value =  _stateInsertCivilId.value.copy(isLoading = false,success="$civilidText $firstNameArText getting text")
-                                withContext(Dispatchers.Main){
-                                    Toast.makeText(baseContext," $civilidText $firstNameArText",
-                                        Toast.LENGTH_LONG).show()
+                                    _stateInsertCivilId.value =  _stateInsertCivilId.value.copy(isLoading = false,error="$civilidText $firstNameArText getting text")
+                                  /*  withContext(Dispatchers.Main){
+                                        Toast.makeText(baseContext," $civilidText $firstNameArText",
+                                            Toast.LENGTH_LONG).show()
 
+                                    }*/
                                 }
+
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }

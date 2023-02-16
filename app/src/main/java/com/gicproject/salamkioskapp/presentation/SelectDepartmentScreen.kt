@@ -195,7 +195,7 @@ fun SelectDepartmentScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalArrangement = Arrangement.Center,
                         state = rememberLazyGridState(),
-                        contentPadding = PaddingValues(30.dp),
+                        contentPadding = PaddingValues(70.dp),
                         modifier = Modifier
                             .width(730.dp)
                             .height(950.dp),
@@ -204,7 +204,7 @@ fun SelectDepartmentScreen(
                         items(state.departments.size) { index ->
                             CustomButton(onClick = {
                                 navController.currentBackStackEntry?.savedStateHandle?.set(
-                                    Constants.STATE_EXTRA, state.departments[index]
+                                    Constants.STATE_SELECT_DEPARTMENT, state.departments[index]
                                 )
                                navController.navigate(Screen.SelectServiceScreen.route)
                                // showDialog.value = true

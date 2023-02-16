@@ -20,7 +20,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
@@ -58,6 +60,7 @@ import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SelectServiceScreen(
     selectDepartment: SelectDepartment?,
@@ -72,10 +75,97 @@ fun SelectServiceScreen(
     val state = viewModel.stateSelectService.value
 
 
+    var showDialog = remember { mutableStateOf(false) }
+    if (showDialog.value) {
+        /*val second = remember { mutableStateOf(30) }
+        LaunchedEffect(key1 = Unit, block = {
+            while (true) {
+                delay(1000)
+                second.value = second.value - 1
+                if (second.value == 0) {
+                    showDialog.value = false
+                }
+            }
+        })*/
+        Dialog(
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = true,
+                usePlatformDefaultWidth = false
+            ),
+            onDismissRequest = {
+                showDialog.value = false
+            },
+
+            ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxWidth()
+                    .padding(top = 80.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    CustomButton(onClick = {
+                        showDialog.value = false
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            Constants.STATE_EXTRA, false
+                        )
+                        navController.navigate(Screen.InsertCivilIdScreen.route)
+                    }, text = "Appointment")
+                    CustomButton(onClick = {
+                        viewModel.onEvent(
+                            MyEvent.GetBookTicket(
+                                serviceID = viewModel.selectService.ServicesPKID.toString(),
+                                isHandicap = false,
+                                isVip = false,
+                                languageID = "0",
+                                appointmentCode = "-1",
+                                isaapt = false,
+                                refid = "-1",
+                                DoctorServiceID = "-1",
+                                ticketDesignId = viewModel.selectService.ServicesTicketDesignerFKID.toString()
+                            )
+                        )
+                    }, text = "Without Appointment")
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Row() {
+                    Button(
+                        onClick = { showDialog.value = false },
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .shadow(50.dp, shape = RoundedCornerShape(5.dp)),
+                        shape = RoundedCornerShape(30.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
+                    ) {
+                        Icon(
+                            Icons.Default.KeyboardArrowLeft,
+                            contentDescription = "",
+                            modifier = Modifier.size(50.dp)
+                        )
+                        Spacer(modifier = Modifier.width(20.dp))
+                        Text("Go Back", fontSize = 25.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                    }
+                    // HeartBeatTimeRow(second = second)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(true) {
 
-        Log.d("TAG", "SelectServiceScreen: department id ${selectDepartment?.DepartmentPKID.toString()}")
+        Log.d(
+            "TAG",
+            "SelectServiceScreen: department id ${selectDepartment?.DepartmentPKID.toString()}"
+        )
         viewModel.onEvent(MyEvent.GetSelectServices(selectDepartment?.DepartmentPKID.toString()))
     }
     LaunchedEffect(key1 = Unit, block = {
@@ -83,12 +173,12 @@ fun SelectServiceScreen(
             delay(1000)
             second.value = second.value - 1
             if (second.value == 0) {
-                navController.popBackStack(Screen.SelectDepartmentScreen.route,false)
+                navController.popBackStack(Screen.SelectDepartmentScreen.route, false)
             }
         }
     })
     if (state.success.isNotBlank()) {
-        navController.popBackStack(Screen.SelectDepartmentScreen.route,false)
+        navController.popBackStack(Screen.SelectDepartmentScreen.route, false)
     }
     Scaffold { innerPadding ->
         Box(
@@ -132,9 +222,14 @@ fun SelectServiceScreen(
             ) {
                 HeartBeatTime(second = second)
             }
-            HeaderDesign("Select Service",navController)
+            HeaderDesign("Select Service", navController)
             if (state.error.isNotBlank()) {
-                Text(state.error, color = MaterialTheme.colors.error, fontSize = 24.sp, modifier = Modifier.padding(top=180.dp))
+                Text(
+                    state.error,
+                    color = MaterialTheme.colors.error,
+                    fontSize = 24.sp,
+                    modifier = Modifier.padding(top = 180.dp)
+                )
             }
             FlowColumn(
                 Modifier.fillMaxSize(),
@@ -145,30 +240,32 @@ fun SelectServiceScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalArrangement = Arrangement.Center,
                     state = rememberLazyGridState(),
-                    contentPadding = PaddingValues(30.dp),
+                    contentPadding = PaddingValues(70.dp),
                     modifier = Modifier
-                        .width(730.dp),
+                        .width(730.dp)
+                        .height(750.dp),
                     columns = GridCells.Fixed(2),
                 ) {
                     items(state.services.size) { index ->
-                        ServiceInfo( state.services[index],navController, onClick = {
-                            viewModel.onEvent(MyEvent.GetBookTicket(
-                                serviceID = state.services[index].ServicesPKID.toString(),
-                                isHandicap = false,
-                                isVip = false,
-                                languageID = "0",
-                                appointmentCode = "-1",
-                                isaapt = false,
-                                refid = "-1",
-                                DoctorServiceID = "-1",
-                                ticketDesignId = state.services[index].ServicesTicketDesignerFKID.toString()
-                            ))
+                        ServiceInfo(state.services[index], navController, onClick = {
+                            showDialog.value = true
+                            viewModel.selectService = state.services[index]
+                            /* viewModel.onEvent(MyEvent.GetBookTicket(
+                                 serviceID = state.services[index].ServicesPKID.toString(),
+                                 isHandicap = false,
+                                 isVip = false,
+                                 languageID = "0",
+                                 appointmentCode = "-1",
+                                 isaapt = false,
+                                 refid = "-1",
+                                 DoctorServiceID = "-1",
+                                 ticketDesignId = state.services[index].ServicesTicketDesignerFKID.toString()
+                             ))*/
                         })
 
                     }
                 }
             }
-
 
 
             /* if (state.error.isNotBlank()) {
@@ -199,9 +296,9 @@ fun SelectServiceScreen(
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
-fun ServiceInfo(service: SelectService,navController: NavController, onClick: () -> Unit) {
+fun ServiceInfo(service: SelectService, navController: NavController, onClick: () -> Unit) {
 
-    val fontName ="GE_SS_Two_Bold"
+    val fontName = "GE_SS_Two_Bold"
 
     val provider = GoogleFont.Provider(
         providerAuthority = "com.google.android.gms.fonts",
@@ -209,27 +306,29 @@ fun ServiceInfo(service: SelectService,navController: NavController, onClick: ()
         certificates = R.array.com_google_android_gms_fonts_certs
     )
     val fontFamily = FontFamily(
-        androidx.compose.ui.text.googlefonts.Font(googleFont = GoogleFont(fontName),provider))
+        androidx.compose.ui.text.googlefonts.Font(googleFont = GoogleFont(fontName), provider)
+    )
     val arabicBold = TextStyle(fontFamily = fontFamily)
 
-    var DoctorDisplayNameEnFontSIze: TextUnit =  with(LocalDensity.current) {
+    var DoctorDisplayNameEnFontSIze: TextUnit = with(LocalDensity.current) {
         service.ServicesFontSize?.toInt()?.toSp() ?: 88.toSp()
     }
 
-  //  var DoctorDisplayNameEnFontColor: Color = state.doctorDetail.DoctorDisplayNameEnFontColor?.color ?: "#2e3192".color
+    //  var DoctorDisplayNameEnFontColor: Color = state.doctorDetail.DoctorDisplayNameEnFontColor?.color ?: "#2e3192".color
 
 
-  /*  val DoctorDisplayNameEnFontName =state.doctorDetail.DoctorDisplayNameEnFontName ?: fontName
-    lateinit var fontFamilyDoctorDisplayNameEnFontName : FontFamily
-    if(DoctorDisplayNameEnFontName != "GE_SS_Two_Bold"){
-        fontFamilyDoctorDisplayNameEnFontName =  FontFamily(
-            androidx.compose.ui.text.googlefonts.Font(googleFont = GoogleFont(DoctorDisplayNameEnFontName),provider))
-    }else{
-        fontFamilyDoctorDisplayNameEnFontName=  FontFamily(Font(R.font.ge_bold))
-    }*/
+    /*  val DoctorDisplayNameEnFontName =state.doctorDetail.DoctorDisplayNameEnFontName ?: fontName
+      lateinit var fontFamilyDoctorDisplayNameEnFontName : FontFamily
+      if(DoctorDisplayNameEnFontName != "GE_SS_Two_Bold"){
+          fontFamilyDoctorDisplayNameEnFontName =  FontFamily(
+              androidx.compose.ui.text.googlefonts.Font(googleFont = GoogleFont(DoctorDisplayNameEnFontName),provider))
+      }else{
+          fontFamilyDoctorDisplayNameEnFontName=  FontFamily(Font(R.font.ge_bold))
+      }*/
     Box(
         modifier = Modifier
             .width(250.dp)
+            .height(250.dp)
             .padding(horizontal = 8.dp, vertical = 12.dp)
             .background(color = Color.White, shape = RoundedCornerShape(20.dp))
             .clickable {
@@ -253,31 +352,45 @@ fun ServiceInfo(service: SelectService,navController: NavController, onClick: ()
                         bitmap = null
                     }
                 }
-                if(bitmap != null){
+                if (bitmap != null) {
                     Image(
                         bitmap = bitmap,
                         contentDescription = "",
                         modifier = Modifier
-                            .width(250.dp)
-                            .height(140.dp)
+                            .width(180.dp)
+                            .height(100.dp)
                     )
-                }else{
-                    Box(    modifier = Modifier
-                        .width(250.dp)
-                        .height(140.dp))
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .width(180.dp)
+                            .height(100.dp)
+                    )
                 }
 
 
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
-            Text((service.ServicesNameEN
-                ?: "") + "\n" + (service.ServicesNameAR ?: ""), color = Color.Black, fontSize = 23.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            Text(
+                (service.ServicesNameEN
+                    ?: "") + "\n" + (service.ServicesNameAR ?: ""),
+                color = Color.Black,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
             Spacer(modifier = Modifier.height(20.dp))
-            Text((service.ServicesDescription
-                ?: "") + "\n" + (service.ServicesDescriptionAr ?: ""), color = MaterialTheme.colors.secondary, fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            Text(
+                (service.ServicesDescription
+                    ?: "") + "\n" + (service.ServicesDescriptionAr ?: ""),
+                color = MaterialTheme.colors.secondary,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
         }
 

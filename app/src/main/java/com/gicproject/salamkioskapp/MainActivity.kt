@@ -332,23 +332,25 @@ class MainActivity : ComponentActivity(){
                             route = Screen.SelectOptionScreen.route
                         ) {
                             viewModel?.readCivilIdOff()
+
                             SelectOptionScreen(navController, viewModel!!)
                         }
                         composable(
                             route = Screen.SelectDepartmentScreen.route
                         ) {
                             viewModel?.readCivilIdOff()
-
+                            viewModel?.resetInsertCivilIdScreen()
                             viewModel?.resetServicesScreen()
                             SelectDepartmentScreen(navController, viewModel!!)
                         }
                         composable(
                             route = Screen.SelectServiceScreen.route
                         ) {
+                            viewModel?.resetInsertCivilIdScreen()
 
                             var selectDepartment =
                                 navController.previousBackStackEntry?.savedStateHandle?.get<SelectDepartment?>(
-                                    Constants.STATE_EXTRA
+                                    Constants.STATE_SELECT_DEPARTMENT
                                 )
                             viewModel?.readCivilIdOff()
                             SelectServiceScreen(selectDepartment,navController, viewModel!!)

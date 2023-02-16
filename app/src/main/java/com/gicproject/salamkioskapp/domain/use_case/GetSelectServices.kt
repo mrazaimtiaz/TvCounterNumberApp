@@ -31,7 +31,42 @@ class GetSelectServices @Inject constructor(
                    ServicesDescriptionAr = "د.محمد معتز فارابيddsd "
                 ),SelectServiceDto(ServicesPKID=1,
                     ServicesNameEN = "Medical Department Two"
-                ))
+                ),SelectServiceDto(ServicesPKID=1,
+                   ServicesNameEN = "Dr.Mohammad Motaz Varabi",
+                   ServicesNameAR = "د.محمد معتز فارابي",
+                   ServicesDescription = "Description is here onte",
+                   ServicesDescriptionAr = "د.محمد معتز فارابيddsd "
+               ),SelectServiceDto(ServicesPKID=1,
+                   ServicesNameEN = "Dr.Mohammad Motaz Varabi",
+                   ServicesNameAR = "د.محمد معتز فارابي",
+                   ServicesDescription = "Description is here onte",
+                   ServicesDescriptionAr = "د.محمد معتز فارابيddsd "
+               ),SelectServiceDto(ServicesPKID=1,
+                   ServicesNameEN = "Dr.Mohammad Motaz Varabi",
+                   ServicesNameAR = "د.محمد معتز فارابي",
+                   ServicesDescription = "Description is here onte",
+                   ServicesDescriptionAr = "د.محمد معتز فارابيddsd "
+               ),SelectServiceDto(ServicesPKID=1,
+                   ServicesNameEN = "Dr.Mohammad Motaz Varabi",
+                   ServicesNameAR = "د.محمد معتز فارابي",
+                   ServicesDescription = "Description is here onte",
+                   ServicesDescriptionAr = "د.محمد معتز فارابيddsd "
+               ),SelectServiceDto(ServicesPKID=1,
+                   ServicesNameEN = "Dr.Mohammad Motaz Varabi",
+                   ServicesNameAR = "د.محمد معتز فارابي",
+                   ServicesDescription = "Description is here onte",
+                   ServicesDescriptionAr = "د.محمد معتز فارابيddsd "
+               ),SelectServiceDto(ServicesPKID=1,
+                   ServicesNameEN = "Dr.Mohammad Motaz Varabi",
+                   ServicesNameAR = "د.محمد معتز فارابي",
+                   ServicesDescription = "Description is here onte",
+                   ServicesDescriptionAr = "د.محمد معتز فارابيddsd "
+               ),SelectServiceDto(ServicesPKID=1,
+                   ServicesNameEN = "Dr.Mohammad Motaz Varabi",
+                   ServicesNameAR = "د.محمد معتز فارابي",
+                   ServicesDescription = "Description is here onte",
+                   ServicesDescriptionAr = "د.محمد معتز فارابيddsd "
+               ))
             }else{
                 listOf(SelectServiceDto(ServicesPKID=1,
                     ServicesNameEN = "Surgery "

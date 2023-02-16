@@ -45,6 +45,7 @@ const val MY_FATOORAH_TOKEN = "rLtt6JWvbUHDDhsZnfpAhpYk4dxYDQkbcPTyGaKp2TYqQgG7F
         //kcbg2gweb.kcb.gov.kw instead of 10.10.15.61
         const val KEY_AUTO_DETECT_CARD = "auto detect card"
         const val STATE_EXTRA = "state extrs"
+        const val STATE_SELECT_DEPARTMENT= "STATE_SELECT_DEPARTMENT"
         const val STATE_MSG_EN = "state msg en"
         const val STATE_MSG_AR = "state msg ar"
         const val STATE_ANSWER = "answer"
