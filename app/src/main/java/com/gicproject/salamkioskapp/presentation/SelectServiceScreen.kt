@@ -4,11 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -58,6 +55,7 @@ import java.util.*
 import androidx.compose.ui.text.font.GenericFontFamily
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.gicproject.salamkioskapp.ui.theme.primarySidra
 
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -119,6 +117,8 @@ fun SelectServiceScreen(
                         navController.navigate(Screen.InsertCivilIdScreen.route)
                     }, text = "Appointment")
                     CustomButton(onClick = {
+                        showDialog.value = false
+                        Log.d("TAG", "SelectServiceScreen: ${viewModel.selectService.ServicesPKID.toString()} ${viewModel.selectService.ServicesTicketDesignerFKID.toString()}")
                         viewModel.onEvent(
                             MyEvent.GetBookTicket(
                                 serviceID = viewModel.selectService.ServicesPKID.toString(),
@@ -243,14 +243,20 @@ fun SelectServiceScreen(
                     contentPadding = PaddingValues(70.dp),
                     modifier = Modifier
                         .width(730.dp)
-                        .height(750.dp),
+                        .height(950.dp),//sidra
+                       // .height(750.dp), //hadi
                     columns = GridCells.Fixed(2),
                 ) {
                     items(state.services.size) { index ->
                         ServiceInfo(state.services[index], navController, onClick = {
-                            showDialog.value = true
-                            viewModel.selectService = state.services[index]
-                            /* viewModel.onEvent(MyEvent.GetBookTicket(
+                            //hadi
+                            /*showDialog.value = true
+                            viewModel.selectService = state.services[index]*/
+
+
+
+                            //sidra
+                             viewModel.onEvent(MyEvent.GetBookTicket(
                                  serviceID = state.services[index].ServicesPKID.toString(),
                                  isHandicap = false,
                                  isVip = false,
@@ -260,7 +266,7 @@ fun SelectServiceScreen(
                                  refid = "-1",
                                  DoctorServiceID = "-1",
                                  ticketDesignId = state.services[index].ServicesTicketDesignerFKID.toString()
-                             ))*/
+                             ))
                         })
 
                     }
@@ -337,7 +343,10 @@ fun ServiceInfo(service: SelectService, navController: NavController, onClick: (
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .border(BorderStroke(1.dp, primarySidra),
+                    shape = RoundedCornerShape(8.dp),),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -345,9 +354,9 @@ fun ServiceInfo(service: SelectService, navController: NavController, onClick: (
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 var bitmap: ImageBitmap? = null
-                if (service.ServicesBackGroundImage != null) {
+                if (service.ServicesLogo != null) {
                     try {
-                        bitmap = service.ServicesBackGroundImage!!.toBitmap().asImageBitmap()
+                        bitmap = service.ServicesLogo!!.toBitmap().asImageBitmap()
                     } catch (e: java.lang.Exception) {
                         bitmap = null
                     }
@@ -357,8 +366,8 @@ fun ServiceInfo(service: SelectService, navController: NavController, onClick: (
                         bitmap = bitmap,
                         contentDescription = "",
                         modifier = Modifier
-                            .width(180.dp)
-                            .height(100.dp)
+                            .width(250.dp)
+                            .height(120.dp)
                     )
                 } else {
                     Box(

@@ -22,9 +22,9 @@ class GetSelectDepartments @Inject constructor(
         try {
             emit(Resource.Loading())
 
-        //   var selectDepartments = repository.getSelectDepartments(branchId,deptParentId)
+           var selectDepartments = repository.getSelectDepartments(branchId,deptParentId)
 
-            var selectDepartments = listOf(SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(2,"Medical"))
+           // var selectDepartments = listOf(SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(1,"Surgery Department"),SelectDepartmentDto(2,"Medical"))
             if (!selectDepartments.isNullOrEmpty()) {
                 emit(Resource.Success(selectDepartments.map {
                     it.toSelectDepartment()

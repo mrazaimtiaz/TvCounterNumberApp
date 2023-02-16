@@ -19,11 +19,8 @@ class GetBranches @Inject constructor(
         try {
             emit(Resource.Loading())
 
-          //  var branches = repository.getBranches()
-            var branches = listOf(
-                BranchDto(1,"Surgery Department"),
-                BranchDto(2,"Medical")
-            )
+           var branches = repository.getBranches()
+         //   var branches = listOf(BranchDto(1,"Surgery Department"), BranchDto(2,"Medical"))
             if (!branches.isNullOrEmpty()) {
                 emit(Resource.Success(branches.map {
                     it.toBranch()

@@ -23,7 +23,7 @@ class GetSelectServices @Inject constructor(
         deptId: String): Flow<Resource<List<SelectService>>> = flow {
         try {
             emit(Resource.Loading())
-            var selectServices =  if(deptId == "1"){
+          /*  var selectServices =  if(deptId == "1"){
                listOf(SelectServiceDto(ServicesPKID=1,
                     ServicesNameEN = "Dr.Mohammad Motaz Varabi",
                    ServicesNameAR = "د.محمد معتز فارابي",
@@ -73,8 +73,8 @@ class GetSelectServices @Inject constructor(
                 ),SelectServiceDto(ServicesPKID=1,
                     ServicesNameEN = "Surgery Medical"
                 ))
-            }
-           //var selectServices = repository.getSelectServices(branchId,deptId)
+            }*/
+           var selectServices = repository.getSelectServices(branchId,deptId)
             if (!selectServices.isNullOrEmpty()) {
                 emit(Resource.Success(selectServices.map {
                     it.toSelectService()

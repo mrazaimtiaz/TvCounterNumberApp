@@ -21,11 +21,8 @@ class GetDepartments @Inject constructor(
         try {
             emit(Resource.Loading())
 
-           // var departments = repository.getDepartments()
-            var departments = listOf(
-                DepartmentDto(1,"Surgery Department"),
-                DepartmentDto(2,"Medical")
-            )
+            var departments = repository.getDepartments()
+          //  var departments = listOf(DepartmentDto(1,"Surgery Department"), DepartmentDto(2,"Medical"))
 
             if (!departments.isNullOrEmpty()) {
                 emit(Resource.Success(departments.map {

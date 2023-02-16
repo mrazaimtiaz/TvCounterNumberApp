@@ -139,7 +139,7 @@ fun HeaderDesign(title: String,navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = Color.White, shape = RoundedCornerShape(10.dp),).border(
-                    BorderStroke(2.dp, Color(0xFF1680bd))
+                    BorderStroke(2.dp, primarySidra)
         ) ){
             Row(
                 modifier = Modifier
@@ -152,8 +152,10 @@ fun HeaderDesign(title: String,navController: NavController) {
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "bg",
                     modifier = Modifier
-                        .width(180.dp)
-                        .height(70.dp).pointerInput(Unit) {
+                        .width(180.dp) //sidra
+                      //  .width(90.dp) //hadi
+                        .height(70.dp)
+                        .pointerInput(Unit) {
                             detectDragGestures { change, _ ->
                                 if (change.position.y > 400) {
                                    navController.navigate(Screen.SettingScreen.route)

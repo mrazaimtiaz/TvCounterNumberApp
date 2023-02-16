@@ -279,13 +279,40 @@ class MyViewModel @Inject constructor(
                                                 is Resource.Success -> {
                                                     result.data?.let {
                                                         viewModelScope.launch {
-                                                            funcPrinterImage(Constants.baseImage.toBitmap())
+                                                         //   funcPrinterImage(Constants.baseImage.toBitmap())
                                                             if(it.Ticket != null){
-                                                                convertBase64ToBitmap(Constants.baseImage2)?.let { it1 ->
+
+
+//        int printWidth = (80 - 8) * 8;
+                                                              //  val printWidth = (58 - 10) * 8
+                                                               var bitmap  =convertBase64ToBitmap(it.Ticket!!)
+                                                                /*bitmap?.let { it1 ->
+                                                                        bitmap = BitmapUtils.reSize(
+                                                                            it1,
+                                                                            printWidth,
+                                                                            it1.getHeight() * printWidth / it1.getWidth()
+                                                                        )
+                                                                }*/
+                                                                bitmap?.let {
                                                                     funcPrinterImage(
-                                                                        it1
+                                                                        it
                                                                     )
                                                                 }
+                                                               // var bitmap2  =convertBase64ToBitmap(Constants.baseImage2)
+
+                                                                /*bitmap2?.let { it1 ->
+                                                                    bitmap2 = BitmapUtils.reSize(
+                                                                        it1,
+                                                                        printWidth,
+                                                                        it1.getHeight() * printWidth / it1.getWidth()
+                                                                    )
+                                                                    bitmap2?.let {
+                                                                        funcPrinterImage(
+                                                                            it
+                                                                        )
+                                                                    }
+
+                                                                }*/
                                                             }else{
                                                                 _stateSelectService.value = _stateSelectService.value.copy(
                                                                     error = result.message ?: "Empty Ticket String",
@@ -522,6 +549,7 @@ class MyViewModel @Inject constructor(
 
     fun funcPrinterImage(bitmap: Bitmap) {
         CoroutineScope(Dispatchers.IO).launch {
+            Log.d(TAG, "funcPrinterImage: called ")
             if (mPrinter?.isConnect == true) {
                 mPrinter?.disconnect()
             }
@@ -533,19 +561,29 @@ class MyViewModel @Inject constructor(
             //  io = UsbNativeAPI()
 
 
-            if (io != null) {
-                val ret = mPrinter?.connect(io)
-            }
+            val ret = mPrinter?.connect(io)
 
             try {
-
-
                 //bitmap print
                // mPrinter!!.setPrintColorSize(4)
              //   mPrinter!!.printString("Picture test printing:\n")
               //  mPrinter!!.printFeed()
+
+                mPrinter!!.setPrintColorSize(4)
+             //   mPrinter!!.printString("Picture test printing:\n")
+               // mPrinter!!.printFeed()
                 mPrinter!!.printRasterBitmap(bitmap)
 
+//                    byte[] bmpBytes = PrintImageUtils.parseBmpToByte(bmp);
+//                    mPrinter.sendOrder(bmpBytes);
+
+//                    byte[] bmpBytes = PrintImageUtils.parseBmpToByte(bmp);
+//                    mPrinter.sendOrder(bmpBytes);
+                mPrinter!!.printFeed()
+            //    mPrinter!!.printString("test is finished！\n")
+            //    mPrinter!!.printFeed()
+
+                val ret = mPrinter!!.cutPaper(66, 0)
                 //                    byte[] bmpBytes = PrintImageUtils.parseBmpToByte(bmp);
                 //                    mPrinter.sendOrder(bmpBytes);
 
@@ -556,7 +594,7 @@ class MyViewModel @Inject constructor(
               //  mPrinter!!.printString("test is finished！\n")
                // mPrinter!!.printFeed()
 
-                mPrinter?.fullCut()
+               // mPrinter?.fullCut()
                 _stateSelectService.value =  _stateSelectService.value.copy(isLoading = false,success = "printed")
 
                 // mPrinter!!.cutPaper(66, 0)

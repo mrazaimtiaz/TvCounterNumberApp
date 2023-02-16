@@ -21,9 +21,7 @@ class GetDoctors @Inject constructor(
             emit(Resource.Loading())
 
          //  var locations = repository.getLocations()
-            var doctors = listOf(DoctorDto("1","Dr Emad","ENT","30 KD","01:00 AM","03-02-2023"),DoctorDto("1","Dr Wasim","ENT","25 KD","02:00 AM","03-02-2023"),
-
-            )
+            var doctors = listOf(DoctorDto("1","Dr Emad","ENT","30 KD","01:00 AM","03-02-2023"),DoctorDto("1","Dr Wasim","ENT","25 KD","02:00 AM","03-02-2023"),)
             if (!doctors.isNullOrEmpty()) {
                 emit(Resource.Success(doctors.map {
                     it.toDoctor()

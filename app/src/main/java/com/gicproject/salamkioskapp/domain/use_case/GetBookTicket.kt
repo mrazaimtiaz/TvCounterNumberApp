@@ -32,10 +32,10 @@ class GetBookTicket @Inject constructor(
         try {
             emit(Resource.Loading())
 
-          // var bookTicket = repository.getBookTicket(serviceID,isHandicap,isVip,languageID,appointmentCode,isaapt,refid,DoctorServiceID)
-            var bookTicket = listOf(BookTicketDto(1,"Dr Emad",),BookTicketDto(1,"Dr Emad",),
+           var bookTicket = repository.getBookTicket(serviceID,isHandicap,isVip,languageID,appointmentCode,isaapt,refid,DoctorServiceID)
+          //  var bookTicket = listOf(BookTicketDto(1,"Dr Emad",),BookTicketDto(1,"Dr Emad",), )
 
-            )
+
             if (!bookTicket.isNullOrEmpty()) {
                 emit(Resource.Success(bookTicket[0].toBookTicket()))
             } else {
