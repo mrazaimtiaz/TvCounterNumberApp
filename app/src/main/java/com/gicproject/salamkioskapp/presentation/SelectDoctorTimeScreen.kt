@@ -25,6 +25,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -110,13 +111,16 @@ fun SelectDoctorTimeScreen(
                             Constants.STATE_EXTRA, false
                         )
                         navController.navigate(Screen.InsertCivilIdScreen.route)
-                    }, text = "Appointment")
+                    }, text = "Appointment","موعد")
                     CustomButton(onClick = {
                         navController.navigate(Screen.SelectDoctorTimeScreen.route)
-                    }, text = "Without Appointment")
+                    }, text = "Without Appointment","بدون موعد")
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
+
+                var fontEnglish = FontFamily(Font(R.font.questrial_regular))
+                var fontArabic = FontFamily(Font(R.font.ge_dinar_one_medium))
                 Row() {
                     Button(
                         onClick = { showDialog.value = false },
@@ -188,7 +192,7 @@ fun SelectDoctorTimeScreen(
             ) {
                 HeartBeatTime(second = second)
             }
-            HeaderDesign("Select Doctor", navController)
+            HeaderDesign("Select Doctor","اختر دكتور", navController)
 
             FlowColumn(
                 Modifier.fillMaxSize(),

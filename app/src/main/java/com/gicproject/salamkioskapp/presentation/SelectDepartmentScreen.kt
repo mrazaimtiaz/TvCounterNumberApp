@@ -99,10 +99,10 @@ fun SelectDepartmentScreen(
                             Constants.STATE_EXTRA, false
                         )
                         navController.navigate(Screen.InsertCivilIdScreen.route)
-                    }, text = "Appointment")
+                    }, text = "Appointment","موعد")
                     CustomButton(onClick = {
                         navController.navigate(Screen.SelectDoctorTimeScreen.route)
-                    }, text = "Without Appointment")
+                    }, text = "Without Appointment","بدون موعد")
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -171,7 +171,7 @@ fun SelectDepartmentScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                HeaderDesign("Select Department", navController)
+                HeaderDesign("Select Department","حدد القسم", navController)
               /*  AndroidView(
                     factory = { context ->
                         val view = LayoutInflater.from(context).inflate(R.layout.myfatoorah_layout, null, false)
@@ -208,8 +208,9 @@ fun SelectDepartmentScreen(
                                 )
                                navController.navigate(Screen.SelectServiceScreen.route)
                                // showDialog.value = true
-                            }, text = (state.departments[index].DepartmentNameEN
-                                ?: "") + "\n\n" + (state.departments[index].DepartmentNameAR ?: "")
+                            }, text = state.departments[index].DepartmentNameEN
+                                ?: "" , textAr =
+                            state.departments[index].DepartmentNameAR ?: "",
                             )
                         }
                     }

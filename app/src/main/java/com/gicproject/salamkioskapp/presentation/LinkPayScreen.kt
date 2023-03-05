@@ -115,7 +115,7 @@ fun LinkPayScreen(
                 }
             }
             HeartBeatTime(second = second)
-            HeaderDesign("Insert Mobile Number",navController)
+            HeaderDesign("Insert Mobile Number","أدخل رقم الهاتف المحمول",navController)
 
             Column(
                 modifier = Modifier.fillMaxSize(),

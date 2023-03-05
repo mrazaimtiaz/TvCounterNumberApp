@@ -105,7 +105,7 @@ fun SelectDoctorScreen(
             ) {
                 HeartBeatTime(second = second)
             }
-            HeaderDesign("Select Doctor",navController)
+            HeaderDesign("Select Doctor","اختر دكتور",navController)
             FlowColumn(
                 Modifier.fillMaxSize(),
                 crossAxisAlignment = FlowCrossAxisAlignment.Center,

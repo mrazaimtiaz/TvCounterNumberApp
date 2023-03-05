@@ -105,7 +105,7 @@ fun InsertCivilIdScreen(
                 }
             }
             HeartBeatTime(second = second)
-            HeaderDesign("Insert Civil ID of Patient",navController)
+            HeaderDesign("Insert Civil ID of Patient","أدخل البطاقة المدنية للمريض",navController)
 
             Column(
                 modifier = Modifier.fillMaxSize(),

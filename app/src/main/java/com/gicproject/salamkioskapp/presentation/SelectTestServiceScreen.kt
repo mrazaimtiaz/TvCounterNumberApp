@@ -72,7 +72,7 @@ fun SelectTestServiceScreen(
                 }
             }
             HeartBeatTime(second = second)
-            HeaderDesign("Select Service",navController)
+            HeaderDesign("Select Service","حدد الخدمة",navController)
 
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -86,11 +86,11 @@ fun SelectTestServiceScreen(
                 ) {
                     CustomButton(onClick = {
                         navController.navigate(Screen.SelectChildServiceScreen.route)
-                    }, text = "Laboratory")
+                    }, text = "Laboratory","معمل")
 
                     CustomButton(onClick = {
                         navController.navigate(Screen.SelectChildServiceScreen.route)
-                    }, text = "X-Rays")
+                    }, text = "X-Rays","الأشعة السينية")
                 }
                 Spacer(modifier = Modifier.height(30.dp))
 

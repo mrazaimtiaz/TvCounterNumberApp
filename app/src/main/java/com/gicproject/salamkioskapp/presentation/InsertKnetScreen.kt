@@ -100,7 +100,7 @@ fun InsertKnetScreen(
             ) {
                 HeartBeatTime(second = second)
             }
-            HeaderDesign("Insert Knet",navController)
+            HeaderDesign("Insert Knet","أدخل كي نت",navController)
 
             Column(
                 modifier = Modifier.fillMaxSize(),

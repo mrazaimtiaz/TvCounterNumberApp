@@ -107,7 +107,7 @@ fun DoctorPayScreen(
             ) {
                 HeartBeatTime(second = second)
             }
-            HeaderDesign("Appointment Information",navController)
+            HeaderDesign("Appointment Information","معلومات التعيين",navController)
 
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -230,10 +230,10 @@ fun PaymentDialog(showDialog: MutableState<Boolean>,navController: NavController
                 CustomButton(onClick = {
                     navController.navigate(Screen.LinkPayScreen.route)
                     showDialog.value = false
-                }, text = "Send Link")
+                }, text = "Send Link","أرسل الرابط")
                 CustomButton(onClick = {
                     navController.navigate(Screen.InsertKnetScreen.route)
-                }, text = "Knet Card")
+                }, text = "Knet Card","بطاقة كي نت")
             }
         }
     }

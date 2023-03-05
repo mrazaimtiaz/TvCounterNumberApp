@@ -99,7 +99,7 @@ fun SelectChildServiceScreen(
                 }
             }
             HeartBeatTime(second = second)
-            HeaderDesign("Select Test",navController)
+            HeaderDesign("Select Test","حدد اختبار",navController)
 
             Column(
                 modifier = Modifier

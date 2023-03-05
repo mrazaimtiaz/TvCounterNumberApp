@@ -18,7 +18,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,7 +60,7 @@ fun SelectOptionScreen(
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            HeaderDesign("Select Option",navController)
+            HeaderDesign("Select Option","حدد خيار", navController)
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -92,13 +94,18 @@ fun SelectOptionScreen(
 
 @Composable
 fun CustomButtonLarge(onClick: () -> Unit, text: String) {
-    Button(onClick = onClick,
+    Button(
+        onClick = onClick,
         modifier = Modifier
             .width(500.dp)
             .height(180.dp)
             .shadow(50.dp, shape = RoundedCornerShape(5.dp)), shape = RoundedCornerShape(30.dp)
     ) {
-        Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text,
                 fontSize = 60.sp,
@@ -110,37 +117,63 @@ fun CustomButtonLarge(onClick: () -> Unit, text: String) {
 }
 
 @Composable
-fun CustomButton(onClick: () -> Unit, text: String) {
-    OutlinedButton(onClick = onClick,
+fun CustomButton(onClick: () -> Unit, text: String,textAr: String) {
+    var fontEnglish = FontFamily(Font(R.font.questrial_regular))
+    var fontArabic = FontFamily(Font(R.font.ge_dinar_one_medium))
+    OutlinedButton(
+        onClick = onClick,
         colors = ButtonDefaults.outlinedButtonColors(contentColor = primarySidra),
         border = BorderStroke(1.dp, primarySidra),
-            modifier = Modifier
-                .width(260.dp)
-                .height(220.dp)
-                .padding(horizontal = 8.dp, vertical = 12.dp)
-                .shadow(15.dp, shape = RoundedCornerShape(5.dp)), shape = RoundedCornerShape(15.dp)
+        modifier = Modifier
+            .width(260.dp)
+            .height(220.dp)
+            .padding(horizontal = 8.dp, vertical = 12.dp)
+            .shadow(15.dp, shape = RoundedCornerShape(5.dp)), shape = RoundedCornerShape(15.dp)
 
     ) {
-        Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text,
-                fontSize = 23.sp,
-                textAlign = TextAlign.Center
-            )
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text,
+                    fontSize = 23.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    style = TextStyle(fontFamily =fontEnglish),
+                )
+                Text(
+                    textAr,
+                    fontSize = 23.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Medium,
+                    style = TextStyle(fontFamily =fontArabic),
+                )
+
+            }
+
         }
 
     }
 }
 
 @Composable
-fun HeaderDesign(title: String,navController: NavController) {
+fun HeaderDesign(title: String,titleAr: String, navController: NavController) {
+
+    var fontEnglish = FontFamily(Font(R.font.questrial_regular))
+    var fontArabic = FontFamily(Font(R.font.ge_dinar_one_medium))
     Box(modifier = Modifier.padding(horizontal = 0.dp, vertical = 0.dp)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = Color.White, shape = RoundedCornerShape(10.dp),).border(
+                .background(color = Color.White, shape = RoundedCornerShape(10.dp))
+                .border(
                     BorderStroke(2.dp, primarySidra)
-        ) ){
+                )
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -153,23 +186,32 @@ fun HeaderDesign(title: String,navController: NavController) {
                     contentDescription = "bg",
                     modifier = Modifier
                         .width(180.dp) //sidra
-                      //  .width(90.dp) //hadi
+                        //  .width(90.dp) //hadi
                         .height(70.dp)
                         .pointerInput(Unit) {
                             detectDragGestures { change, _ ->
                                 if (change.position.y > 400) {
-                                   navController.navigate(Screen.SettingScreen.route)
+                                    navController.navigate(Screen.SettingScreen.route)
                                 }
                                 change.consume()
                             }
                         }
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 22.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(title, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Column(verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(title, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.Black,
+                            style = TextStyle(fontFamily =fontEnglish),)
+                        Text(titleAr, fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.Black,
+                            style = TextStyle(fontFamily =fontArabic),)
+
+                    }
                 }
             }
 

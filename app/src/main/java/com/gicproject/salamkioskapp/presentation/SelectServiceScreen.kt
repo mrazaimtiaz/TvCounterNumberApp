@@ -115,7 +115,7 @@ fun SelectServiceScreen(
                             Constants.STATE_EXTRA, false
                         )
                         navController.navigate(Screen.InsertCivilIdScreen.route)
-                    }, text = "Appointment")
+                    }, text = "Appointment","موعد")
                     CustomButton(onClick = {
                         showDialog.value = false
                         Log.d("TAG", "SelectServiceScreen: ${viewModel.selectService.ServicesPKID.toString()} ${viewModel.selectService.ServicesTicketDesignerFKID.toString()}")
@@ -132,7 +132,7 @@ fun SelectServiceScreen(
                                 ticketDesignId = viewModel.selectService.ServicesTicketDesignerFKID.toString()
                             )
                         )
-                    }, text = "Without Appointment")
+                    }, text = "Without Appointment","بدون موعد")
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -222,7 +222,7 @@ fun SelectServiceScreen(
             ) {
                 HeartBeatTime(second = second)
             }
-            HeaderDesign("Select Service", navController)
+            HeaderDesign("Select Service","حدد الخدمة", navController)
             if (state.error.isNotBlank()) {
                 Text(
                     state.error,
@@ -306,6 +306,8 @@ fun ServiceInfo(service: SelectService, navController: NavController, onClick: (
 
     val fontName = "GE_SS_Two_Bold"
 
+    var fontEnglish = FontFamily(Font(R.font.questrial_regular))
+    var fontArabic = FontFamily(Font(R.font.ge_dinar_one_medium))
     val provider = GoogleFont.Provider(
         providerAuthority = "com.google.android.gms.fonts",
         providerPackage = "com.google.android.gms",
@@ -382,12 +384,22 @@ fun ServiceInfo(service: SelectService, navController: NavController, onClick: (
             Spacer(modifier = Modifier.height(15.dp))
 
             Text(
-                (service.ServicesNameEN
-                    ?: "") + "\n" + (service.ServicesNameAR ?: ""),
+                service.ServicesNameEN
+                    ?: "",
                 color = Color.Black,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                style = TextStyle(fontFamily =fontEnglish),
+            )
+
+            Text(
+                service.ServicesNameAR ?: "",
+                color = Color.Black,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                style = TextStyle(fontFamily =fontEnglish),
             )
             Spacer(modifier = Modifier.height(20.dp))
             Text(
