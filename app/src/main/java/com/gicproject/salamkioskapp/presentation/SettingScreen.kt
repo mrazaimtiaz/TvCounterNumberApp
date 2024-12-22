@@ -252,39 +252,9 @@ fun SettingScreen(
                         )
                     }
                     IntentToSetting(context)
-                    Button(
-                        modifier = Modifier.padding(top = 30.dp),
-                        onClick = {
-                            viewModel.funcPrinterConnect()
 
-                        }) {
-                        Icon(
-                            Icons.Filled.Settings,
-                            "setting",
-                            tint = Color.White,
-                            modifier = Modifier
-                                .size(30.dp, 30.dp)
-                        )
 
-                        Text(text = "Print Test", Modifier.padding(start = 10.dp))
-                    }
 
-                    Button(
-                        modifier = Modifier.padding(top = 30.dp),
-                        onClick = {
-                            viewModel.initializeReaderAgain()
-
-                        }) {
-                        Icon(
-                            Icons.Filled.Settings,
-                            "setting",
-                            tint = Color.White,
-                            modifier = Modifier
-                                .size(30.dp, 30.dp)
-                        )
-
-                        Text(text = "Initialize Card Reader Indetiv", Modifier.padding(start = 10.dp))
-                    }
                 }
                 if (state.error.isNotBlank()) {
                 }

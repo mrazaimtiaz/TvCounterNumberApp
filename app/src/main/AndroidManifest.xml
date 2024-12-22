@@ -2,28 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-feature android:name="android.hardware.camera.any"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 
-    <uses-permission android:name="android.permission.NFC" />
-    <uses-feature android:name="android.hardware.usb.host" /> <!-- WIFIManage permission -->
-    <!-- Allows applications to access information about networks -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Allows applications to access information about Wi-Fi networks -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- Allows applications to change network connectivity state -->
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" /> <!-- Allows applications to change network connectivity state -->
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" /> <!-- Allows applications to enter Wi-Fi Multicast mode -->
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Internet permission -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- SDCard permission -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" /> <!-- If your application uses Wi-Fi, declare so with a <uses-feature> element in the manifest file -->
-    <uses-feature android:name="android.hardware.wifi" /> <!-- Bluetooth permission -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
+
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <queries>
+        <intent>
+            <action
+                android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
 
 
     <uses-feature android:name="android.hardware.nfc" android:required="true" />
@@ -47,39 +38,13 @@
             android:hardwareAccelerated="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.KcbSignatureApp">
-            <intent-filter>
-                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
-                <!-- Default category is required for the intent filter to work -->
-                <category android:name="android.intent.category.DEFAULT"/>
-                <!-- Browsable also enables opening this app through a link on a website -->
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Intent filters without data will never be triggered on NFC devices.
-                Always define the specific data you expect to be present. -->
-                <data android:scheme="https" android:host="www.andreasjakl.com" />
-                <!-- Additionally support http scheme. See:
-                https://developer.android.com/training/app-links/verify-site-associations.html -->
-                <data android:scheme="http" />
-            </intent-filter>
 
-            <!-- Also register for the URL if it appears outside of NFC tags -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="www.andreasjakl.com" />
-                <data android:scheme="http" />
-            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
                 <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
 
-                <!--
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-                -->
             </intent-filter>
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"

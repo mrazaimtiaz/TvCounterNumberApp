@@ -2,11 +2,6 @@ package com.gicproject.salamkioskapp.domain.use_case
 
 
 import com.gicproject.salamkioskapp.common.Resource
-import com.gicproject.salamkioskapp.data.remote.dto.DepartmentDto
-import com.gicproject.salamkioskapp.data.remote.dto.SelectDepartmentDto
-import com.gicproject.salamkioskapp.data.remote.dto.SelectServiceDto
-import com.gicproject.salamkioskapp.domain.model.Department
-import com.gicproject.salamkioskapp.domain.model.SelectDepartment
 import com.gicproject.salamkioskapp.domain.model.SelectService
 import com.gicproject.salamkioskapp.domain.repository.MyRepository
 import kotlinx.coroutines.flow.Flow

@@ -26,10 +26,10 @@ const val MY_FATOORAH_TOKEN = "rLtt6JWvbUHDDhsZnfpAhpYk4dxYDQkbcPTyGaKp2TYqQgG7F
         //const val BASE_URL = "http://kcbg2gweb.kcb.gov.kw/"
         //kcbg2gweb.kcb.gov.kw instead of 10.10.15.61
 
-        const val LOGO = R.drawable.logo //sidra
-        const val BACKGROUND_IMAGE = R.drawable.background //sidra
-       // const val LOGO = R.drawable.hadilogo //hadi
-      //  const val BACKGROUND_IMAGE = R.drawable.hadibg //hadi
+      //  const val LOGO = R.drawable.logo //sidra
+      //  const val BACKGROUND_IMAGE = R.drawable.background //sidra
+        const val LOGO = R.drawable.hadilogo //hadi
+        const val BACKGROUND_IMAGE = R.drawable.hadibg //hadi
       const val DOCTOR_SAMPLE_IMAGE = R.drawable.doctorsample
       const val DOCTOR_SAMPLE_IMAGE_TWO = R.drawable.doctorsampletwo
 

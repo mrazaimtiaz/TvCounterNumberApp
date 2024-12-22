@@ -54,12 +54,7 @@ class AppModule {
             getDepartments = GetDepartments(repository = repository),
             getBranches = GetBranches(repository = repository),
             getCounters = GetCounters(repository = repository),
-            getDoctors = GetDoctors(repository = repository),
-            getPrintTicket = GetPrintTicket(repository = repository),
-            getSelectDepartments = GetSelectDepartments(repository = repository),
             getSelectServices = GetSelectServices(repository = repository),
-            getTicket = GetTicket(repository = repository),
-            getBookTicket = GetBookTicket(repository = repository),
         )
     }
 }
